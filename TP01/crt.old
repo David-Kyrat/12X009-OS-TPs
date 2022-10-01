@@ -1,5 +1,5 @@
 #!/bin/bash
-oldPath=$(pwd)
+
 # Parse args
 if [ $# -lt 2 ]; then 
     >&2 echo "Not enough arguments, expecting at least 2"
@@ -23,8 +23,8 @@ mkdir -p -v $dest
 function copyMoveRenameFile {
     name="$1" # quoting since name might contain spaces
     newName=$(echo $name | tr -d "['\"]" | tr ' ' '-')
-    cp $name "$dest/tmp/$newName"
-    echo "$dest/$newName" #output is new path of the img
+    cp $name "$dest/$newName"
+    echo "$dest/$newNamem" #output is new path of the img
 }
 
 function cvrt {
@@ -37,19 +37,13 @@ function cvrt {
 }
 
 function getImgsFromBeg {
-    for f in `ls $beg`; do 
-        if [[ `file "$f" -i` =~ image ]]; then copyMoveRenameFile "$f"; fi; done
-    cd "$dest/tmp"
-    #cmd="mogrify -format png"
-    #if [ $res ]; then cmd="$cmd -resize $res"; fi
-    #cmd="$cmd *"; eval $cmd
-    if [ $res ]; then mogrify -format png -resize "$res" *
-    else mogrify -format png *; fi
-    rm "*.[^(png)]*" # remove all resulting non png files 
-    mv * .. # put back png imgs at $dest
-    rm tmp -r
+    for f in `ls $beg`; do
+        name="$f"
+        if [[ `file $name -i` =~ image ]]; then 
+            cvrt $( copyMoveRenameFile $name )
+        fi
+    done
 }
 
 getImgsFromBeg 
 
-cd $oldPath  #go back to path where script was called
