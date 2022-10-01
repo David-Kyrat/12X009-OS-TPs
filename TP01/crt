@@ -19,6 +19,7 @@ echo ""
 
 # Create output dir if does not exists
 mkdir -p -v $dest
+mkdir -p $dest/tmp
 
 function copyMoveRenameFile {
     name="$1" # quoting since name might contain spaces
@@ -45,11 +46,11 @@ function getImgsFromBeg {
     #cmd="$cmd *"; eval $cmd
     if [ $res ]; then mogrify -format png -resize "$res" *
     else mogrify -format png *; fi
-    rm "*.[^(png)]*" # remove all resulting non png files 
+    rm *.[^(png)]* # remove all resulting non png files 
     mv * .. # put back png imgs at $dest
-    rm tmp -r
+    #rm tmp -r
 }
 
 getImgsFromBeg 
 
-cd $oldPath  #go back to path where script was called
+#cd $oldPath  #go back to path where script was called
