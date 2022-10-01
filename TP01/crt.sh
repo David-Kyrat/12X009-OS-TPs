@@ -3,7 +3,7 @@ oldPath=$(pwd)
 # Parse args
 if [ $# -lt 2 ]; then 
     >&2 echo "Not enough arguments, expecting at least 2"
-    exit 2
+    #exit 2
 fi
 
 res=""
@@ -39,14 +39,45 @@ function cvrt {
 
 }
 
+function is {
+      [[ $1 ]] && echo "true" || echo "false"
+  }
+
+function renameBeforeExecution {
+    mkdir tmp
+    cp ./* tmp -r
+    cd tmp
+    for f in * ; do mv "$f" $(tr -d "[' ''\"]" <<< "$f")  ; done 
+}
+
+function isImg {
+    crtFile="$1"
+    is '$(file "$crtFile" -i) =~ image'
+}
+
 function copyAndConvertAll {
-    for f in $(ls "$beg"); do 
-        name="$f"
-        if [[ $(file "$name" -i) =~ image ]]; then 
+    cd $beg; renameBeforeExecution
+
+    for f in * ; do 
+        #if [[ $(file "$f" -i) =~ image ]]; then 
+        if [[ isImg "$f" ]]; then
             echo "calling copyMoveRename "
-            copyMoveRenameFile "$name"
+            #copyMoveRenameFile "$name"
+            mv "$f" "$dest/$f"
         fi
     done
+    cd ..
+    rm tmp -r
+
+    # for f in $(ls "$beg"); do 
+    #     name="$f"
+    #     is '`file "$f" -i`" =~ image'
+
+    #     if [[ $(file "$name" -i) =~ image ]]; then 
+    #         echo "calling copyMoveRename "
+    #         copyMoveRenameFile "$name"
+    #     fi
+    # done
 
     cd "$dest"
     echo "converting"
