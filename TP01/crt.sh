@@ -41,13 +41,6 @@ function cvrt {
 
 function is {
       [[ $1 ]] && echo "true" || echo "false"
-  }
-
-function renameBeforeExecution {
-    mkdir tmp
-    cp ./* tmp -r
-    cd tmp
-    for f in * ; do mv "$f" $(tr -d "[' ''\"]" <<< "$f")  ; done 
 }
 
 function isImg {
@@ -55,20 +48,34 @@ function isImg {
     is '$(file "$crtFile" -i) =~ image'
 }
 
-function copyAndConvertAll {
-    cd $beg; renameBeforeExecution
 
+function renameBeforeExecution {
+    mkdir tmp; cd tmp
+    cp ../* . -f 2> err
+    for f in * ; do mv "$f" $(tr -d "[' ''\"]" <<< "$f") -f 2> err; done 
+    ls
+    exit
+}
+
+
+function copyAndConvertAll {
+    cd "$beg"    
+    renameBeforeExecution
     for f in * ; do 
         #if [[ $(file "$f" -i) =~ image ]]; then 
-        if [[ isImg "$f" ]]; then
-            echo "calling copyMoveRename "
+        if [[ $(isImg "$f") ]]; then
+            #echo "calling copyMoveRename "
             #copyMoveRenameFile "$name"
-            mv "$f" "$dest/$f"
+            mv "$f" "$dest"
         fi
     done
+    echo " "
+    exit 
+    echo " "
     cd ..
+    echo "Removing tmp"
     rm tmp -r
-
+    cd $oldPath
     # for f in $(ls "$beg"); do 
     #     name="$f"
     #     is '`file "$f" -i`" =~ image'
@@ -81,9 +88,11 @@ function copyAndConvertAll {
 
     cd "$dest"
     echo "converting"
-    if [ "$res" ]; then mogrify -format png -resize "$res" ./*
-    else mogrify -format png ./*; fi
+    if [ "$res" ]; then mogrify -format png -resize "$res" *
+    else mogrify -format png * ; fi
     echo "done"
     cd $oldPath #go back to path where script was called
 }
+
+
 copyAndConvertAll 
