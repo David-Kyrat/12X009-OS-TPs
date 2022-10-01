@@ -65,12 +65,13 @@ function copyAndConvertAll {
     done
     cd ..
     rm tmp -r
-    cd "$oldPath/$dest"; echo " "; pwd; ls; echo " "
+    cd "$oldPath/$dest";
 
-    echo "converting"
-    if [ "$res" ]; then mogrify -format png -resize "$res" *
-    else mogrify -format png * ; fi
-    echo "done"
+
+    if [ "$res" ]; then mogrify -format png -resize "$res" * 2> err
+    else mogrify -format png * 2> err; fi
+
+    echo $'\nConverted Files:\n\t'; ls *.png -l ; echo $'________________________________________________\n'
     cd $oldPath #go back to path where script was called
 }
 
