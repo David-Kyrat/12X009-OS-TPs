@@ -22,22 +22,6 @@ dest="lul"
 # Create output dir if does not exists
 mkdir -p -v "$dest"
 
-function copyMoveRenameFile {
-    name="$1" # quoting since name might contain spaces
-    newName=$(echo "$name" | tr -d "['\"]" | tr ' ' '-')
-    echo "copying $name to \"$dest/$newName\""
-    cp "$name" "$dest/$newName"
-    echo "$dest/$newName" #output is new path of the img
-}
-
-function cvrt {
-    name=$1; nameNoExt="${name%%.*}"
-    cmd="convert "
-    if [ "$res" ]; then cmd="$cmd resize $res "; fi
-    cmd="$cmd""$name $nameNoExt.png"
-    echo $'command is\n\t'"\"$cmd\""
-
-}
 
 function is {
       [[ $1 ]] && echo "true" || echo "false"
@@ -67,16 +51,14 @@ function copyAndConvertAll {
     rm tmp -r
     cd "$oldPath/$dest";
 
-
     if [ "$res" ]; then mogrify -format png -resize "$res" * 2> err
     else mogrify -format png * 2> err; fi
 
     echo $'\nConverted Files:\n\t'; ls *.png -l ; echo $'________________________________________________\n'
-    cd $oldPath #go back to path where script was called
 }
 
 cd "$beg"
 
 copyAndConvertAll 
 
-cd "$oldPath"
+cd $oldPath #go back to path where script was called
