@@ -1,0 +1,12 @@
+#!/bin/bash
+DATA=~/BA3
+
+if [ $# -lt 2 ]; then echo "at least 2 args"; fi
+
+if [ -d $DATA ]; then
+    #Efface les anciens backups
+    echo "Lul"
+else
+    #Crée le repetoire
+    mkdir "Backup"
+fi

@@ -1,0 +1,10 @@
+#!/bin/bash
+
+function is {
+    [[ $1 ]] && echo "true" || echo "false"
+}
+
+if [ `is "12 -ge 5"` ]; then echo "nice"; fi
+
+for f in `ls`; do is "`file $f -i` =~ image"  ; done
+

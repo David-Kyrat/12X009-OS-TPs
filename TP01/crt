@@ -1,0 +1,57 @@
+#!/bin/bash
+
+# Parse args
+if [ $# -lt 2 ]; then 
+    >&2 echo "Not enough arguments, expecting at least 2"
+    exit 2
+fi
+
+res=""
+if [ $# -ge 3 ]; then 
+    if [ $# != 3 ]; then echo "Too many arguments, only taking the first 3 in consideration"; fi
+    res=$3;
+fi
+beg=$1; dest=$2
+
+echo $'\n Starting (png) conversion of images from'" \"$1\" to \"$2\" ..." 
+if [ $3 ]; then echo $'\t (specified res: '"\"$3\")"; fi
+
+# "Real" Start
+
+# Test a condition then display output
+function is {
+    [[ $1 ]] && echo "true" || echo "false"
+}
+
+# Create output dir if does not exists
+mkdir -p -v $dest
+
+function copyMoveRenameFile {
+    name="$1" # quoting since name might contain spaces
+    newName=$(echo $name | tr -d "['\"]" | tr ' ' '-')
+    cp $name "$dest/$newName"
+    echo "$dest/$newNamem"
+    #output is new path of the img
+}
+
+function cvrt {
+    cmd="convert "
+    if [ $res ] cmd.="resize $res "
+    cmd.="$1 $nameNoExt.png"
+    echo $cmd
+}
+
+function getImgsFromBeg {
+    for f in `ls $beg`; do
+        $name = "$f"
+        if [[ `file $name -i` =~ image ]]; then 
+            cvrt $( copyMoveRenameFile $name )
+        fi
+    done
+}
+
+getImgsFromBeg
+
+
+
+
