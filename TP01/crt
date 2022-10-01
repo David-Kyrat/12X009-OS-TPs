@@ -19,12 +19,11 @@ echo ""
 
 # Create output dir if does not exists
 mkdir -p -v $dest
-mkdir -p $dest/tmp
 
 function copyMoveRenameFile {
     name="$1" # quoting since name might contain spaces
     newName=$(echo $name | tr -d "['\"]" | tr ' ' '-')
-    cp $name "$dest/tmp/$newName"
+    cp $name "$dest/$newName"
     echo "$dest/$newName" #output is new path of the img
 }
 
@@ -37,20 +36,12 @@ function cvrt {
 
 }
 
-function getImgsFromBeg {
+function copyAndConvertAll {
     for f in `ls $beg`; do 
         if [[ `file "$f" -i` =~ image ]]; then copyMoveRenameFile "$f"; fi; done
-    cd "$dest/tmp"
-    #cmd="mogrify -format png"
-    #if [ $res ]; then cmd="$cmd -resize $res"; fi
-    #cmd="$cmd *"; eval $cmd
+    cd "$dest"
     if [ $res ]; then mogrify -format png -resize "$res" *
     else mogrify -format png *; fi
-    rm *.[^(png)]* # remove all resulting non png files 
-    mv * .. # put back png imgs at $dest
-    #rm tmp -r
+    cd $oldPath #go back to path where script was called
 }
-
-getImgsFromBeg 
-
-#cd $oldPath  #go back to path where script was called
+copyAndConvertAll 
