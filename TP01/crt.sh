@@ -53,40 +53,20 @@ function renameBeforeExecution {
     mkdir tmp; cd tmp
     cp ../* . -f 2> err
     for f in * ; do mv "$f" $(tr -d "[' ''\"]" <<< "$f") -f 2> err; done 
-    ls
-    exit
 }
 
 
 function copyAndConvertAll {
-    cd "$beg"    
     renameBeforeExecution
     for f in * ; do 
-        #if [[ $(file "$f" -i) =~ image ]]; then 
         if [[ $(isImg "$f") ]]; then
-            #echo "calling copyMoveRename "
-            #copyMoveRenameFile "$name"
-            mv "$f" "$dest"
+            mv "$f" "$oldPath/$dest"
         fi
     done
-    echo " "
-    exit 
-    echo " "
     cd ..
-    echo "Removing tmp"
     rm tmp -r
-    cd $oldPath
-    # for f in $(ls "$beg"); do 
-    #     name="$f"
-    #     is '`file "$f" -i`" =~ image'
+    cd "$oldPath/$dest"; echo " "; pwd; ls; echo " "
 
-    #     if [[ $(file "$name" -i) =~ image ]]; then 
-    #         echo "calling copyMoveRename "
-    #         copyMoveRenameFile "$name"
-    #     fi
-    # done
-
-    cd "$dest"
     echo "converting"
     if [ "$res" ]; then mogrify -format png -resize "$res" *
     else mogrify -format png * ; fi
@@ -94,5 +74,8 @@ function copyAndConvertAll {
     cd $oldPath #go back to path where script was called
 }
 
+cd "$beg"
 
 copyAndConvertAll 
+
+cd "$oldPath"
