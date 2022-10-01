@@ -9,39 +9,50 @@ fi
 res=""
 if [ $# -ge 3 ]; then 
     if [ $# != 3 ]; then echo "Too many arguments, only taking the first 3 in consideration"; fi
-    res=$3;
+    res="$3";
 fi
-beg=$1; dest=$2
+beg="$1"; dest="$2"
 
 echo $'\n Starting (png) conversion of images from'" \"$1\" to \"$2\" ..." 
-if [ $3 ]; then echo $'\t (specified res: '"\"$3\")"; fi
+if [ "$3" ]; then echo $'\t (specified res: '"\"$3\")"; fi
 echo ""
 
+beg="images"
+dest="lul"
 # Create output dir if does not exists
-mkdir -p -v $dest
+mkdir -p -v "$dest"
 
 function copyMoveRenameFile {
     name="$1" # quoting since name might contain spaces
-    newName=$(echo $name | tr -d "['\"]" | tr ' ' '-')
-    cp $name "$dest/$newName"
+    newName=$(echo "$name" | tr -d "['\"]" | tr ' ' '-')
+    echo "copying $name to \"$dest/$newName\""
+    cp "$name" "$dest/$newName"
     echo "$dest/$newName" #output is new path of the img
 }
 
 function cvrt {
-    $name=$1; nameNoExt="${name%%.*}"
+    name=$1; nameNoExt="${name%%.*}"
     cmd="convert "
-    if [ $res ]; then cmd.="resize $res "; fi
+    if [ "$res" ]; then cmd="$cmd resize $res "; fi
     cmd="$cmd""$name $nameNoExt.png"
     echo $'command is\n\t'"\"$cmd\""
 
 }
 
 function copyAndConvertAll {
-    for f in `ls $beg`; do 
-        if [[ `file "$f" -i` =~ image ]]; then copyMoveRenameFile "$f"; fi; done
+    for f in $(ls "$beg"); do 
+        name="$f"
+        if [[ $(file "$name" -i) =~ image ]]; then 
+            echo "calling copyMoveRename "
+            copyMoveRenameFile "$name"
+        fi
+    done
+
     cd "$dest"
-    if [ $res ]; then mogrify -format png -resize "$res" *
-    else mogrify -format png *; fi
+    echo "converting"
+    if [ "$res" ]; then mogrify -format png -resize "$res" ./*
+    else mogrify -format png ./*; fi
+    echo "done"
     cd $oldPath #go back to path where script was called
 }
 copyAndConvertAll 
