@@ -17,15 +17,9 @@ echo $'\n Starting (png) conversion of images from'" \"$1\" to \"$2\" ..."
 if [ "$3" ]; then echo $'\t (specified res: '"\"$3\")"; fi
 echo ""
 
-beg="images"
-dest="lul"
-# Create output dir if does not exists
-mkdir -p -v "$dest"
+mkdir -p -v "$dest" # Create output dir if does not exists
 
-
-function is {
-      [[ $1 ]] && echo "true" || echo "false"
-}
+function is { [[ $1 ]] && echo "true" || echo "false" }
 
 function isImg {
     crtFile="$1"
