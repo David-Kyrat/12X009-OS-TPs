@@ -1,0 +1,7 @@
+#!/bin/bash
+
+ exec < ./test.csv
+ while IFS="," read -r im
+	 do 
+		 echo (tr -d "[' ''\"]" <<< $im)
+	 done
