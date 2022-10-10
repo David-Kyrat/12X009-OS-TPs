@@ -4,6 +4,10 @@
 
 ---
 
-Below you can find the links to the reports for each TP of the semester.  
+Below you can find the links to the enonce & reports for each TP of the semester.  
 
-- [TP 01](TP01/TP01-rapport.pdf)
+- [TP 01](TP01/TP1.pdf)
+  - [Report](TP01/TP01-rapport.pdf)
+  
+- [TP 02](TP02/TP2.pdf)
+  - [Report](TP02/TP02-rapport.pdf)
