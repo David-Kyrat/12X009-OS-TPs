@@ -5,7 +5,7 @@
 CC = gcc
 CFLAGS = -lm -Wall -Wuninitialized -Wfloat-equal -Wshadow -Wbad-function-cast -Wcast-qual -Wcast-align -Wconversion -Wunreachable-code -Wformat=2 -Winit-self 
 #-Wno-conversin -Wno-implicit-function-declaration  -Wno-discarded-qualifiers -Wno-unknown-pragmas
-OBJ = .
+OBJ = *.o
 
 #
 # Debug build settings
