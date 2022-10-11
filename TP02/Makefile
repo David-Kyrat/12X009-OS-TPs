@@ -13,5 +13,12 @@ OBJ = .
 #
 DBGFLAGS = -g -DDEBUG
 
+
+openssl_example: examples/openssl_example.c
+	$(CC) examples/openssl_example.c -lssl -lcrypto $(CFLAGS) $(DBGFLAGS) -o examples/openssl_example.out
+
 all: main.c options.c digest.c
-	$(CC) -o digest main.c options.c digest.c -lssl -lcrypto
+	$(CC) $(CFLAGS) $(DBGFLAGS)  -o digest main.c options.c digest.c -lssl -lcrypto
+
+clean:
+	rm *.out examples/*.out
