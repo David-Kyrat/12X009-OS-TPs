@@ -18,7 +18,7 @@ int main(int argc, char* argv[]) {
     md = EVP_get_digestbyname(argv[1]);
 
     if (md == NULL) {
-        printf("Unknown message digest %s\n", argv[1]);
+        printf("Unknown message digest \"%s\"\n", argv[1]);
         exit(1);
         }
 
