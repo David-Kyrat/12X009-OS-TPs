@@ -95,7 +95,8 @@ char** extractFilesFromArgv(int argc, char* argv[], int startIdx, int* fileAmnt)
     char** filePaths;
 
     tryalc(filePaths = calloc(*fileAmnt, sizeof(char*)), __LINE__);
-    for (int i = startIdx; i < argc; i++) *(filePaths + i) = argv[i];
+
+    for (int i = startIdx; i < argc; i++) *(filePaths + (i - startIdx)) = argv[i];
 
     return filePaths;
 }
@@ -138,22 +139,25 @@ int main(int argc, char* argv[]) {
 
     char opt;  //* We expect only 1 options (-f), no need to have a loop.
     if ((opt = getopt(argc, argv, availableOptions)) != -1) {
-        printf("optind=%i, argv[optind]=%s\t opt=%c\n", optind, argv[optind], opt);
+        //printf("optind=%i\t argv[optind]=%s\t opt=%c\n", optind, argv[optind], opt);
 
         int fileAmnt = 0;
         char** filePaths = parseOptArgs(argc, argv, opt, &fileAmnt);
         char** fileHashs;// = malloc() //calloc(fileAmnt*10, sizeof(char*));
+        printf("%s\n", "this is not a var");
+        tryalc(fileHashs = (char**)malloc(((fileAmnt+1) * sizeof(char*))), __LINE__);  
 
-        //tryalc(fileHashs = (char**)malloc(((fileAmnt+1) * sizeof(char*))), __LINE__);  
-
+        //for (int i = 0; i < fileAmnt; i++) fileHashs[i] = "0x";
 
         for (int i = 0; i < fileAmnt; i++) {
             char* crtFile = filePaths[i];
             
-            printf("Hashing file \"%s\"\n", crtFile);
+            printf("Hashing file \"%s\"...\n", crtFile);
+            
             //fileHashs[i] = 
             //TODO: Call hash_calc on current file
-            
+
+            printf("fileHash[%i] \t \"%s\"\n\n", i, fileHashs[i]);
         }
 
         free(filePaths);
@@ -168,7 +172,7 @@ int main(int argc, char* argv[]) {
         return EXIT_SUCCESS;
     }
 
-    printf("optind=%i\n", optind);
+    //printf("optind=%i\n", optind);
 
     exit(EXIT_SUCCESS);
 }
