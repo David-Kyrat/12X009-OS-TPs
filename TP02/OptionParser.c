@@ -142,8 +142,11 @@ int main(int argc, char* argv[]) {
 
         int fileAmnt = 0;
         char** filePaths = parseOptArgs(argc, argv, opt, &fileAmnt);
-        char** fileHashs;
-        tryalc(fileHashs = calloc(fileAmnt, sizeof(char*)), __LINE__);
+        char** fileHashs;// = malloc() //calloc(fileAmnt*10, sizeof(char*));
+
+        tryalc(fileHashs = (char**)malloc(((fileAmnt+1) * sizeof(char*))), __LINE__);  
+
+        tryalc(fileHashs, __LINE__);
 
         for (int i = 0; i < fileAmnt; i++) {
             char* crtFile = filePaths[i];
@@ -155,7 +158,7 @@ int main(int argc, char* argv[]) {
         }
 
         free(filePaths);
-        free(argv);
+        //free(argv);
 
     } else {
         char* stringToHash = parseSingleArg(argc, argv);

@@ -20,11 +20,14 @@ getopt_example: examples/getopt_example.c
 openssl_example: examples/openssl_example.c
 	$(CC) examples/openssl_example.c -lssl -lcrypto $(CFLAGS) $(DBGFLAGS) -o examples/openssl_example.out
 
-optionparser: OptionParser.c OptionParser.h
-	$(CC) OptionParser.c $(CFLAGS) $(DBGFLAGS) -o OptionParser.out
+OptionParser.o: OptionParser.c OptionParser.h
+	$(CC) -c OptionParser.c $(CFLAGS) $(DBGFLAGS) -o out/OptionParser.o
+
+OptionParser.out: OptionParser.o
+	$(CC) out/OptionParser.o $(CFLAGS) $(DBGFLAGS) -o out/OptionParser.out
 
 all: main.c options.c digest.c
 	$(CC) $(CFLAGS) $(DBGFLAGS)  -o digest main.c options.c digest.c -lssl -lcrypto
 
 clean:
-	rm *parser.out
+	rm *[pP]arser.out *[pP]arser.o
