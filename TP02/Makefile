@@ -21,7 +21,7 @@ openssl_example: examples/openssl_example.c
 	$(CC) examples/openssl_example.c -lssl -lcrypto $(CFLAGS) $(DBGFLAGS) -o examples/openssl_example.out
 
 optionparser: OptionParser.c OptionParser.h
-	$(CC) OptionParser.c $(CFLAGS) $(DBGFLAGS) -o optionparser.out
+	$(CC) OptionParser.c $(CFLAGS) $(DBGFLAGS) -o OptionParser.out
 
 all: main.c options.c digest.c
 	$(CC) $(CFLAGS) $(DBGFLAGS)  -o digest main.c options.c digest.c -lssl -lcrypto

@@ -58,7 +58,7 @@ void checkEnoughArgs(int argc, char* fileName) {
     if (argc <= 1) {
         fprintf(stderr, "Expected at least 1 argument.\tUsage: %s [-f file1 file2 ...] [<text to hash>]\n", fileName);
         errno = EINVAL;
-        exit(EXIT_FAILURE);
+        exit(EINVAL);
     }
 }
 
@@ -78,8 +78,30 @@ char* parseSingleArg(int argc, char* argv[]) {
     char** strArgs = &argv[1];  //creating a view on argv[1:]
     char* stringToHash = catArr(strArgs, strNb, " ");
     printf("String to hash:\t\t\"%s\"\n", stringToHash);
-    
+
     return stringToHash;
+}
+
+//startIdx : idx from wich argv[idx:] contains only the files given as argument (and all of them)
+
+/**
+ * Extract & return a copy of the different file paths given as argument with the "-f" flag 
+ * 
+ * @param argc The number of arguments passed to the program.
+ * @param argv The array of arguments given to the program.
+ * @param startIdx The index of the first file in argv
+ * @param fileAmnt The variable into which store the amount of files given as argument
+ * 
+ * @return Copied array of file paths
+ */
+char** extractFilesFromArgv(int argc, char* argv[], int startIdx, int* fileAmnt) {
+    *fileAmnt = argc - startIdx;  //? Number of file given as argument equals argcount - (<Number of available options> + 1) (e.g. 3 => ./prog.out -f file1 file2 file3)
+    char** filePaths;
+
+    tryalc(filePaths = calloc(*fileAmnt, sizeof(char*)), __LINE__);
+    for (int i = startIdx; i < argc; i++) *(filePaths + i) = argv[i];
+
+    return filePaths;
 }
 
 //!
@@ -89,46 +111,59 @@ char* parseSingleArg(int argc, char* argv[]) {
 int main(int argc, char* argv[]) {
     checkEnoughArgs(argc, argv[0]);
 
-    printf("argc=%i\t argv=[%s]\n", argc, catArr(argv, argc, ", "));
-    printf("optind=%i\n", optind);
+    //printf("argc=%i\t argv=[%s]\n", argc, catArr(argv, argc, ", "));
 
-    int fileGiven = 0, opt;
+    int fileGiven = 0, fileAmnt = 0, init = 0, opt;
     char** filePaths;
-    
-    while ((opt = getopt(argc, argv, availableOptions)) != -1) {
-        printf("optind=%i\t opt=%c\n", optind, opt);
+
+    printf("optind=%i, argv[optind]=%s\n", optind, argv[optind]);
+
+
+    //* We expect only 1 options (-f), no need to have a loop.
+    if ((opt = getopt(argc, argv, availableOptions)) != -1) {
+        printf("optind=%i, argv[optind]=%s\t opt=%c\n", optind, argv[optind], opt);
 
         switch (opt) {
             case 'f':
-                if (optind <= 1) {
+                if (!init) {
+                    printf("\n-----------\n\n");
                     fileGiven = 1;
+                    fileAmnt = argc - 2;  //? Number of file given as argument equals argcount - (<Number of available options> + 1) (e.g. 3 => ./prog.out -f file1 file2 file3)
+                    filePaths = tryalc(calloc(fileAmnt, sizeof(char*)), __LINE__);
+                    init = 1;
                 }
-                
+
+                char* arg1 = optarg;
+
+                char* arg2 = argv[optind];
+                char* arg3 = &(*(arg2 + strlen(arg2) + 1));
+
+                printf("optargs:\t \"%s\"\n", arg1);
+                printf("optargs:\t \"%s\"\n", arg2);
+                printf("optargs:\t \"%s\"\n", arg3);
+                arg3 = &(*(arg2 + strlen(arg2) + 1));
                 //filePath;          //array of path to the given files
-                int fileAmnt = argc - 2;  //? Number of file given as argument equals argcount - (<Number of available options> + 1) (e.g. 3 => ./prog.out -f file1 file2 file3)
+
                 break;
 
             default: /* '?' */
                 fprintf(stderr, errMess, argv[0]);
                 exit(EXIT_FAILURE);
-        } 
-        //* If flag is something else than 'f' with arguments, the program just exits. so we don't have to handle multiple case and branching 
+        }
+        //* If flag is something else than 'f' with arguments, the program just exits. so we don't have to handle multiple case and branching
         //* because after having entered the while if the programm didnt exit then the arguments must have been parsed correctly.
-
     }
-    printf("optind=%i\n", optind);
 
-    
-    if (optind <= 1) {
+    else {
         char* stringToHash = parseSingleArg(argc, argv);
-        
+
         //TODO: Call hash_calc on stringToHash
 
         free(stringToHash);
         return EXIT_SUCCESS;
     }
-   
 
+    printf("optind=%i\n", optind);
 
     exit(EXIT_SUCCESS);
 }
