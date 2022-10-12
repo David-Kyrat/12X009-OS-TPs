@@ -29,8 +29,8 @@ int main(int argc, char* argv[]) {
     if (optind >= argc) {
         fprintf(stderr, "Expected argument after options\n");
         exit(EXIT_FAILURE);
-
-        printf("name argument = %s\n", argv[optind]);
-        exit(EXIT_SUCCESS);
     }
+
+    printf("name argument = %s\n", argv[optind]);
+    exit(EXIT_SUCCESS);
 }
