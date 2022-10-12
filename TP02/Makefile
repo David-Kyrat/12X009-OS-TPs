@@ -13,6 +13,10 @@ OBJ = *.o
 DBGFLAGS = -g -DDEBUG
 
 
+getopt_example: examples/getopt_example.c
+	$(CC) examples/getopt_example.c -lssl -lcrypto $(CFLAGS) $(DBGFLAGS) -o examples/getopt_example.out
+
+
 openssl_example: examples/openssl_example.c
 	$(CC) examples/openssl_example.c -lssl -lcrypto $(CFLAGS) $(DBGFLAGS) -o examples/openssl_example.out
 
