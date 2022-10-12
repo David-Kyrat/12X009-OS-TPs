@@ -20,11 +20,20 @@ void* tryalc(void* allocReturn, int line) {
     if (allocReturn) return allocReturn;
 
     //*malloc returned null => exiting with error message ENOMEM
-    //errno = ENOMEM;
     fprintf(stderr, "line %d: Cannot allocate Memory\n", line);
     exit(ENOMEM);
 }
 
+/**
+ * Takes an array of strings, a separator string, and returns a string that is the concatenation of
+ * all the strings in the array, separated by the separator
+ * 
+ * @param arr the array of strings to concatenate
+ * @param arrSize the size of the array
+ * @param sep the separator to use between each element of the array.
+ * 
+ * @return Concatenation of array
+ */
 char* catArr(char** arr, int arrSize, char* sep) {
     char* out;
     int sepLen = strlen(sep);
@@ -35,32 +44,46 @@ char* catArr(char** arr, int arrSize, char* sep) {
     for (int i = 0; i < arrSize; i++) {
         char* crt = arr[i];
 
-        if (sep) strncat(out, sep, sepLen);
+        if (sep && i != 0) strncat(out, sep, sepLen);
         strncat(out, crt, strlen(crt) + 1);
     }
 
     return out;
 }
 
+//TODO: wrap everything in method parseArgs
+
 int main(int argc, char* argv[]) {
+    if (argc <= 1) {
+        fprintf(stderr, "Expected at least 1 argument.\tUsage: %s [-f file1 file2 ...] [<text to hash>]\n", argv[0]);
+        errno = EINVAL;
+        exit(EXIT_FAILURE);
+    }
+
     int fileGiven = 0, opt;
-    tryalc(NULL, __LINE__);
 
-    char** filePaths;  //array of path to the given files
-
-    printf("argc=%i\t argv=[", argc);
-    for (int i = 0; i < argc - 1; i++) printf("\"%s\",  ", argv[i]);
-    printf("\"%s\"]\n\n", argv[argc - 1]);
+    //printf("argc=%i\t argv=[%s]\n", argc, catArr(argv, argc, ", "));
 
     if (optind <= 1) {
-        //TODO: treat every arg as a single
+        int strNb = argc - 1;
+        char** strArgs = &argv[1];  //creating a view on argv[1:]
+        char* stringToHash = catArr(strArgs, strNb, " ");
+
+        printf("String to hash:\t\t\"%s\"\n", stringToHash);
+        //TODO: Call hash_calc on stringToHash
+
+        
+        free(stringToHash);
+        return EXIT_SUCCESS;
     }
 
     while ((opt = getopt(argc, argv, availableOptions)) != -1) {
+        printf("optind=%i\n", optind);
+        
         switch (opt) {
-            printf("optind=%i\n", optind);
             case 'f':
                 fileGiven = 1;
+                char** filePath;     //array of path to the given files
                 int fileAmnt = argc - 2;  //? Number of file given as argument equals argcount - (<Number of available options> + 1) (e.g. 3 => ./prog.out -f file1 file2 file3)
                 break;
 
@@ -72,20 +95,6 @@ int main(int argc, char* argv[]) {
 
     printf("fileGiven=%d\t optind=%d\n\n", fileGiven, optind);
 
-    if (argc <= 1) {
-        //printf("test\n");
-        fprintf(stderr, "Expected at least 1 argument,\n\tUsage: %s [-f file1 file2 ...] [<text to hash>]\n", argv[0]);
-
-        //perror(optarg);
-        errno = EINVAL;
-        /* exit(EXIT_FAILURE);
-        fprintf(stderr, "Expected argument after options\n"); */
-        perror(optarg);
-
-        return EINVAL;
-    }
-
     printf("last argument:\"%s\"\n", argv[argc - 1]);
     exit(EXIT_SUCCESS);
 }
-
