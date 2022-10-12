@@ -16,18 +16,27 @@ DBGFLAGS = -g -DDEBUG
 getopt_example: examples/getopt_example.c
 	$(CC) examples/getopt_example.c -lssl -lcrypto $(CFLAGS) $(DBGFLAGS) -o examples/getopt_example.out
 
-
 openssl_example: examples/openssl_example.c
 	$(CC) examples/openssl_example.c -lssl -lcrypto $(CFLAGS) $(DBGFLAGS) -o examples/openssl_example.out
+
 
 OptionParser.o: OptionParser.c OptionParser.h
 	$(CC) -c OptionParser.c $(CFLAGS) $(DBGFLAGS) -o out/OptionParser.o
 
-OptionParser.out: OptionParser.o
-	$(CC) out/OptionParser.o $(CFLAGS) $(DBGFLAGS) -o OptionParser.out
+OptionParser.out: out/OptionParser.o
+	$(CC) out/OptionParser.o $(CFLAGS) $(DBGFLAGS) -o out/OptionParser.out
 
-all: main.c options.c digest.c
-	$(CC) $(CFLAGS) $(DBGFLAGS)  -o digest main.c options.c digest.c -lssl -lcrypto
+
+main.o: main.c OptionParser.h
+	$(CC) -c main.c $(CFLAGS) $(DBGFLAGS) -o out/main.o
+
+main.out: out/main.o out/OptionParser.o
+	$(CC) out/main.o out/OptionParser.o $(CFLAGS) $(DBGFLAGS) -o main.out
+
+
+all: main.c OptionParser.o digest.c
+	$(CC) $(CFLAGS) $(DBGFLAGS)  -o digest main.c OptionParser.c digest.c -lssl -lcrypto
+
 
 clean:
-	rm *[pP]arser.out *[pP]arser.o
+	rm out/*[pP]arser.o*  out/main.o*
