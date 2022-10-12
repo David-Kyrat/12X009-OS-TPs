@@ -89,10 +89,36 @@ char* parseSingleArg(int argc, char* argv[]) {
 int main(int argc, char* argv[]) {
     checkEnoughArgs(argc, argv[0]);
 
+    printf("argc=%i\t argv=[%s]\n", argc, catArr(argv, argc, ", "));
+    printf("optind=%i\n", optind);
+
+    int fileGiven = 0, opt;
+    char** filePaths;
     
+    while ((opt = getopt(argc, argv, availableOptions)) != -1) {
+        printf("optind=%i\t opt=%c\n", optind, opt);
 
-    //printf("argc=%i\t argv=[%s]\n", argc, catArr(argv, argc, ", "));
+        switch (opt) {
+            case 'f':
+                if (optind <= 1) {
+                    fileGiven = 1;
+                }
+                
+                //filePath;          //array of path to the given files
+                int fileAmnt = argc - 2;  //? Number of file given as argument equals argcount - (<Number of available options> + 1) (e.g. 3 => ./prog.out -f file1 file2 file3)
+                break;
 
+            default: /* '?' */
+                fprintf(stderr, errMess, argv[0]);
+                exit(EXIT_FAILURE);
+        } 
+        //* If flag is something else than 'f' with arguments, the program just exits. so we don't have to handle multiple case and branching 
+        //* because after having entered the while if the programm didnt exit then the arguments must have been parsed correctly.
+
+    }
+    printf("optind=%i\n", optind);
+
+    
     if (optind <= 1) {
         char* stringToHash = parseSingleArg(argc, argv);
         
@@ -101,32 +127,8 @@ int main(int argc, char* argv[]) {
         free(stringToHash);
         return EXIT_SUCCESS;
     }
-    else {
+   
 
-    }
 
-    int fileGiven = 0, opt;
-
-    while ((opt = getopt(argc, argv, availableOptions)) != -1) {
-        printf("optind=%i\n", optind);
-
-        switch (opt) {
-            case 'f':
-                fileGiven = 1;
-                char** filePath;          //array of path to the given files
-                int fileAmnt = argc - 2;  //? Number of file given as argument equals argcount - (<Number of available options> + 1) (e.g. 3 => ./prog.out -f file1 file2 file3)
-                
-
-                break;
-
-            default: /* '?' */
-                fprintf(stderr, errMess, argv[0]);
-                exit(EXIT_FAILURE);
-        }
-    }
-
-    printf("fileGiven=%d\t optind=%d\n\n", fileGiven, optind);
-
-    printf("last argument:\"%s\"\n", argv[argc - 1]);
     exit(EXIT_SUCCESS);
 }
