@@ -24,7 +24,7 @@ OptionParser.o: OptionParser.c OptionParser.h
 	$(CC) -c OptionParser.c $(CFLAGS) $(DBGFLAGS) -o out/OptionParser.o
 
 OptionParser.out: OptionParser.o
-	$(CC) out/OptionParser.o $(CFLAGS) $(DBGFLAGS) -o out/OptionParser.out
+	$(CC) out/OptionParser.o $(CFLAGS) $(DBGFLAGS) -o OptionParser.out
 
 all: main.c options.c digest.c
 	$(CC) $(CFLAGS) $(DBGFLAGS)  -o digest main.c options.c digest.c -lssl -lcrypto
