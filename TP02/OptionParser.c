@@ -49,6 +49,7 @@ char* catArr(char** arr, int arrSize, char* sep) {
     return out;
 }
 
+
 /**
  * @brief Check if there is at least 1 argument, otherwise exits with code 22 (Invalid argument)
  * @param argc same as argc in main
@@ -62,7 +63,6 @@ void checkEnoughArgs(int argc, char* fileName) {
     }
 }
 
-//TODO: wrap everything in method parseArgs
 
 /**
  * Handle case where user does not use the -f flag. (i.e. takes every given string and hash them as 1)
@@ -82,14 +82,13 @@ char* parseSingleArg(int argc, char* argv[]) {
     return stringToHash;
 }
 
-//startIdx : idx from wich argv[idx:] contains only the files given as argument (and all of them)
 
 /**
  * Extract & return a copy of the different file paths given as argument with the "-f" flag 
  * 
  * @param argc The number of arguments passed to the program.
  * @param argv The array of arguments given to the program.
- * @param startIdx The index of the first file in argv
+ * @param startIdx The index of the first file in argv, (i.e. idx from wich argv[idx:] contains only the files given as argument (and all of them))
  * @param fileAmnt The variable into which store the amount of files given as argument
  * 
  * @return Copied array of file paths
@@ -104,6 +103,34 @@ char** extractFilesFromArgv(int argc, char* argv[], int startIdx, int* fileAmnt)
     return filePaths;
 }
 
+
+/**
+ * Extracts the file names from the command line arguments and returns them as an array of strings
+ * 
+ * @param argc Number of arguments passed to the program.
+ * @param argv Array of arguments given to the program.
+ * @param opt Option that was given as argument
+ * @param fileAmnt Variable into which store the amount of given files
+ * 
+ * @return array of file paths
+ */
+char** parseOptArgs(int argc, char* argv[], char opt, int* fileAmnt) {
+    char** filesToHash = NULL;
+    switch (opt) {
+        case 'f': 
+            filesToHash = extractFilesFromArgv(argc, argv, 2, fileAmnt);
+            //? 2 because Number of file given as argument equals argcount - (<Number of available options> + 1) (e.g. 3 => ./prog.out -f file1 file2 file3)
+            break;
+        
+        default:
+            fprintf(stderr, errMess, argv[0]);
+            exit(EXIT_FAILURE);
+            break;
+    }
+
+    return filesToHash;
+}
+
 //!
 //! The main will not be here !
 //!
@@ -113,27 +140,31 @@ int main(int argc, char* argv[]) {
 
     //printf("argc=%i\t argv=[%s]\n", argc, catArr(argv, argc, ", "));
 
-    int fileGiven = 0, fileAmnt = 0, init = 0, opt;
-    char** filePaths;
+    char opt;
 
     printf("optind=%i, argv[optind]=%s\n", optind, argv[optind]);
 
-
     //* We expect only 1 options (-f), no need to have a loop.
     if ((opt = getopt(argc, argv, availableOptions)) != -1) {
+        char** filePaths;
+        int fileGiven = 0, fileAmnt = 0;
+
         printf("optind=%i, argv[optind]=%s\t opt=%c\n", optind, argv[optind], opt);
 
-        switch (opt) {
-            case 'f':
-                if (!init) {
+
+        //switch (opt) {
+        //  case 'f':
+        /* if (!init) {
                     printf("\n-----------\n\n");
                     fileGiven = 1;
                     fileAmnt = argc - 2;  //? Number of file given as argument equals argcount - (<Number of available options> + 1) (e.g. 3 => ./prog.out -f file1 file2 file3)
                     filePaths = tryalc(calloc(fileAmnt, sizeof(char*)), __LINE__);
                     init = 1;
-                }
+                } */
 
-                char* arg1 = optarg;
+        // char** filesToHash = extractFilesFromArgv(argc, argv, 2, &fileAmnt);
+
+        /* char* arg1 = optarg;
 
                 char* arg2 = argv[optind];
                 char* arg3 = &(*(arg2 + strlen(arg2) + 1));
@@ -141,15 +172,15 @@ int main(int argc, char* argv[]) {
                 printf("optargs:\t \"%s\"\n", arg1);
                 printf("optargs:\t \"%s\"\n", arg2);
                 printf("optargs:\t \"%s\"\n", arg3);
-                arg3 = &(*(arg2 + strlen(arg2) + 1));
-                //filePath;          //array of path to the given files
+                arg3 = &(*(arg2 + strlen(arg2) + 1)); */
+        //filePath;          //array of path to the given files
 
-                break;
+        //     break;
 
-            default: /* '?' */
-                fprintf(stderr, errMess, argv[0]);
-                exit(EXIT_FAILURE);
-        }
+        //default: /* '?' */
+        //fprintf(stderr, errMess, argv[0]);
+        //exit(EXIT_FAILURE);
+        //}
         //* If flag is something else than 'f' with arguments, the program just exits. so we don't have to handle multiple case and branching
         //* because after having entered the while if the programm didnt exit then the arguments must have been parsed correctly.
     }
