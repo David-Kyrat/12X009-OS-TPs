@@ -1,7 +1,7 @@
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <getopt.h>
 
 int main(int argc, char* argv[]) {
     int flags, opt;
@@ -19,14 +19,12 @@ int main(int argc, char* argv[]) {
                 tfnd = 1;
                 break;
             default: /* '?' */
-                fprintf(stderr, "Usage: %s [-t nsecs] [-n] name\n",
-                        argv[0]);
+                fprintf(stderr, "Usage: %s [-t nsecs] [-n] name\n", argv[0]);
                 exit(EXIT_FAILURE);
         }
     }
 
-    printf("flags=%d; tfnd=%d; nsecs=%d; optind=%d\n",
-           flags, tfnd, nsecs, optind);
+    printf("flags=%d; tfnd=%d; nsecs=%d; optind=%d\n", flags, tfnd, nsecs, optind);
 
     if (optind >= argc) {
         fprintf(stderr, "Expected argument after options\n");
