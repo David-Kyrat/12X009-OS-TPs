@@ -43,48 +43,80 @@ char* catArr(char** arr, int arrSize, char* sep) {
 
     for (int i = 0; i < arrSize; i++) {
         char* crt = arr[i];
-
         if (sep && i != 0) strncat(out, sep, sepLen);
         strncat(out, crt, strlen(crt) + 1);
     }
-
     return out;
+}
+
+/**
+ * @brief Check if there is at least 1 argument, otherwise exits with code 22 (Invalid argument)
+ * @param argc same as argc in main
+ * @param fileName argv[0]
+ */
+void checkEnoughArgs(int argc, char* fileName) {
+    if (argc <= 1) {
+        fprintf(stderr, "Expected at least 1 argument.\tUsage: %s [-f file1 file2 ...] [<text to hash>]\n", fileName);
+        errno = EINVAL;
+        exit(EXIT_FAILURE);
+    }
 }
 
 //TODO: wrap everything in method parseArgs
 
-int main(int argc, char* argv[]) {
-    if (argc <= 1) {
-        fprintf(stderr, "Expected at least 1 argument.\tUsage: %s [-f file1 file2 ...] [<text to hash>]\n", argv[0]);
-        errno = EINVAL;
-        exit(EXIT_FAILURE);
-    }
+/**
+ * Handle case where user does not use the -f flag. (i.e. takes every given string and hash them as 1)
+ * Takes array of strings from main function and concatenates them into a single string - the string to hash
+ * 
+ * @param argc the number of arguments passed to the program
+ * @param argv the array of arguments passed to the program
+ * 
+ * @return The String to hash
+ */
+char* parseSingleArg(int argc, char* argv[]) {
+    int strNb = argc - 1;
+    char** strArgs = &argv[1];  //creating a view on argv[1:]
+    char* stringToHash = catArr(strArgs, strNb, " ");
+    printf("String to hash:\t\t\"%s\"\n", stringToHash);
+    
+    return stringToHash;
+}
 
-    int fileGiven = 0, opt;
+//!
+//! The main will not be here !
+//!
+
+int main(int argc, char* argv[]) {
+    checkEnoughArgs(argc, argv[0]);
+
+    
 
     //printf("argc=%i\t argv=[%s]\n", argc, catArr(argv, argc, ", "));
 
     if (optind <= 1) {
-        int strNb = argc - 1;
-        char** strArgs = &argv[1];  //creating a view on argv[1:]
-        char* stringToHash = catArr(strArgs, strNb, " ");
-
-        printf("String to hash:\t\t\"%s\"\n", stringToHash);
+        char* stringToHash = parseSingleArg(argc, argv);
+        
         //TODO: Call hash_calc on stringToHash
 
-        
         free(stringToHash);
         return EXIT_SUCCESS;
     }
+    else {
+
+    }
+
+    int fileGiven = 0, opt;
 
     while ((opt = getopt(argc, argv, availableOptions)) != -1) {
         printf("optind=%i\n", optind);
-        
+
         switch (opt) {
             case 'f':
                 fileGiven = 1;
-                char** filePath;     //array of path to the given files
+                char** filePath;          //array of path to the given files
                 int fileAmnt = argc - 2;  //? Number of file given as argument equals argcount - (<Number of available options> + 1) (e.g. 3 => ./prog.out -f file1 file2 file3)
+                
+
                 break;
 
             default: /* '?' */
