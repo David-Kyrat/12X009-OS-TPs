@@ -14,6 +14,7 @@ int main(int argc, char* argv[]) {
     char** filesToHash = NULL;
     char* stringToHash = NULL;
     int fileAmnt = -1;
+    printf("argv: [%s]\n", catArr(argv, argc, ", "));
 
     int parseError = parseArgs(argc, argv, &filesToHash, &fileAmnt, &stringToHash);
     if (parseError != 0) {

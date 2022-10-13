@@ -12,7 +12,8 @@ const char* OPT_STRING = "f:t:";
 const int HASH_METH_MAXLEN = 10;  //* maxium length of string describing hashing method
 
 char* hashMethod = NULL;
-int tpos = 0; //* 0 if prog was not called with "-t" and index of -t argument otherwise
+int tflag = 0; //* 0 if prog was not called with "-t", 1 otherwise  
+// and index of -t argument otherwise
 
 char** filesToHash = NULL;
 char* stringToHash = NULL;
@@ -82,7 +83,7 @@ char* catArrRange(char** arr, char* sep, int start, int stop) {
 
     for (int i = start; i < stop; i++) {
         char* crt = arr[i];
-        if (sep && i != 0) strncat(out, sep, sepLen);
+        if (sep && i != start) strncat(out, sep, sepLen);
         strncat(out, crt, strlen(crt) + 1);
     }
     return out;
@@ -114,10 +115,11 @@ void checkEnoughArgs(int argc, char* fileName) {
 int parseArgsAsString(int argc, char* argv[]) {
     int strNb = argc - 1, errcode = 0;
     char** strArgs = &argv[1];  //creating a view on argv[1:]
-
-    if (tpos == 0) stringToHash = catArr(strArgs, strNb, " "); //* if "-t" was not used
-    else if (optind >= argc) stringToHash = catArrRange(strArgs, " ", 0, tpos); //* if "-t" was used at the end
-    else if (tpos <= 1) stringToHash = catArrRange(strArgs, " ", 2, strNb);
+    
+    //argv[] got reversed somehow ?
+    
+    if (tflag == 0) stringToHash = catArr(strArgs, strNb, " "); //* if "-t" was not used
+    else if (optind <= 3) stringToHash = catArrRange(strArgs, " ", 2, strNb); //* if "-t" was used and was parsed correctly
     //printf("String to hash:\t\t\"%s\"\n", stringToHash);
 
     if (!stringToHash || strlen(stringToHash) == 0) errcode = -1;
@@ -158,7 +160,7 @@ char** extractFilesFromArgv(int argc, char* argv[], int startIdx, int* fileAmnt)
  * @return 0 if success else error code
  */
 int parseOptArgs(int argc, char* argv[], int* fileAmnt) {
-    int finit = 0, tinit = 0, opt;
+    int finit = 0, opt;
     *fileAmnt = 0;  //* if fileAmnt stays 0 at the end of the call, then 'f' option was not provided
 
     while ((opt = getopt(argc, argv, getOptString())) != -1) {
@@ -172,15 +174,11 @@ int parseOptArgs(int argc, char* argv[], int* fileAmnt) {
                 break;
 
             case 't': {
-                if (!tpos) {
+                if (!tflag) {
+                    tflag = 1;
                     tryalc(hashMethod = malloc(HASH_METH_MAXLEN * sizeof(char)), __LINE__);
                     if (strlen(optarg) <= 1) return EINVAL;
                     hashMethod = strncpy(hashMethod, optarg, HASH_METH_MAXLEN);
-                    tpos = optind - 2; //* index of "-t" in argv
-                    // if (optind >= argc) -t is at end 
-                    // Removing the "-t <method>" from argv to make rest of parsing easier.
-                    //argv[optind-2] = NULL; // the "-t"
-                    //argv[optind-1] = NULL; // after the "-t"
                 }
                 break;
             }
