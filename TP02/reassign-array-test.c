@@ -36,6 +36,19 @@ void reassignArr(char** arrToReassign[]) {
     arrToReassign[0] = t;
 } */
 
+char** fillArr() {
+    char** t = malloc(4 * sizeof(char*));
+    char* test[] = {"foo1", "foo2", "foo3", "foo4"};
+    for (int i = 0; i < 5; i++) t[i] = test[i];
+    return t;
+}
+
+//! also works like this
+void reassignArr(char** arrToReassign[]) {
+    char** t = fillArr();
+    *arrToReassign = &t[0];
+}
+
 void temp() {
     for (int i = 0; i < 5; i++) {
         printf("");
