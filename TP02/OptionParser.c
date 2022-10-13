@@ -90,7 +90,7 @@ int parseArgsAsString(int argc, char* argv[]) {
     printf("String to hash:\t\t\"%s\"\n", stringToHash);
 
     if (!stringToHash || strlen(stringToHash) == 0) errcode = -1;
-    return stringToHash;
+    return errcode;
 }
 
 /**
