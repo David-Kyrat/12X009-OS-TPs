@@ -25,12 +25,16 @@ char* catArr(char** arr, int arrSize, char* sep) {
     return out;
 }
 
-void reassignArr(char*** arrToReassign) {
-    char** t = malloc(5 * sizeof(char*));
+
+
+/* 
+WORKS LIKE THIS
+void reassignArr(char** arrToReassign[]) {
+    char** t = malloc(4 * sizeof(char*));
     char* test[] = {"foo1", "foo2", "foo3", "foo4"};
-    t = test;
-    *arrToReassign = t;
-}
+    for (int i = 0; i < 5; i++) t[i] = test[i];
+    arrToReassign[0] = t;
+} */
 
 void temp() {
     for (int i = 0; i < 5; i++) {
@@ -41,21 +45,20 @@ void temp() {
 
 int main() {
 
-    //char* test[] = {"lul1", "lul2", "lul3", "lul4"};
-    //char** t = malloc(5 * sizeof(char*));
-    char*** t = malloc(5 * sizeof(char**));
+    char* test[] = {"lul1", "lul2", "lul3", "lul4"};
+    char** t = malloc(5 * sizeof(char*));
+    for (int i = 0; i < 5; i++) t[i] = test[i];
+
+    /* char*** t = malloc(5 * sizeof(char**));
     (*t)[0] = "lul1";
     (*t)[1] = "lul2";
     (*t)[2] = "lul3";
-    (*t)[3] = "lul4";
+    (*t)[3] = "lul4"; */
 
     printf("test before [%s]\n", catArr(t, 4, ", "));
-    //sreassignArr(&t);
+    reassignArr(&t);
     
     temp();
-    printf("test after [%s]\n", catArr(t, 4, ", "));
-    temp();
-    printf("test after [%s]\n", catArr(t, 4, ", "));
     temp();
     printf("test after [%s]\n", catArr(t, 4, ", "));
 
