@@ -9,7 +9,7 @@
 
 const char* ERR_MESS = "\tUsage: %s [-f file1 file2 ...] [<text to hash>]\n";
 const char* OPT_STRING = "f:t:";
-const int HASH_METH_MAXLEN = 5;  //* maxium length of string describing hashing method i.e. here:  5 = strlen("SHA1") + 1
+const int HASH_METH_MAXLEN = 10;  //* maxium length of string describing hashing method
 
 char* hashMethod = NULL;
 int fileMode = 0;  //* whether program was called with -f option
@@ -193,8 +193,7 @@ int parseArgs(int argc, char* argv[], char** givenFilesToHash, int* fileAmnt, ch
 
     //givenFilesToHash = filesToHash;
     //errcode = (!givenFilesToHash && !givenStringToHash); 
-    if (errcode != 0) fprintf(stderr, "Error %d in parseArgs()\n", errcode);
-    
+    //if (errcode != 0) fprintf(stderr, "Error %d in parseArgs()\n", errcode);
     return errcode; 
 }
 
