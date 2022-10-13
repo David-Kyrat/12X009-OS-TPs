@@ -141,7 +141,8 @@ char** extractFilesFromArgv(int argc, char* argv[], int startIdx, int* fileAmnt)
     char** filePaths;
 
     tryalc(filePaths = calloc(*fileAmnt, sizeof(char*)), __LINE__);
-
+    //int i = startIdx;
+    //while (i < argc && argv[i])
     for (int i = startIdx; i < argc; i++) *(filePaths + (i - startIdx)) = argv[i];
 
     return filePaths;
@@ -167,27 +168,26 @@ int parseOptArgs(int argc, char* argv[], int* fileAmnt) {
         switch (opt) {
             case 'f':
                 if (!finit) {
-                    filesToHash = extractFilesFromArgv(argc, argv, 2, fileAmnt);
+                    filesToHash = extractFilesFromArgv(argc, argv, optind-1, fileAmnt); //? 2 because Number of file given as argument equals argcount - (<Number of available options> + 1) (e.g. 3 => ./prog.out -f file1 file2 file3)
                     finit = 1;  //* Memory should not be allocated more than once.
                 }
-                //? 2 because Number of file given as argument equals argcount - (<Number of available options> + 1) (e.g. 3 => ./prog.out -f file1 file2 file3)
                 break;
 
             case 't': {
                 if (!tflag) {
-                    tflag = 1;
                     tryalc(hashMethod = malloc(HASH_METH_MAXLEN * sizeof(char)), __LINE__);
                     if (strlen(optarg) <= 1) return EINVAL;
                     hashMethod = strncpy(hashMethod, optarg, HASH_METH_MAXLEN);
+                    tflag = 1; 
                 }
                 break;
             }
 
             default:
                 fprintf(stderr, ERR_MESS, argv[0]);
+                char mess[100];
+                sprintf(mess, "optind: %d \t argc: %d", optind, argc);
                 errno = EINVAL;
-                char mess[200];
-                sprintf(mess, "optind: %d \t argc: %d \t argv:[%s]", optind, argc, catArr(argv, argc, "; "));
                 perror(mess);
                 return EINVAL;
         }
@@ -220,15 +220,12 @@ int parseArgs(int argc, char* argv[], char** givenFileToHash[], int* fileAmnt, c
             return errcode;
         }
         *givenStringToHash = stringToHash;
-        //TOOD: reassign str
-    } else if (filesToHash)
-        *givenFileToHash = filesToHash;
+    } else if (filesToHash) *givenFileToHash = filesToHash;
     //* Make givenFileToHash point to the argument passed here (the option parser). i.e. "redirect" its content to filesToHash
 
-    else
-        errcode = EXIT_FAILURE;
+    else errcode = EXIT_FAILURE;
     return errcode;
 }
 
-/** @return hashMethod parsed by the optionParser or the defaultHashMethod if none were given as argument (i.e. hahsMethod == NULL) */
+/** @return hashMethod parsed by the optionParser or the defaultHashMethod if none were given in argv (i.e. hahsMethod == NULL) */
 char* getHashMethod(char* defaultHashMethod) { return hashMethod ? hashMethod : defaultHashMethod; }
