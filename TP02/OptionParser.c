@@ -69,7 +69,7 @@ char* catArr(char** arr, int arrSize, char* sep) {
 void checkEnoughArgs(int argc, char* fileName) {
     if (argc <= 1) {
         fprintf(stderr, "Expected at least 1 argument.\tUsage: %s [-f file1 file2 ...] [<text to hash>]\n", fileName);
-        errno = EINVAL;
+        errno = EINVAL; perror("checkEnoughArgs()");
         exit(EINVAL);
     }
 }
@@ -87,7 +87,7 @@ int parseArgsAsString(int argc, char* argv[]) {
     int strNb = argc - 1, errcode = 0;
     char** strArgs = &argv[1];  //creating a view on argv[1:]
     stringToHash = catArr(strArgs, strNb, " ");
-    printf("String to hash:\t\t\"%s\"\n", stringToHash);
+    //printf("String to hash:\t\t\"%s\"\n", stringToHash);
 
     if (!stringToHash || strlen(stringToHash) == 0) errcode = -1;
     return errcode;
@@ -139,17 +139,24 @@ int parseOptArgs(int argc, char* argv[], int* fileAmnt) {
                 }
                 //? 2 because Number of file given as argument equals argcount - (<Number of available options> + 1) (e.g. 3 => ./prog.out -f file1 file2 file3)
                 break;
+
             case 't': {
                 if (!tinit) {
                     tryalc(hashMethod = malloc(HASH_METH_MAXLEN * sizeof(char)), __LINE__);
+                    if (strlen(optarg) <= 1) return EINVAL;
                     hashMethod = strncpy(hashMethod, optarg, HASH_METH_MAXLEN);
                     tinit = 1;  //* idem as with finit
                 }
+                break;
             }
 
             default:
                 fprintf(stderr, ERR_MESS, argv[0]);
-                return EXIT_FAILURE;
+                errno = EINVAL;
+                char mess[200];
+                sprintf(mess, "optind: %d \t argc: %d \t argv:[%s]", optind, argc, catArr(argv, argc, "; "));
+                perror(mess);
+                return EINVAL;
         }
     }
 

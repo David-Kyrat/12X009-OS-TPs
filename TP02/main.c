@@ -18,12 +18,12 @@ int main(int argc, char* argv[]) {
     int parseError = parseArgs(argc, argv, &filesToHash, &fileAmnt, &stringToHash);
     if (parseError != 0) {
         fprintf(stderr, "Error %d in parseArgs()\n", parseError);
+        errno = parseError; perror("parseArgs()");
         exit(parseError);
     }
     char* hashMethod = getHashMethod(DEFAULT_HASH_METH);
     printf("fileAmnt %d\n", fileAmnt);
-    printf("String to hash: %s\n", stringToHash);
-
+    printf("Hashing Method: %s\n", hashMethod);
 
     if (filesToHash) { //* if the array of files is not null, i.e. has been correctly initialized
         char** fileHashs;
@@ -43,8 +43,7 @@ int main(int argc, char* argv[]) {
         free(fileHashs);
     }
     else {
-
-        printf("String to hash: %s\n", stringToHash);
+        printf("String to hash: \"%s\"\n", stringToHash);
         //TODO: Call hash_calc with hashMethod on stringToHash
 
         free(stringToHash);        
