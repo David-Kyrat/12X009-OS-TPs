@@ -176,12 +176,12 @@ int parseArgs(int argc, char* argv[], char** givenFileToHash[], int* fileAmnt, c
 
     if (!(*fileAmnt)) {
         parseArgsAsString(argc, argv);
-        *givenStringToHash = &stringToHash[0];
+        *givenStringToHash = stringToHash;
         //TOOD: reassign str
     }
     else if (filesToHash) {
         //TODO: maybe allocate memory to givenFileToHash to contain pointer
-         *givenFileToHash = &filesToHash[0];
+         *givenFileToHash = filesToHash;
          //* Make *givenFileToHash point to the argument passed here (the option parser). i.e. "redirect" its content to filesToHash
     
     } else errcode = EXIT_FAILURE;
