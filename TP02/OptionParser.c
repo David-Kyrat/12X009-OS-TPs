@@ -163,23 +163,37 @@ int parseOptArgs(int argc, char* argv[], int* fileAmnt) {
  * 
  * @param argc Number of arguments passed to the program.
  * @param argv Array of arguments given to the program.
- * @param givenFilesToHash variable into which store the parsed files to hash or null if -f was not provided
+ * @param givenFilesToHash variable into which store the parsed files to hash or null if -f was not provided. Does a malloc! Remember to free! (when according option was chosen)
  * @param fileAmnt Variable into which store the amount of given files.
- * @param givenStringToHash variable into which store the parsed string to hash or null if -f was provided
+ * @param givenStringToHash variable into which store the parsed string to hash or null if -f was provided. Does a malloc! Remember to free! (when according option was chosen)
  * @return 0 if success else error code
  */
 int parseArgs(int argc, char* argv[], char** givenFilesToHash, int* fileAmnt, char* givenStringToHash) {
     int errcode = parseOptArgs(argc, argv, fileAmnt);
     if (!errcode) return errcode;
 
-    if (!(*fileAmnt)) {
-        parseArgsAsString(argc, argv);
-    }
+    if (!(*fileAmnt)) parseArgsAsString(argc, argv);
 
-    givenFilesToHash = filesToHash;
-    givenStringToHash = stringToHash;
-    errcode = (!givenFilesToHash && !givenStringToHash); 
-    if (errcode != 0) fprintf(stderr, "error in parseArgs(), both potential params to hash are null \n");
+    if (filesToHash) {
+        tryalc(givenFilesToHash = calloc(*fileAmnt, sizeof(char*)), __LINE__);
+        memcpy(givenFilesToHash, filesToHash, *fileAmnt);
+        
+        free(filesToHash);
+
+    } else if(stringToHash) {
+        int argLen = strlen(stringToHash);
+        
+        tryalc(givenStringToHash = malloc(argLen * sizeof(char*) + 1), __LINE__);
+        strncpy(givenStringToHash, stringToHash, argLen+1);
+        
+        free(stringToHash);
+
+    } else errcode = EXIT_FAILURE;
+
+
+    //givenFilesToHash = filesToHash;
+    //errcode = (!givenFilesToHash && !givenStringToHash); 
+    if (errcode != 0) fprintf(stderr, "Error %d in parseArgs()\n", errcode);
     
     return errcode; 
 }
