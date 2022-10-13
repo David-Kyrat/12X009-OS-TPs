@@ -15,7 +15,7 @@ const char* getOptString();
 char* catArr(char** arr, int arrSize, char* sep);
 
 /**
- * If malloc returns null, print an error message and exit
+ * Receives the output of the "malloc attempt". If it's null, print an error message to stderr and exit
  * 
  * @param allocReturn The return value of malloc.
  * @param line The line number of the file where the error occurred.
@@ -38,21 +38,22 @@ void checkEnoughArgs(int argc, char* fileName);
  * @param argc the number of arguments passed to the program
  * @param argv the array of arguments passed to the program
  * 
- * @return The String to hash
+ * @return 0 if success else error code
  */
 int parseArgsAsString(int argc, char* argv[]);
 
 
 /**
+ * When program was called with -f or -t option.
  * Extracts the file names from the command line arguments and returns them as an array of strings
  * 
  * @param argc Number of arguments passed to the program.
  * @param argv Array of arguments given to the program.
  * @param opt Option that was given as argument
- * @param fileAmnt (unsigned int) Variable into which store the amount of given files.
+ * @param fileAmnt Variable into which store the amount of given files.
  *                  [ NB: if fileAmnt stays 0 at the end of the call, then 'f' option was not provided ]
  * 
- * @return array of file paths
+ * @return 0 if success else error code
  */
 int parseOptArgs(int argc, char* argv[], int* fileAmnt);
 
@@ -62,7 +63,6 @@ int parseOptArgs(int argc, char* argv[], int* fileAmnt);
  * call parseArgsAsString to interpret all given argument (that are not options) as 1 single string
  * i.e. "-f file1 file2 [-t <hashMethod>]" parses file1, file2 and hashMethod as separate things to hash.
  * and "s1 s2 [-t <hashMethod>]" parses "s1 s2" as 1 string to hash.
- *
  * 
  * @param argc Number of arguments passed to the program.
  * @param argv Array of arguments given to the program.
@@ -73,8 +73,5 @@ int parseOptArgs(int argc, char* argv[], int* fileAmnt);
  */
 int parseArgs(int argc, char* argv[], char** givenFileToHash[], int* fileAmnt, char* givenStringToHash[]);
 
-/**
- * Return hashMethod parsed by the optionParser or the defaultHashMethod if none were given as argument (i.e. hahsMethod == NULL)
- * @param defaultHashMethod 
- */
+/** @return hashMethod parsed by the optionParser or the defaultHashMethod if none were given as argument (i.e. hahsMethod == NULL) */
 char* getHashMethod(char* defaultHashMethod);

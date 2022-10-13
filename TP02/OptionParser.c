@@ -21,7 +21,7 @@ char* stringToHash = NULL;
 const char* getOptString() { return OPT_STRING; }
 
 /**
- * If malloc returns null, print an error message and exit
+ * Receives the output of the "malloc attempt". If it's null, print an error message to stderr and exit
  * 
  * @param allocReturn The return value of malloc.
  * @param line The line number of the file where the error occurred.
@@ -189,8 +189,5 @@ int parseArgs(int argc, char* argv[], char** givenFileToHash[], int* fileAmnt, c
     return errcode;
 }
 
-/**
- * Return hashMethod parsed by the optionParser or the defaultHashMethod if none were given as argument (i.e. hahsMethod == NULL)
- * @param defaultHashMethod 
- */
+/** @return hashMethod parsed by the optionParser or the defaultHashMethod if none were given as argument (i.e. hahsMethod == NULL) */
 char* getHashMethod(char* defaultHashMethod) { return hashMethod ? hashMethod : defaultHashMethod; }
