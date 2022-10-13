@@ -10,22 +10,20 @@ const char* DEFAULT_HASH_METH = "SHA1";
 
 int main(int argc, char* argv[]) {
     checkEnoughArgs(argc, argv[0]);
-
-    char opt;  //* We expect only 1 options (-f), no need to have a loop.
     char** filesToHash = NULL;
     char* stringToHash = NULL;
     int fileAmnt = -1;
-    int parseError = parseArgs(argc, argv, filesToHash, &fileAmnt, stringToHash);
+
+    int parseError = parseArgs(argc, argv, &filesToHash, &fileAmnt, &stringToHash);
     if (parseError != 0) {
         fprintf(stderr, "Error %d in parseArgs()\n", parseError);
         exit(parseError);
     }
-
     char* hashMethod = getHashMethod(DEFAULT_HASH_METH);
 
-    if (filesToHash) {
+    if (filesToHash) { //* if the array of files is not null, i.e. has been correctly initialized
         char** fileHashs;
-        tryalc(fileHashs = (char**)malloc(((fileAmnt + 1) * sizeof(char*))), __LINE__);
+        tryalc(fileHashs = (char**)calloc(fileAmnt,  sizeof(char*)), __LINE__);
         for (int i = 0; i < fileAmnt; i++) fileHashs[i] = "0x"; //? Debugging purposes - TOREMOVE
 
         for (int i = 0; i < fileAmnt; i++) {

@@ -160,7 +160,6 @@ int parseOptArgs(int argc, char* argv[], int* fileAmnt) {
  * call parseArgsAsString to interpret all given argument (that are not options) as 1 single string
  * i.e. "-f file1 file2 [-t <hashMethod>]" parses file1, file2 and hashMethod as separate things to hash.
  * and "s1 s2 [-t <hashMethod>]" parses "s1 s2" as 1 string to hash.
- *
  * 
  * @param argc Number of arguments passed to the program.
  * @param argv Array of arguments given to the program.
@@ -185,34 +184,6 @@ int parseArgs(int argc, char* argv[], char** givenFileToHash[], int* fileAmnt, c
     return errcode;
 }
 
-/* int parseArgs(int argc, char* argv[], char** givenFilesToHash, int* fileAmnt, char* givenStringToHash) {
-    int errcode = parseOptArgs(argc, argv, fileAmnt);
-    if (!errcode) return errcode;
-
-    if (!(*fileAmnt)) parseArgsAsString(argc, argv);
-
-    if (filesToHash) {
-        tryalc(givenFilesToHash = calloc(*fileAmnt, sizeof(char*)), __LINE__);
-        memcpy(givenFilesToHash, filesToHash, *fileAmnt);
-        
-        free(filesToHash);
-
-    } else if(stringToHash) {
-        int argLen = strlen(stringToHash);
-        
-        tryalc(givenStringToHash = malloc(argLen * sizeof(char*) + 1), __LINE__);
-        strncpy(givenStringToHash, stringToHash, argLen+1);
-        
-        free(stringToHash);
-
-    } else errcode = EXIT_FAILURE;
-
-
-    //givenFilesToHash = filesToHash;
-    //errcode = (!givenFilesToHash && !givenStringToHash); 
-    //if (errcode != 0) fprintf(stderr, "Error %d in parseArgs()\n", errcode);
-    return errcode; 
-} */
 
 /**
  * Return hashMethod parsed by the optionParser or the defaultHashMethod if none were given as argument (i.e. hahsMethod == NULL)
