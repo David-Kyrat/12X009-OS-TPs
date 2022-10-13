@@ -4,10 +4,18 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+
 #include "OptionParser.h"
 
 const char* ERR_MESS = "\tUsage: %s [-f file1 file2 ...] [<text to hash>]\n";
-const char* OPT_STRING = "f:";
+const char* OPT_STRING = "f:t:";
+const int HASH_METH_MAXLEN = 5;  //* maxium length of string describing hashing method i.e. here:  5 = strlen("SHA1") + 1
+
+char* hashMethod = NULL;
+int fileMode = 0;  //* whether program was called with -f option
+
+char** filesToHash = NULL;
+char* stringToHash = NULL;
 
 /** @return const char*, the different options that can be used */
 const char* getOptString() { return OPT_STRING; }
@@ -75,7 +83,7 @@ void checkEnoughArgs(int argc, char* fileName) {
  * 
  * @return The String to hash
  */
-char* parseSingleArg(int argc, char* argv[]) {
+char* parseArgsAsString(int argc, char* argv[]) {
     int strNb = argc - 1;
     char** strArgs = &argv[1];  //creating a view on argv[1:]
     char* stringToHash = catArr(strArgs, strNb, " ");
@@ -106,28 +114,78 @@ char** extractFilesFromArgv(int argc, char* argv[], int startIdx, int* fileAmnt)
 }
 
 /**
+ * When program was called with -f or -t option.
  * Extracts the file names from the command line arguments and returns them as an array of strings
  * 
  * @param argc Number of arguments passed to the program.
  * @param argv Array of arguments given to the program.
  * @param opt Option that was given as argument
- * @param fileAmnt Variable into which store the amount of given files
+ * @param fileAmnt Variable into which store the amount of given files.
+ *                  [ NB: if fileAmnt stays 0 at the end of the call, then 'f' option was not provided ]
  * 
- * @return array of file paths
+ * @return 0 if success else error code
  */
-char** parseOptArgs(int argc, char* argv[], char opt, int* fileAmnt) {
-    char** filesToHash = NULL;
-    switch (opt) {
-        case 'f':
-            filesToHash = extractFilesFromArgv(argc, argv, 2, fileAmnt);
-            //? 2 because Number of file given as argument equals argcount - (<Number of available options> + 1) (e.g. 3 => ./prog.out -f file1 file2 file3)
-            break;
+int parseOptArgs(int argc, char* argv[], int* fileAmnt) {
+    int finit = 0, tinit = 0, opt;
+    *fileAmnt = 0;  //* if fileAmnt stays 0 at the end of the call, then 'f' option was not provided
 
-        default:
-            fprintf(stderr, ERR_MESS, argv[0]);
-            exit(EXIT_FAILURE);
-            break;
+    while ((opt = getopt(argc, argv, getOptString())) != -1) {
+        switch (opt) {
+            case 'f':
+                if (!finit) {
+                    filesToHash = extractFilesFromArgv(argc, argv, 2, fileAmnt);
+                    finit = 1;  //* Memory should not be allocated more than once.
+                }
+                //? 2 because Number of file given as argument equals argcount - (<Number of available options> + 1) (e.g. 3 => ./prog.out -f file1 file2 file3)
+                break;
+            case 't': {
+                if (!tinit) {
+                    tryalc(hashMethod = malloc(HASH_METH_MAXLEN * sizeof(char)), __LINE__);
+                    hashMethod = strncpy(hashMethod, optarg, HASH_METH_MAXLEN);
+                    tinit = 1; //* idem as with finit
+                }
+            }
+
+            default:
+                fprintf(stderr, ERR_MESS, argv[0]);
+                return EXIT_FAILURE;
+        }
     }
 
-    return filesToHash;
+    return EXIT_SUCCESS;
 }
+
+/**
+ * Call parseOptArgs to parse given options and if "-f" was not provided, 
+ * then call parseArgsAsString to interpret all given argument (that are not options) as 1 single string
+ * i.e. "-f file1 file2 [-t <hashMethod>]" parses file1, file2 and hashMethod as separate things to hash.
+ * and "s1 s2 [-t <hashMethod>]" parses "s1 s2" as 1 string to hash
+ * 
+ * @param argc Number of arguments passed to the program.
+ * @param argv Array of arguments given to the program.
+ * @param givenFilesToHash variable into which store the parsed files to hash or null if -f was not provided
+ * @param fileAmnt Variable into which store the amount of given files.
+ * @param givenStringToHash variable into which store the parsed string to hash or null if -f was provided
+ * @return 0 if success else error code
+ */
+int parseArgs(int argc, char* argv[], char** givenFilesToHash, int* fileAmnt, char* givenStringToHash) {
+    int errcode = parseOptArgs(argc, argv, fileAmnt);
+    if (!errcode) return errcode;
+
+    if (!(*fileAmnt)) {
+        parseArgsAsString(argc, argv);
+    }
+
+    givenFilesToHash = filesToHash;
+    givenStringToHash = stringToHash;
+    errcode = (!givenFilesToHash && !givenStringToHash); 
+    if (errcode != 0) fprintf(stderr, "error in parseArgs(), both potential params to hash are null \n");
+    
+    return errcode; 
+}
+
+/**
+ * Return hashMethod parsed by the optionParser or the defaultHashMethod if none were given as argument (i.e. hahsMethod == NULL)
+ * @param defaultHashMethod 
+ */
+char* getHashMethod(char* defaultHashMethod) { return hashMethod ? hashMethod : defaultHashMethod; }

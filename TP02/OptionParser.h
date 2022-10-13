@@ -40,7 +40,7 @@ void checkEnoughArgs(int argc, char* fileName);
  * 
  * @return The String to hash
  */
-char* parseSingleArg(int argc, char* argv[]);
+char* parseArgsAsString(int argc, char* argv[]);
 
 
 /**
@@ -49,8 +49,9 @@ char* parseSingleArg(int argc, char* argv[]);
  * @param argc Number of arguments passed to the program.
  * @param argv Array of arguments given to the program.
  * @param opt Option that was given as argument
- * @param fileAmnt Variable into which store the amount of given files
+ * @param fileAmnt (unsigned int) Variable into which store the amount of given files.
+ *                  [ NB: if fileAmnt stays 0 at the end of the call, then 'f' option was not provided ]
  * 
  * @return array of file paths
  */
-char** parseOptArgs(int argc, char* argv[], char opt, int* fileAmnt);
+int parseOptArgs(int argc, char* argv[], int* fileAmnt);

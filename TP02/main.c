@@ -8,7 +8,8 @@ int main(int argc, char* argv[]) {
     checkEnoughArgs(argc, argv[0]);
 
     char opt;  //* We expect only 1 options (-f), no need to have a loop.
-    if ((opt = getopt(argc, argv, getOptString())) != -1) {
+
+    /* if ((opt = getopt(argc, argv, getOptString())) != -1) {
         //printf("optind=%i\t argv[optind]=%s\t opt=%c\n", optind, argv[optind], opt);
 
         int fileAmnt = 0;
@@ -30,12 +31,12 @@ int main(int argc, char* argv[]) {
 
         free(filePaths);
     } else {
-        char* stringToHash = parseSingleArg(argc, argv);
+        char* stringToHash = parseArgsAsString(argc, argv);
 
         //TODO: Call hash_calc on stringToHash
 
         free(stringToHash);
-    }
+    } */
 
     exit(EXIT_SUCCESS);
 }
