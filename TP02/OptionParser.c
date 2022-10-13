@@ -12,7 +12,7 @@ const char* OPT_STRING = "f:t:";
 const int HASH_METH_MAXLEN = 10;  //* maxium length of string describing hashing method
 
 char* hashMethod = NULL;
-int fileMode = 0;  //* whether program was called with -f option
+int tpos = 0; //* 0 if prog was not called with "-t" and index of -t argument otherwise
 
 char** filesToHash = NULL;
 char* stringToHash = NULL;
@@ -62,6 +62,33 @@ char* catArr(char** arr, int arrSize, char* sep) {
 }
 
 /**
+ * Same as catArr but start at "start" and stop at "stop"
+ * i.e. concat stop-start values
+ * 
+ * @param arr the array of strings to concatenate
+ * @param sep the separator to use between each element of the array.
+ * @param start index (inclusive) from where to start the concatenation
+ * @param stop (exclusive) index from where to stop the concatenation
+ * @return 
+ */
+char* catArrRange(char** arr, char* sep, int start, int stop) {
+    int effSize = stop - start; // effective size
+    if (effSize < 1) return NULL;
+    char* out;
+    int sepLen = strlen(sep);
+    size_t size = effSize + 1 + (sep ? sepLen * effSize: 0);
+
+    tryalc(out = (char*) malloc((size * sizeof(char*))), __LINE__);
+
+    for (int i = start; i < stop; i++) {
+        char* crt = arr[i];
+        if (sep && i != 0) strncat(out, sep, sepLen);
+        strncat(out, crt, strlen(crt) + 1);
+    }
+    return out;
+}
+
+/**
  * @brief Check if there is at least 1 argument, otherwise exits with code 22 (Invalid argument)
  * @param argc same as argc in main
  * @param fileName argv[0]
@@ -69,7 +96,8 @@ char* catArr(char** arr, int arrSize, char* sep) {
 void checkEnoughArgs(int argc, char* fileName) {
     if (argc <= 1) {
         fprintf(stderr, "Expected at least 1 argument.\tUsage: %s [-f file1 file2 ...] [<text to hash>]\n", fileName);
-        errno = EINVAL; perror("checkEnoughArgs()");
+        errno = EINVAL;
+        perror("checkEnoughArgs()");
         exit(EINVAL);
     }
 }
@@ -86,7 +114,10 @@ void checkEnoughArgs(int argc, char* fileName) {
 int parseArgsAsString(int argc, char* argv[]) {
     int strNb = argc - 1, errcode = 0;
     char** strArgs = &argv[1];  //creating a view on argv[1:]
-    stringToHash = catArr(strArgs, strNb, " ");
+
+    if (tpos == 0) stringToHash = catArr(strArgs, strNb, " "); //* if "-t" was not used
+    else if (optind >= argc) stringToHash = catArrRange(strArgs, " ", 0, tpos); //* if "-t" was used at the end
+    else if (tpos <= 1) stringToHash = catArrRange(strArgs, " ", 2, strNb);
     //printf("String to hash:\t\t\"%s\"\n", stringToHash);
 
     if (!stringToHash || strlen(stringToHash) == 0) errcode = -1;
@@ -141,11 +172,15 @@ int parseOptArgs(int argc, char* argv[], int* fileAmnt) {
                 break;
 
             case 't': {
-                if (!tinit) {
+                if (!tpos) {
                     tryalc(hashMethod = malloc(HASH_METH_MAXLEN * sizeof(char)), __LINE__);
                     if (strlen(optarg) <= 1) return EINVAL;
                     hashMethod = strncpy(hashMethod, optarg, HASH_METH_MAXLEN);
-                    tinit = 1;  //* idem as with finit
+                    tpos = optind - 2; //* index of "-t" in argv
+                    // if (optind >= argc) -t is at end 
+                    // Removing the "-t <method>" from argv to make rest of parsing easier.
+                    //argv[optind-2] = NULL; // the "-t"
+                    //argv[optind-1] = NULL; // after the "-t"
                 }
                 break;
             }
@@ -188,10 +223,12 @@ int parseArgs(int argc, char* argv[], char** givenFileToHash[], int* fileAmnt, c
         }
         *givenStringToHash = stringToHash;
         //TOOD: reassign str
-    } else if (filesToHash) *givenFileToHash = filesToHash;  
+    } else if (filesToHash)
+        *givenFileToHash = filesToHash;
     //* Make givenFileToHash point to the argument passed here (the option parser). i.e. "redirect" its content to filesToHash
-    
-    else errcode = EXIT_FAILURE;
+
+    else
+        errcode = EXIT_FAILURE;
     return errcode;
 }
 

@@ -25,7 +25,7 @@ int main(int argc, char* argv[]) {
     printf("fileAmnt %d\n", fileAmnt);
     printf("Hashing Method: %s\n", hashMethod);
 
-    if (filesToHash) { //* if the array of files is not null, i.e. has been correctly initialized
+    if (filesToHash) { //* if the array of files is not null, i.e. program was called with -f option and has been correctly initialized
         char** fileHashs;
         tryalc(fileHashs = (char**)calloc(fileAmnt,  sizeof(char*)), __LINE__);
         //for (int i = 0; i < fileAmnt; i++) fileHashs[i] = "0x"; //? Debugging purposes - TOREMOVE
