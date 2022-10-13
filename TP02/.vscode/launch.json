@@ -6,7 +6,7 @@
             "request": "launch",
             "program": "${fileDirname}/${fileBasenameNoExtension}.out",
             //"args": ["-t", "MD5", "-f", "lul1", "lul2", "lul3"],
-            "args": ["-f", "lul1", "lul2", "lul3", "-t", "MD5"],
+            "args": ["lul1", "lul2", "lul3", "-t", "MD5"],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [],

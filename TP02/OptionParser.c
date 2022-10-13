@@ -165,7 +165,7 @@ char** extractFilesFromArgv(int argc, char* argv[], int startIdx, int* fileAmnt)
  * @return 0 if success else error code
  */
 int parseOptArgs(int argc, char* argv[], int* fileAmnt) {
-    int finit = 0, opt;
+    int finit = 0, opt; *fileAmnt = 0;
     //* if fileAmnt stays 0 at the end of the call, then 'f' option was not provided
 
     while ((opt = getopt(argc, argv, getOptString())) != -1) {
