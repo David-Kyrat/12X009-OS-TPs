@@ -20,6 +20,9 @@ int main(int argc, char* argv[]) {
         exit(parseError);
     }
     char* hashMethod = getHashMethod(DEFAULT_HASH_METH);
+    printf("fileAmnt %d\n", fileAmnt);
+    printf("String to hash: %s\n", stringToHash);
+
 
     if (filesToHash) { //* if the array of files is not null, i.e. has been correctly initialized
         char** fileHashs;
@@ -40,6 +43,7 @@ int main(int argc, char* argv[]) {
     }
     else {
 
+        printf("String to hash: %s\n", stringToHash);
         //TODO: Call hash_calc with hashMethod on stringToHash
 
         free(stringToHash);        

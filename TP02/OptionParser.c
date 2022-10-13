@@ -86,7 +86,7 @@ void checkEnoughArgs(int argc, char* fileName) {
 char* parseArgsAsString(int argc, char* argv[]) {
     int strNb = argc - 1;
     char** strArgs = &argv[1];  //creating a view on argv[1:]
-    char* stringToHash = catArr(strArgs, strNb, " ");
+    stringToHash = catArr(strArgs, strNb, " ");
     printf("String to hash:\t\t\"%s\"\n", stringToHash);
 
     return stringToHash;
@@ -170,7 +170,7 @@ int parseOptArgs(int argc, char* argv[], int* fileAmnt) {
  */
 int parseArgs(int argc, char* argv[], char** givenFileToHash[], int* fileAmnt, char* givenStringToHash[]) {
     int errcode = parseOptArgs(argc, argv, fileAmnt);
-    if (!errcode) return errcode;
+    if (errcode) return errcode;
 
     if (!(*fileAmnt)) {
         parseArgsAsString(argc, argv);
@@ -180,7 +180,6 @@ int parseArgs(int argc, char* argv[], char** givenFileToHash[], int* fileAmnt, c
     else if (filesToHash) *givenFileToHash = filesToHash; //* Make givenFileToHash point to the argument passed here (the option parser). i.e. "redirect" its content to filesToHash
 
     else errcode = EXIT_FAILURE;
-    
     return errcode;
 }
 

@@ -20,14 +20,14 @@ openssl_example: examples/openssl_example.c
 	$(CC) examples/openssl_example.c -lssl -lcrypto $(CFLAGS) $(DBGFLAGS) -o examples/openssl_example.out
 
 
-OptionParser.o: OptionParser.c OptionParser.h
+out/OptionParser.o: OptionParser.c OptionParser.h
 	$(CC) -c OptionParser.c $(CFLAGS) $(DBGFLAGS) -o out/OptionParser.o
 
 OptionParser.out: out/OptionParser.o
 	$(CC) out/OptionParser.o $(CFLAGS) $(DBGFLAGS) -o out/OptionParser.out
 
 
-main.o: main.c OptionParser.h
+out/main.o: main.c OptionParser.h
 	$(CC) -c main.c $(CFLAGS) $(DBGFLAGS) -o out/main.o
 
 main.out: out/main.o out/OptionParser.o
