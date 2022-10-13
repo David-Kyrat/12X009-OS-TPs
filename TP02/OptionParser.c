@@ -142,7 +142,7 @@ int parseOptArgs(int argc, char* argv[], int* fileAmnt) {
                 if (!tinit) {
                     tryalc(hashMethod = malloc(HASH_METH_MAXLEN * sizeof(char)), __LINE__);
                     hashMethod = strncpy(hashMethod, optarg, HASH_METH_MAXLEN);
-                    tinit = 1; //* idem as with finit
+                    tinit = 1;  //* idem as with finit
                 }
             }
 
@@ -161,13 +161,34 @@ int parseOptArgs(int argc, char* argv[], int* fileAmnt) {
  * i.e. "-f file1 file2 [-t <hashMethod>]" parses file1, file2 and hashMethod as separate things to hash.
  * and "s1 s2 [-t <hashMethod>]" parses "s1 s2" as 1 string to hash
  * 
+ * Does not copy anymore just redirects the content of given arrays to the one computed here
+ * 
  * @param argc Number of arguments passed to the program.
  * @param argv Array of arguments given to the program.
- * @param givenFilesToHash variable into which store the parsed files to hash or null if -f was not provided. Does a malloc! Remember to free! (when according option was chosen)
+ * @param givenFilesToHash pointer to string array into which store the parsed files to hash or null if -f was not provided. Does a malloc! Remember to free! (when according option was chosen)
  * @param fileAmnt Variable into which store the amount of given files.
- * @param givenStringToHash variable into which store the parsed string to hash or null if -f was provided. Does a malloc! Remember to free! (when according option was chosen)
+ * @param givenStringToHash pointer to string into which store the parsed string to hash or null if -f was provided. Does a malloc! Remember to free! (when according option was chosen)
  * @return 0 if success else error code
  */
+int parseArgs(int argc, char* argv[], char** givenFileToHash[], int* fileAmnt, char* givenStringToHash[]) {
+    int errcode = parseOptArgs(argc, argv, fileAmnt);
+    if (!errcode) return errcode;
+
+    if (!(*fileAmnt)) {
+        parseArgsAsString(argc, argv);
+        *givenStringToHash = &stringToHash[0];
+        //TOOD: reassign str
+    }
+    else if (filesToHash) {
+        //TODO: maybe allocate memory to givenFileToHash to contain pointer
+         *givenFileToHash = &filesToHash[0];
+         //* Make *givenFileToHash point to the argument passed here (the option parser). i.e. "redirect" its content to filesToHash
+    
+    } else errcode = EXIT_FAILURE;
+    
+    return errcode;
+}
+
 /* int parseArgs(int argc, char* argv[], char** givenFilesToHash, int* fileAmnt, char* givenStringToHash) {
     int errcode = parseOptArgs(argc, argv, fileAmnt);
     if (!errcode) return errcode;

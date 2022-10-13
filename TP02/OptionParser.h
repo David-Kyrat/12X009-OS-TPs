@@ -70,7 +70,7 @@ int parseOptArgs(int argc, char* argv[], int* fileAmnt);
  * @param givenStringToHash variable into which store the parsed string to hash or null if -f was provided. Does a malloc! Remember to free! (when according option was chosen)
  * @return 0 if success else error code
  */
-int parseArgs(int argc, char* argv[], char** givenFilesToHash, int* fileAmnt, char* givenStringToHash);
+int parseArgs(int argc, char* argv[], char** givenFilesToHash[], int* fileAmnt, char* givenStringToHash[]);
 
 /**
  * Return hashMethod parsed by the optionParser or the defaultHashMethod if none were given as argument (i.e. hahsMethod == NULL)
