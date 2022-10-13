@@ -6,24 +6,49 @@
 EVP_MD_CTX* mdctx;
 const EVP_MD* md;
 
-char test_mess[] = "Le manuel disait: Nécessite Windows 7 ou mieux. J'ai donc installé Linux\n";
 unsigned char md_value[EVP_MAX_MD_SIZE];
 unsigned int md_len, i;
 
 // ------------------------------------------------------------------------------------------------------------------------------------
 // Hashing function, which takes a string and a hash function as arguments, and will return a string, the hash digest
 
-char* hash() {
+char* hash(char* text, char* hash_f) {
 
+    // Initialise our hash digest string
+    char* hash_digest;
+
+
+    // Check if a text was given. If not, inform the user that there is no text.
+    if (text == NULL) {
+        printf("No text given.");
+        return "";
+    }
+
+
+    // Check if a hash function was given. If yes, use it. If not, use SHA1 as our hash function.
+    if (hash_f == NULL) {
+        md = "SHA1";
+    }
+
+    else {
+        md = EVP_get_digestbyname(hash_f);
+    }
+    
+
+    // Code taken from the openssl example, modified for the program
     mdctx = EVP_MD_CTX_new();
     EVP_DigestInit_ex(mdctx, md, NULL);
-    EVP_DigestUpdate(mdctx, test_mess, strlen(test_mess));
+    EVP_DigestUpdate(mdctx, text, strlen(text));
 
     EVP_DigestFinal_ex(mdctx, md_value, &md_len);
     EVP_MD_CTX_free(mdctx);
-    printf("Digest is: \"");
-    for (i = 0; i < md_len; i++) printf("%02x", md_value[i]);
-    printf("\"\n");
+
+    for (i = 0; i < md_len; i++) {
+        hash_digest[i] = md_value[i];
+        // printf("%02x", hash_digest[i]);
+    }
+
+    return hash_digest;
 
 }
 // ------------------------------------------------------------------------------------------------------------------------------------
@@ -54,6 +79,7 @@ char* convert_f_to_s(char* filename) {
     // fgets here reads an entire line or 99 characters (+1 for \0) at a time, whichever comes first
     while (fgets(buffer, sizeof(buffer), fichier) != NULL) {
         printf("Line read = %s\n", buffer);
+        strcat(buffer, converted_string);
     }
 
     fclose(fichier);
