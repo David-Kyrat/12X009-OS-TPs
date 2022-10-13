@@ -40,7 +40,7 @@ void checkEnoughArgs(int argc, char* fileName);
  * 
  * @return The String to hash
  */
-char* parseArgsAsString(int argc, char* argv[]);
+int parseArgsAsString(int argc, char* argv[]);
 
 
 /**

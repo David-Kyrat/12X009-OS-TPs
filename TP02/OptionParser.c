@@ -81,14 +81,15 @@ void checkEnoughArgs(int argc, char* fileName) {
  * @param argc the number of arguments passed to the program
  * @param argv the array of arguments passed to the program
  * 
- * @return The String to hash
+ * @return 0 if success else error code
  */
-char* parseArgsAsString(int argc, char* argv[]) {
-    int strNb = argc - 1;
+int parseArgsAsString(int argc, char* argv[]) {
+    int strNb = argc - 1, errcode = 0;
     char** strArgs = &argv[1];  //creating a view on argv[1:]
     stringToHash = catArr(strArgs, strNb, " ");
     printf("String to hash:\t\t\"%s\"\n", stringToHash);
 
+    if (!stringToHash || strlen(stringToHash) == 0) errcode = -1;
     return stringToHash;
 }
 
@@ -173,16 +174,20 @@ int parseArgs(int argc, char* argv[], char** givenFileToHash[], int* fileAmnt, c
     if (errcode) return errcode;
 
     if (!(*fileAmnt)) {
-        parseArgsAsString(argc, argv);
+        errcode = parseArgsAsString(argc, argv);
+        if (errcode) {
+            fprintf(stderr, "Error %d in parseArgsAsString()\n", errcode);
+            return errcode;
+        }
         *givenStringToHash = stringToHash;
         //TOOD: reassign str
-    }
-    else if (filesToHash) *givenFileToHash = filesToHash; //* Make givenFileToHash point to the argument passed here (the option parser). i.e. "redirect" its content to filesToHash
+    } else if (filesToHash)
+        *givenFileToHash = filesToHash;  //* Make givenFileToHash point to the argument passed here (the option parser). i.e. "redirect" its content to filesToHash
 
-    else errcode = EXIT_FAILURE;
+    else
+        errcode = EXIT_FAILURE;
     return errcode;
 }
-
 
 /**
  * Return hashMethod parsed by the optionParser or the defaultHashMethod if none were given as argument (i.e. hahsMethod == NULL)

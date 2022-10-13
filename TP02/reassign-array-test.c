@@ -15,7 +15,7 @@ char* catArr(char** arr, int arrSize, char* sep) {
     int sepLen = strlen(sep);
     size_t size = arrSize + 1 + (sep ? sepLen * arrSize : 0);
 
-    tryalc(out = (char*) malloc((size * sizeof(char*))), __LINE__);
+    tryalc(out = (char*)malloc((size * sizeof(char*))), __LINE__);
 
     for (int i = 0; i < arrSize; i++) {
         char* crt = arr[i];
@@ -24,8 +24,6 @@ char* catArr(char** arr, int arrSize, char* sep) {
     }
     return out;
 }
-
-
 
 /* 
 WORKS LIKE THIS
@@ -58,28 +56,28 @@ void temp() {
     for (int i = 0; i < 5; i++) {
         printf("");
     }
-    
 }
 
 int main() {
-
     /* char* test[] = {"lul1", "lul2", "lul3", "lul4"};
     char** t = malloc(5 * sizeof(char*));
     for (int i = 0; i < 5; i++) t[i] = test[i]; */
     char** t = NULL;
     char* str = NULL;
+    fprintf(stderr, "Error %d in parseARg()\n", -2);
+    fprintf(stderr, "Error %d in parseArgsAsString()\n", -3);
     /* char*** t = malloc(5 * sizeof(char**));
     (*t)[0] = "lul1";
     (*t)[1] = "lul2";
     (*t)[2] = "lul3";
     (*t)[3] = "lul4"; */
 
-    printf("test before [%p]\t str: %s\n", t, str);
+    /*   printf("test before [%p]\t str: %s\n", t, str);
     reassignArr(&t);
     reassignSrt(&str);
     temp();
     temp();
     printf("test after [%p]\t str: %s\n", t, str);
-
+ */
     return 0;
 }
