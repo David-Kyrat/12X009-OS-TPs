@@ -181,11 +181,10 @@ int parseArgs(int argc, char* argv[], char** givenFileToHash[], int* fileAmnt, c
         }
         *givenStringToHash = stringToHash;
         //TOOD: reassign str
-    } else if (filesToHash)
-        *givenFileToHash = filesToHash;  //* Make givenFileToHash point to the argument passed here (the option parser). i.e. "redirect" its content to filesToHash
-
-    else
-        errcode = EXIT_FAILURE;
+    } else if (filesToHash) *givenFileToHash = filesToHash;  
+    //* Make givenFileToHash point to the argument passed here (the option parser). i.e. "redirect" its content to filesToHash
+    
+    else errcode = EXIT_FAILURE;
     return errcode;
 }
 
