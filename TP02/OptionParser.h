@@ -58,19 +58,20 @@ int parseOptArgs(int argc, char* argv[], int* fileAmnt);
 
 
 /**
- * Call parseOptArgs to parse given options and if "-f" was not provided, 
- * then call parseArgsAsString to interpret all given argument (that are not options) as 1 single string
+ * Call parseOptArgs to parse given options then if "-f" was not provided, 
+ * call parseArgsAsString to interpret all given argument (that are not options) as 1 single string
  * i.e. "-f file1 file2 [-t <hashMethod>]" parses file1, file2 and hashMethod as separate things to hash.
- * and "s1 s2 [-t <hashMethod>]" parses "s1 s2" as 1 string to hash
+ * and "s1 s2 [-t <hashMethod>]" parses "s1 s2" as 1 string to hash.
+ *
  * 
  * @param argc Number of arguments passed to the program.
  * @param argv Array of arguments given to the program.
- * @param givenFilesToHash variable into which store the parsed files to hash or null if -f was not provided. Does a malloc! Remember to free! (when according option was chosen)
+ * @param givenFilesToHash pointer to string array into which store the parsed files to hash or null if -f was not provided. Does a malloc. Remember to free! (when according option was chosen)
  * @param fileAmnt Variable into which store the amount of given files.
- * @param givenStringToHash variable into which store the parsed string to hash or null if -f was provided. Does a malloc! Remember to free! (when according option was chosen)
+ * @param givenStringToHash pointer to string into which store the parsed string to hash or null if -f was provided. Does a malloc. Remember to free! (when according option was chosen)
  * @return 0 if success else error code
  */
-int parseArgs(int argc, char* argv[], char** givenFilesToHash[], int* fileAmnt, char* givenStringToHash[]);
+int parseArgs(int argc, char* argv[], char** givenFileToHash[], int* fileAmnt, char* givenStringToHash[]);
 
 /**
  * Return hashMethod parsed by the optionParser or the defaultHashMethod if none were given as argument (i.e. hahsMethod == NULL)
