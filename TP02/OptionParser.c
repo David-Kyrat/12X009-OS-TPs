@@ -52,7 +52,7 @@ char* catArr(char** arr, int arrSize, char* sep) {
     int sepLen = strlen(sep);
     size_t size = arrSize + 1 + (sep ? sepLen * arrSize : 0);
 
-    tryalc(out = (char*)malloc((size * sizeof(char*))), __LINE__);
+    tryalc(out = (char*) malloc((size * sizeof(char*))), __LINE__);
 
     for (int i = 0; i < arrSize; i++) {
         char* crt = arr[i];
@@ -166,7 +166,7 @@ char** extractFilesFromArgv(int argc, char* argv[], int startIdx, int* fileAmnt)
  */
 int parseOptArgs(int argc, char* argv[], int* fileAmnt) {
     int finit = 0, opt;
-    *fileAmnt = 0;  //* if fileAmnt stays 0 at the end of the call, then 'f' option was not provided
+    //* if fileAmnt stays 0 at the end of the call, then 'f' option was not provided
 
     while ((opt = getopt(argc, argv, getOptString())) != -1) {
         switch (opt) {

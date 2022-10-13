@@ -23,7 +23,6 @@ int main(int argc, char* argv[]) {
         exit(parseError);
     }
     char* hashMethod = getHashMethod(DEFAULT_HASH_METH);
-    printf("fileAmnt %d\n", fileAmnt);
     printf("Hashing Method: %s\n", hashMethod);
 
     if (filesToHash) { //* if the array of files is not null, i.e. program was called with -f option and has been correctly initialized
