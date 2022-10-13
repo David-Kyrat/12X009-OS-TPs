@@ -137,13 +137,17 @@ int parseArgsAsString(int argc, char* argv[]) {
  * @return Copied array of file paths
  */
 char** extractFilesFromArgv(int argc, char* argv[], int startIdx, int* fileAmnt) {
-    *fileAmnt = argc - startIdx;  //? Number of file given as argument equals argcount - (<Number of available options> + 1) (e.g. 3 => ./prog.out -f file1 file2 file3)
-    char** filePaths;
+    int maxFileAmnt = argc - startIdx;  //? max Number of file given as argument 
+    char** filePaths; *fileAmnt = 0; 
 
-    tryalc(filePaths = calloc(*fileAmnt, sizeof(char*)), __LINE__);
-    //int i = startIdx;
-    //while (i < argc && argv[i])
-    for (int i = startIdx; i < argc; i++) *(filePaths + (i - startIdx)) = argv[i];
+    tryalc(filePaths = calloc(maxFileAmnt, sizeof(char*)), __LINE__);
+    int i = startIdx;
+    //* while there is arguments left and we did not hit another option (like -t) 
+    while (i < argc && argv[i][0] != '-') {
+        filePaths[i - startIdx] = argv[i]; i++;
+        *fileAmnt += 1;
+    }
+    //for (int i = startIdx; i < argc; i++) *(filePaths + (i - startIdx)) = argv[i];
 
     return filePaths;
 }
