@@ -45,9 +45,9 @@ int main(int argc, char* argv[]) {
 
             
             //TODO: Call hash_calc with hashMethod on current file
-            fileHashs[i] = hash(crtFile, hashMethod);
+            fileHashs[i] = hash(convert_f_to_s(crtFile), hashMethod);
 
-            printf("Digest: %s, File: %s\n", fileHashs[i], crtFile);
+            printf(" File: %s\n", crtFile);
             //printf("fileHash[%i]: \t \"%s\"\n\n", i, fileHashs[i]); //? Debugging purposes - TOREMOVE
         }
 
@@ -59,8 +59,9 @@ int main(int argc, char* argv[]) {
     else {
         printf("String to hash: \"%s\"\n", stringToHash);
         //TODO: Call hash_calc with hashMethod on stringToHash
-        printf("Here");
-        // printf("Digest: %s\n", hash(stringToHash, hashMethod));
+        printf("Digest: ");
+        printf(hash(stringToHash, hashMethod));
+        printf("\n");
 
         free(stringToHash);        
 
