@@ -34,8 +34,8 @@ main.out: out/main.o out/OptionParser.o
 	$(CC) out/main.o out/OptionParser.o $(CFLAGS) $(DBGFLAGS) -o main.out
 
 
-all: main.c OptionParser.o digest.c
-	$(CC) $(CFLAGS) $(DBGFLAGS)  -o digest main.c OptionParser.c digest.c -lssl -lcrypto
+all: main.c OptionParser.o hash_calc.o
+	$(CC) $(CFLAGS) $(DBGFLAGS)  -o digest main.c OptionParser.c hash_calc.c -lssl -lcrypto
 
 
 clean:

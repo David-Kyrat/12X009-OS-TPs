@@ -15,24 +15,10 @@ unsigned int md_len, i;
 char* hash(char* text, char* hash_f) {
 
     // Initialise our hash digest string
-    char* hash_digest;
+    char hash_digest[EVP_MAX_MD_SIZE];
 
 
-    // Check if a text was given. If not, inform the user that there is no text.
-    if (text == NULL) {
-        printf("No text given.");
-        return "";
-    }
-
-
-    // Check if a hash function was given. If yes, use it. If not, use SHA1 as our hash function.
-    if (hash_f == NULL) {
-        md = "SHA1";
-    }
-
-    else {
-        md = EVP_get_digestbyname(hash_f);
-    }
+    md = EVP_get_digestbyname(hash_f);
     
 
     // Code taken from the openssl example, modified for the program
@@ -44,11 +30,11 @@ char* hash(char* text, char* hash_f) {
     EVP_MD_CTX_free(mdctx);
 
     for (i = 0; i < md_len; i++) {
-        hash_digest[i] = md_value[i];
-        // printf("%02x", hash_digest[i]);
+    //    hash_digest[i] = md_value[i];
+        printf("%02x", hash_digest[i]);
     }
 
-    return hash_digest;
+    return md_value;
 
 }
 // ------------------------------------------------------------------------------------------------------------------------------------
@@ -59,30 +45,30 @@ char* hash(char* text, char* hash_f) {
 // Function to convert a file's data into a string, which can be used as input for the hash function
 // a file is inputted and a string is returned
 
-char* convert_f_to_s(char* filename) {
+// char* convert_f_to_s(char* filename) {
 
-    char* converted_string;
-    char buffer[100];
+//     char* converted_string;
+//     char buffer[100];
 
-    if (filename == "") {
-        printf("Le nom du fichier n'a pas été rentré.");
-        return "";
-    }
+//     if (filename == "") {
+//         printf("Le nom du fichier n'a pas été rentré.");
+//         return "";
+//     }
 
-    FILE *fichier = fopen(filename, "r");
+//     FILE *fichier = fopen(filename, "r");
 
-    if (fichier == NULL) {
-        printf("Le fichier n'a pas pu etre ouvert.");
-        return "";
-    }
+//     if (fichier == NULL) {
+//         printf("Le fichier n'a pas pu etre ouvert.");
+//         return "";
+//     }
 
-    // fgets here reads an entire line or 99 characters (+1 for \0) at a time, whichever comes first
-    while (fgets(buffer, sizeof(buffer), fichier) != NULL) {
-        printf("Line read = %s\n", buffer);
-        strcat(buffer, converted_string);
-    }
+//     // fgets here reads an entire line or 99 characters (+1 for \0) at a time, whichever comes first
+//     while (fgets(buffer, sizeof(buffer), fichier) != NULL) {
+//         printf("Line read = %s\n", buffer);
+//         strcat(buffer, converted_string);
+//     }
 
-    fclose(fichier);
+//     fclose(fichier);
 
-}
+// }
 // ------------------------------------------------------------------------------------------------------------------------------------
