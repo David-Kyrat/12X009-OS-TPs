@@ -41,30 +41,38 @@ char* hash(char* text, char* hash_f) {
 
 char* convert_f_to_s(char* filename) {
 
-    char* converted_string = malloc(sizeof(char));
-    char buffer[100];
+    FILE* fichier;
+    char* ligne;
+    char* converted_string;
+    converted_string = (char*) malloc(sizeof(char*) * 100);
+    size_t len = 0;
+    ssize_t nread;
 
+    // Check if filename was given
     if (filename == "") {
         printf("Le nom du fichier n'a pas été rentré.");
         return "";
     }
 
-    FILE *fichier = fopen(filename, "r");
+    fichier = fopen(filename, "r");
 
+    // Check if the file is empty
     if (fichier == NULL) {
         printf("Le fichier n'a pas pu etre ouvert.");
         return "";
     }
 
-    while (fgets(buffer, sizeof(buffer), fichier) != NULL)
-    {
-        strcat(converted_string, buffer);
-    }
+    while ((nread = getline(&ligne, &len, fichier)) != -1) {
+            strcat(converted_string, ligne);
+           }
 
 
+    free(ligne);
     fclose(fichier);
 
     return converted_string;
 
 }
+
+
 // ------------------------------------------------------------------------------------------------------------------------------------
