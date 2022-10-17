@@ -54,7 +54,8 @@ int main(int argc, char* argv[]) {
         printf("String to hash: \"%s\"\n", stringToHash);
         
         printf("Digest: ");
-        printf("%s\n", hash(stringToHash, hashMethod));
+        hash(stringToHash, hashMethod);
+        //printf("%s\n", hash(stringToHash, hashMethod));
         printf("\n");
         free(stringToHash);        
 
