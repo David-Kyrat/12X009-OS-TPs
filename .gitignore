@@ -3,3 +3,4 @@
 .clang-format
 **/.clang-format
 .fake
+*.zip
