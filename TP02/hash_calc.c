@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <openssl/evp.h>
-
+#include <errno.h>
 
 EVP_MD_CTX* mdctx;
 const EVP_MD* md;
@@ -11,8 +11,7 @@ unsigned int md_len, i;
 
 // ------------------------------------------------------------------------------------------------------------------------------------
 // Hashing function, which takes a string and a hash function as arguments, and will return a string, the hash digest
-
-char* hash(char* text, char* hash_f) {
+unsigned char* hash(char* text, char* hash_f) {
 
     md = EVP_get_digestbyname(hash_f);
     
@@ -23,22 +22,16 @@ char* hash(char* text, char* hash_f) {
 
     EVP_DigestFinal_ex(mdctx, md_value, &md_len);
     EVP_MD_CTX_free(mdctx);
-
-    for (i = 0; i < md_len; i++) {
-        printf("%02x", md_value[i]);
-    }
+    for (i = 0; i < md_len; i++) printf("%02x", md_value[i]);
+    //printf("\n");
 
     return md_value;
-
 }
-// ------------------------------------------------------------------------------------------------------------------------------------
-
 
 
 // ------------------------------------------------------------------------------------------------------------------------------------
 // Function to convert a file's data into a string, which can be used as input for the hash function
 // a file is inputted and a string is returned
-
 char* convert_f_to_s(char* filename) {
 
     // Set up variables and pointers
@@ -51,8 +44,9 @@ char* convert_f_to_s(char* filename) {
     ssize_t nread;
 
     // Check if filename was given
-    if (filename == "") {
-        printf("Le nom du fichier n'a pas été rentré.");
+    if (strcmp(filename, "") == 0) {
+        fprintf(stderr, "Filename was not entered\n");
+        errno = EINVAL;
         return "";
     }
 
@@ -61,7 +55,8 @@ char* convert_f_to_s(char* filename) {
 
     // Check if the file is empty
     if (fichier == NULL) {
-        printf("Le fichier n'a pas pu etre ouvert.");
+        fprintf(stderr, "File could not be opened\n");
+        errno = ENOENT;
         return "";
     }
 
@@ -76,8 +71,5 @@ char* convert_f_to_s(char* filename) {
     fclose(fichier);
 
     return converted_string;
-
 }
 
-
-// ------------------------------------------------------------------------------------------------------------------------------------

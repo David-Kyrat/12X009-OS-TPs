@@ -31,11 +31,9 @@ int main(int argc, char* argv[]) {
     printf("Hashing Method: %s\n", hashMethod);
 
 
-    // If files are given, do this part
-
     if (filesToHash) { //* if the array of files is not null, i.e. program was called with -f option and has been correctly initialized
-        char** fileHashs;
-        tryalc(fileHashs = (char**)calloc(fileAmnt,  sizeof(char*)), __LINE__);
+        unsigned char** fileHashs;
+        tryalc(fileHashs = (unsigned char**)calloc(fileAmnt,  sizeof(unsigned char*)), __LINE__);
         //for (int i = 0; i < fileAmnt; i++) fileHashs[i] = "0x"; //? Debugging purposes - TOREMOVE
 
         for (int i = 0; i < fileAmnt; i++) {
@@ -43,10 +41,8 @@ int main(int argc, char* argv[]) {
             printf("Hashing file \"%s\"...\n", crtFile);
 
             fileHashs[i] = hash(convert_f_to_s(crtFile), hashMethod);
-
             printf(" File: %s\n", crtFile);
             printf("____________________________________________\n\n");
-            //printf("fileHash[%i]: \t \"%s\"\n\n", i, fileHashs[i]); //? Debugging purposes - TOREMOVE
         }
 
         free(fileHashs);
