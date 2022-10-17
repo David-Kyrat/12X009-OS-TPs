@@ -39,4 +39,4 @@ all: main.c OptionParser.o hash_calc.o
 
 
 clean:
-	rm out/*[pP]arser.o*  out/main.o*
+	rm out/*.o*

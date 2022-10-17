@@ -120,7 +120,6 @@ int parseArgsAsString(int argc, char* argv[]) {
     
     if (tflag == 0) stringToHash = catArr(strArgs, strNb, " "); //* if "-t" was not used
     else if (optind <= 3) stringToHash = catArrRange(strArgs, " ", 2, strNb); //* if "-t" was used and was parsed correctly
-    //printf("String to hash:\t\t\"%s\"\n", stringToHash);
 
     if (!stringToHash || strlen(stringToHash) == 0) errcode = -1;
     return errcode;

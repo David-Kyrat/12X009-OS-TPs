@@ -16,7 +16,6 @@ int main(int argc, char* argv[]) {
     char** filesToHash = NULL;
     char* stringToHash = NULL;
     int fileAmnt = -1;
-    printf("argv: [%s]\n", catArr(argv, argc, ", "));
 
 
     // Parse the arguments
@@ -43,11 +42,10 @@ int main(int argc, char* argv[]) {
             char* crtFile = filesToHash[i];
             printf("Hashing file \"%s\"...\n", crtFile);
 
-            
-            //TODO: Call hash_calc with hashMethod on current file
             fileHashs[i] = hash(convert_f_to_s(crtFile), hashMethod);
 
             printf(" File: %s\n", crtFile);
+            printf("____________________________________________\n\n");
             //printf("fileHash[%i]: \t \"%s\"\n\n", i, fileHashs[i]); //? Debugging purposes - TOREMOVE
         }
 
@@ -58,15 +56,13 @@ int main(int argc, char* argv[]) {
 
     else {
         printf("String to hash: \"%s\"\n", stringToHash);
-        //TODO: Call hash_calc with hashMethod on stringToHash
+        
         printf("Digest: ");
-        printf(hash(stringToHash, hashMethod));
+        printf("%s\n", hash(stringToHash, hashMethod));
         printf("\n");
-
         free(stringToHash);        
 
     }
 
      exit(EXIT_SUCCESS);
-   
 }
