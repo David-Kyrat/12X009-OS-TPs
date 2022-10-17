@@ -14,28 +14,9 @@ unsigned int md_len, i;
 
 char* hash(char* text, char* hash_f) {
 
-    // Initialise our hash digest string
-    char* hash_digest;
-
-
-    // Check if a text was given. If not, inform the user that there is no text.
-    if (text == NULL) {
-        printf("No text given.");
-        return "";
-    }
-
-
-    // Check if a hash function was given. If yes, use it. If not, use SHA1 as our hash function.
-    if (hash_f == NULL) {
-        md = "SHA1";
-    }
-
-    else {
-        md = EVP_get_digestbyname(hash_f);
-    }
+    md = EVP_get_digestbyname(hash_f);
     
-
-    // Code taken from the openssl example, modified for the program
+    // Code taken from the openssl example, modified for this program
     mdctx = EVP_MD_CTX_new();
     EVP_DigestInit_ex(mdctx, md, NULL);
     EVP_DigestUpdate(mdctx, text, strlen(text));
@@ -44,11 +25,10 @@ char* hash(char* text, char* hash_f) {
     EVP_MD_CTX_free(mdctx);
 
     for (i = 0; i < md_len; i++) {
-        hash_digest[i] = md_value[i];
-        // printf("%02x", hash_digest[i]);
+        printf("%02x", md_value[i]);
     }
 
-    return hash_digest;
+    return md_value;
 
 }
 // ------------------------------------------------------------------------------------------------------------------------------------
@@ -61,28 +41,43 @@ char* hash(char* text, char* hash_f) {
 
 char* convert_f_to_s(char* filename) {
 
+    // Set up variables and pointers
+    FILE* fichier;
+    char* ligne;
     char* converted_string;
-    char buffer[100];
+    size_t c_s_len = 1;
+    converted_string = (char*) malloc(sizeof(char*) * c_s_len);
+    size_t len = 0;
+    ssize_t nread;
 
+    // Check if filename was given
     if (filename == "") {
         printf("Le nom du fichier n'a pas été rentré.");
         return "";
     }
 
-    FILE *fichier = fopen(filename, "r");
+    // Open file given
+    fichier = fopen(filename, "r");
 
+    // Check if the file is empty
     if (fichier == NULL) {
         printf("Le fichier n'a pas pu etre ouvert.");
         return "";
     }
 
-    // fgets here reads an entire line or 99 characters (+1 for \0) at a time, whichever comes first
-    while (fgets(buffer, sizeof(buffer), fichier) != NULL) {
-        printf("Line read = %s\n", buffer);
-        strcat(buffer, converted_string);
-    }
+    // Read each line, and concatenate it to the converted_string
+    while ((nread = getline(&ligne, &len, fichier)) != -1) {
+            converted_string = (char *) realloc(converted_string, c_s_len + len);
+            strcat(converted_string, ligne);
+           }
 
+
+    free(ligne);
     fclose(fichier);
 
+    return converted_string;
+
 }
+
+
 // ------------------------------------------------------------------------------------------------------------------------------------
