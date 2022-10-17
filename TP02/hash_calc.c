@@ -41,10 +41,12 @@ char* hash(char* text, char* hash_f) {
 
 char* convert_f_to_s(char* filename) {
 
+    // Set up variables and pointers
     FILE* fichier;
     char* ligne;
     char* converted_string;
-    converted_string = (char*) malloc(sizeof(char*) * 100);
+    size_t c_s_len = 1;
+    converted_string = (char*) malloc(sizeof(char*) * c_s_len);
     size_t len = 0;
     ssize_t nread;
 
@@ -54,6 +56,7 @@ char* convert_f_to_s(char* filename) {
         return "";
     }
 
+    // Open file given
     fichier = fopen(filename, "r");
 
     // Check if the file is empty
@@ -62,7 +65,9 @@ char* convert_f_to_s(char* filename) {
         return "";
     }
 
+    // Read each line, and concatenate it to the converted_string
     while ((nread = getline(&ligne, &len, fichier)) != -1) {
+            converted_string = (char *) realloc(converted_string, c_s_len + len);
             strcat(converted_string, ligne);
            }
 
