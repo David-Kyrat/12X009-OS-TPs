@@ -57,6 +57,10 @@ static void list_dir (const char * dir_name){
   }
 }
 
-int main () {
-  list_dir("/var/log/");
+int main (int argc, char* argv[]) {
+  //list_dir("/var/log/");
+  
+  if (argc > 1) list_dir(argv[1]);
+  
   return EXIT_SUCCESS;
+}
