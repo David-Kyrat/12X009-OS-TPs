@@ -10,11 +10,12 @@ CFLAGS = -lm -Wall -Wuninitialized -Wfloat-equal -Wshadow -Wbad-function-cast -W
 #
 DBGFLAGS = -g -DDEBUG
 
-listDir.out: listDir.c
-	$(CC) listDir.c $(CFLAGS) $(DBGFLAGS) -o listDir.out
 
-all: 
-	$(CC) main.c -o ultra-cp
+all: main.c
+	$(CC) main.c $(CFLAGS) $(DBGFLAGS) -o ultra-cp
+
+#listDir.out: listDir.c
+#	$(CC) listDir.c $(CFLAGS) $(DBGFLAGS) -o listDir.out
 
 ultra-cp: all
 

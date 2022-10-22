@@ -14,9 +14,17 @@ int isDot(const char *entry_name) {
 
 char permRepr[] = {'r', 'w', 'x'};
 
+/**
+ * Takes the mode (int) and dtype (char) of an inode and returns a string representing the permissions of the file
+ * 
+ * @param mode the mode of the file, which is a bitmask.
+ * @param dtype The type of the file. This is a bitmask, so the bitwise AND operator was used to extract the type.
+ * 
+ * @return Permissions of the file, as a String. (i.e. -rw-r--r-x ...)
+ */
 char* computePerm(int mode, char dtype) {
       //* 3 groups: owner, group, others, 3 perm: read write execute
-    int x = 01, r = 04, w = 02, permNb = 3, groupNb = 3, dashNb = 10;
+    int x = 01, r = 04, w = 02, permNb = 3, dashNb = 10;
     int perms[] = {r, w, x};
     char permsPrty[10];  // Permission as a readable string
     for (int i = 0; i < dashNb; i++) permsPrty[i] = '-';
@@ -32,6 +40,14 @@ char* computePerm(int mode, char dtype) {
     return strndup(permsPrty, dashNb);
 }
 
+/**
+ * Emulates ls -lRa behavior. (except that it doesnt print . and .. because they are always present).  
+ * 
+ * It Takes a directory name as an argument, opens it, reads its entries, and recursively calls itself
+ * on each subdirectory.
+ * 
+ * @param dir_name the name of the directory to list
+ */
 static void list_dir(const char *dir_name) {
     //TODO: CHECK IF IS FILE, BASE ON INODE INFO
 
@@ -49,7 +65,7 @@ static void list_dir(const char *dir_name) {
 
     // Loop on each entry
     while ((entry = readdir(d)) != NULL) {
-        // Get entry name and displays it
+        // Get entry name
         d_name = entry->d_name;
         int isEntDot = isDot(d_name);  //* is 'entry' '..' or '.' ?
         char path[PATH_MAX]; 
@@ -57,7 +73,7 @@ static void list_dir(const char *dir_name) {
         //* Do not print ., .. as they are always here
         if (!isEntDot) {
             struct stat infos;
-            // computes the name of the subdirectory and checks if it is too long
+            // computes the name of the subdirectory and checks if it is not too long
             if (snprintf(path, PATH_MAX, "%s/%s", dir_name, d_name) >= PATH_MAX) {
                 fprintf(stderr, "Path length has gotten too long.\n");  // Check that subdir pathname isnt too long
                 exit(EXIT_FAILURE);
