@@ -63,17 +63,17 @@ char* computePerm2(int mode, char* name, unsigned char dtype) {
     int perms[] = {r, w, x};
     char permsPrty[10];  // Permission as a readable string
     for (int i = 0; i < dashNb; i++) permsPrty[i] = '-';
-    permsPrty[0] = (dtype & 4) ? 'd' : '-';
+    //permsPrty[0] = (dtype & 4) ? 'd' : '-';
+    if (dtype & 4) permsPrty[0] = 'd';
 
-    for (int i = 2; i >= 0; i--) {
+    for (int i = 0; i < 3; i++) {
         for (int j = 0; j < permNb; j++) {
-            int crtPerm = mode & (perms[j] << i * permNb);
-            if (crtPerm) permsPrty[((2 - i) * 3 + j) + 1] = permRepr[j];
-            //printf("%c", permRepr[j]);
+            int crtPerm = mode & (perms[j] << (2-i) * permNb);
+            if (crtPerm) permsPrty[i * 3 + j + 1] = permRepr[j];
+            // i*3 to shift to corresponding block and + 1 because permPrty[0] is d_type
         }
     }
-    char* out = strndup(permsPrty, dashNb);
-    return out;
+    return strndup(permsPrty, dashNb);
 }
 
 int main() {

@@ -14,23 +14,22 @@ int isDot(const char *entry_name) {
 
 char permRepr[] = {'r', 'w', 'x'};
 
-char* computePerm(int mode, char *name, char dtype) {
-    //* 3 groups: owner, group, others, 3 perm: read write execute
+char* computePerm(int mode, char dtype) {
+      //* 3 groups: owner, group, others, 3 perm: read write execute
     int x = 01, r = 04, w = 02, permNb = 3, groupNb = 3, dashNb = 10;
     int perms[] = {r, w, x};
     char permsPrty[10];  // Permission as a readable string
     for (int i = 0; i < dashNb; i++) permsPrty[i] = '-';
-    permsPrty[0] = (dtype & DT_DIR) ? 'd' : '-';
+    if (dtype & DT_DIR) permsPrty[0] = 'd';
 
-    for (int i = groupNb - 1; i >= 0; i--) {
+    for (int i = 0; i < 3; i++) {
         for (int j = 0; j < permNb; j++) {
-            int crtPerm = mode & (perms[j] << i * permNb);
-            if (crtPerm) permsPrty[i * 3 + j] = permRepr[j];
-            //printf("%c", permRepr[j]);
+            int crtPerm = mode & (perms[j] << (2-i) * permNb);
+            if (crtPerm) permsPrty[i * 3 + j + 1] = permRepr[j];
+            // i*3 to shift to corresponding block and + 1 because permPrty[0] is d_type
         }
     }
-    char* out = strndup(permsPrty, dashNb);
-    return out;
+    return strndup(permsPrty, dashNb);
 }
 
 static void list_dir(const char *dir_name) {
@@ -53,33 +52,28 @@ static void list_dir(const char *dir_name) {
         // Get entry name and displays it
         d_name = entry->d_name;
         int isEntDot = isDot(d_name);  //* is 'entry' '..' or '.' ?
-        //int isDir = entry -> d_type & DT_DIR;
+        char path[PATH_MAX]; 
 
         //* Do not print ., .. as they are always here
         if (!isEntDot) {
-            //? 10 '-' max in ls -l
             struct stat infos;
-            if (stat(d_name, &infos) < 0) fprintf(stderr, "Cannot stat %s: %s\n", d_name, strerror(errno));
-
-            //printf("%s ", meta);
-
-            printf("\t%s/%s\n", dir_name, d_name);
+            // computes the name of the subdirectory and checks if it is too long
+            if (snprintf(path, PATH_MAX, "%s/%s", dir_name, d_name) >= PATH_MAX) {
+                fprintf(stderr, "Path length has gotten too long.\n");  // Check that subdir pathname isnt too long
+                exit(EXIT_FAILURE);
+            }
+            if (stat(path, &infos) < 0) fprintf(stderr, "Cannot stat %s: %s\n", d_name, strerror(errno));
+            
+            char* permissions = computePerm(infos.st_mode, entry->d_type);
+            printf("%s\t%s/%s\n", permissions, dir_name, d_name);
         }
 
         // Is 'entry' a subdirectory ?
         if (entry->d_type & DT_DIR) {
             if (!isEntDot) {
-                char path[PATH_MAX];
-
-                // computes the name of the subdirectory and checks if it is too long
-                if (snprintf(path, PATH_MAX, "%s/%s", dir_name, d_name) >= PATH_MAX) {
-                    fprintf(stderr, "Path length has gotten too long.\n");  // Check that subdir pathname isnt too long
-                    exit(EXIT_FAILURE);
-                }
-
-                // recursive call & print carriage return to help cleanly separate directories and subdirectories
                 printf("\n");
                 list_dir(path);
+                printf("\n%s/ (rest):\n", dir_name);
             }
         }
     }
