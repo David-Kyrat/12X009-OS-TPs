@@ -60,7 +60,6 @@ static void list_dir(const char *dir_name) {
         fprintf(stderr, "Cannot open directory '%s': %s\n", dir_name, strerror(errno));
         exit(EXIT_FAILURE);
     }
-
     printf("%s/:\n", dir_name);
 
     // Loop on each entry
@@ -93,7 +92,6 @@ static void list_dir(const char *dir_name) {
             }
         }
     }
-
     // closing directory
     if (closedir(d)) {
         fprintf(stderr, "Could not close '%s': %s\n", dir_name, strerror(errno));
