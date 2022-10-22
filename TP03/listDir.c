@@ -4,13 +4,33 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>  //snprintf
-#include <sys/types.h>
 #include <sys/stat.h>
-
+#include <sys/types.h>
 
 /** @return Is 'entry_name' '.' or '..' ? */
 int isDot(const char *entry_name) {
     return strcmp(entry_name, "..") == 0 || strcmp(entry_name, ".") == 0;
+}
+
+char permRepr[] = {'r', 'w', 'x'};
+
+char* computePerm(int mode, char *name, char dtype) {
+    //* 3 groups: owner, group, others, 3 perm: read write execute
+    int x = 01, r = 04, w = 02, permNb = 3, groupNb = 3, dashNb = 10;
+    int perms[] = {r, w, x};
+    char permsPrty[10];  // Permission as a readable string
+    for (int i = 0; i < dashNb; i++) permsPrty[i] = '-';
+    permsPrty[0] = (dtype & DT_DIR) ? 'd' : '-';
+
+    for (int i = groupNb - 1; i >= 0; i--) {
+        for (int j = 0; j < permNb; j++) {
+            int crtPerm = mode & (perms[j] << i * permNb);
+            if (crtPerm) permsPrty[i * 3 + j] = permRepr[j];
+            //printf("%c", permRepr[j]);
+        }
+    }
+    char* out = strndup(permsPrty, dashNb);
+    return out;
 }
 
 static void list_dir(const char *dir_name) {
@@ -33,25 +53,15 @@ static void list_dir(const char *dir_name) {
         // Get entry name and displays it
         d_name = entry->d_name;
         int isEntDot = isDot(d_name);  //* is 'entry' '..' or '.' ?
+        //int isDir = entry -> d_type & DT_DIR;
 
         //* Do not print ., .. as they are always here
         if (!isEntDot) {
             //? 10 '-' max in ls -l
             struct stat infos;
-            if( stat(d_name, &infos ) < 0 ) fprintf( stderr, "Cannot stat %s: %s\n", d_name, strerror(errno) );
+            if (stat(d_name, &infos) < 0) fprintf(stderr, "Cannot stat %s: %s\n", d_name, strerror(errno));
 
-            unsigned int tot_dash_nb = 10;
-            //calloc(tot_dash_nb + 2, sizeof(char));  //TODO: check if malloc returned null
-            char meta[10];
-            for (int i = 0; i < tot_dash_nb; i++) meta[i] = '-';
-            if (S_ISDIR(entry->d_type)) meta[0] = 'd';
-            int perms[9] = {00400, 00200, 00100, 00040, 00020, 00010, 00004, 00002, 00001};
-            char perm_repr[9] = {'r', 'w', 'x', 'r', 'w', 'x', 'r', 'w', 'x'};
-            
-            if (infos.st_mode & S_IRUSR)
-            
-
-            printf("%s ", meta);
+            //printf("%s ", meta);
 
             printf("\t%s/%s\n", dir_name, d_name);
         }
