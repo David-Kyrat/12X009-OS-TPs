@@ -1,3 +1,4 @@
+.PHONY : clean all
 #
 # Compiler flags
 #
@@ -14,7 +15,9 @@ DBGFLAGS = -g -DDEBUG
 #	$(CC) #out/main.o out/hash_calc.o  out/OptionParser.o -o digest 
 
 all: 
-	$(CC) -o ultra-cp
+	$(CC) main.c -o ultra-cp
+
+ultra-cp: all
 
 out/main.o: main.c #hash_calc.h OptionParser.h
 	$(CC) -c main.c $(CFLAGS) $(DBGFLAGS) -o out/main.o
