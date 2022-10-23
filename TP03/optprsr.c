@@ -21,14 +21,7 @@ int checkEnoughArgs(int argc, char* file_name) {
 
 //parse and copy parse args to parsedArgs
 
-/**
- * Parses arguments given at main function and return a copy of them.
- * 
- * @param argc the number of arguments passed to the program
- * @param argv the array of arguments passed to the program
- * 
- * @return Copy of parsed arguments.
- */
+
 char** parseArgs(int argc, char* argv[]) {
     char** parsedArgs = NULL;
     if (checkEnoughArgs(argc, argv[0]) != 0) { errno = EINVAL; return parsedArgs; }
@@ -39,10 +32,10 @@ char** parseArgs(int argc, char* argv[]) {
     tryalc(parsedArgs = calloc(len, sizeof(char*)));
 
     for (int i = 0; i < len; i++) {
-        int len = strlen(args[i]);
-        if (len <= 0 || len >= PATH_MAX) { errno = EINVAL; return parsedArgs; }
+        int argLen = strlen(args[i]);
+        if (argLen <= 0 || argLen >= PATH_MAX) { errno = EINVAL; return parsedArgs; }
         // if a given filepath is too long => return error
-        parsedArgs[i] = strndup(args[i], len + 1);
+        parsedArgs[i] = strndup(args[i], argLen + 1);
     }
 
     return parsedArgs;

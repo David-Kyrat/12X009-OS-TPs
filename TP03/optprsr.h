@@ -7,4 +7,12 @@
  */
 int checkEnoughArgs(int argc, char* file_name);
 
+/**
+ * Parses arguments given at main function and return a copy of them.
+ * 
+ * @param argc the number of arguments passed to the program
+ * @param argv the array of arguments passed to the program
+ * 
+ * @return Copy of parsed arguments.
+ */
 char** parseArgs(int argc, char* argv[]);
