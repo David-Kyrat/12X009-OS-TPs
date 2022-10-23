@@ -12,7 +12,8 @@ int checkEnoughArgs(int argc, char* file_name);
  * 
  * @param argc the number of arguments passed to the program
  * @param argv the array of arguments passed to the program
+ * @param fileNb variable into which store the amount of parsed file to process
  * 
  * @return Copy of parsed arguments.
  */
-char** parseArgs(int argc, char* argv[]);
+char** parseArgs(int argc, char* argv[], int* fileNb);

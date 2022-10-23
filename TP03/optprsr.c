@@ -12,17 +12,15 @@ const int MIN_ARG_NB = 1;
 
 int checkEnoughArgs(int argc, char* file_name) {
     if (argc < MIN_ARG_NB + 1) {
-        fprintf(stderr, "%s: Not Enough arguments: Expecting at least %d.\n", file_name, MIN_ARG_NB);
+        //fprintf(stderr, "%s: Not Enough arguments: Expecting at least %d.\n", file_name, MIN_ARG_NB);
         errno = EINVAL;
         return EINVAL;
     }
     return 0;
 }
 
-//parse and copy parse args to parsedArgs
 
-
-char** parseArgs(int argc, char* argv[]) {
+char** parseArgs(int argc, char* argv[], int* fileNb) {
     char** parsedArgs = NULL;
     if (checkEnoughArgs(argc, argv[0]) != 0) { errno = EINVAL; return parsedArgs; }
     
@@ -37,6 +35,7 @@ char** parseArgs(int argc, char* argv[]) {
         // if a given filepath is too long => return error
         parsedArgs[i] = strndup(args[i], argLen + 1);
     }
+    *fileNb = len;
 
     return parsedArgs;
 }

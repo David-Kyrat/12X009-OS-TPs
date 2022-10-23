@@ -83,7 +83,7 @@ static void list_dir(const char *dir_name) {
             if (stat(path, &infos) < 0) fprintf(stderr, "Cannot stat %s: %s\n", d_name, strerror(errno));
             
             char* permissions = computePerm(infos.st_mode, entry->d_type);
-            printf("%s\t%s/%s\n", permissions, dir_name, d_name);
+            printf(" %s\t%s/%s\n", permissions, dir_name, d_name);
         }
 
         // Is 'entry' a subdirectory ?
@@ -104,16 +104,19 @@ static void list_dir(const char *dir_name) {
 
 int main(int argc, char *argv[]) {
     //list_dir("/var/log/");
-    //int err = EXIT_SUCCESS;
-    //if (checkEnoughArgs(argc, argv[0]) != 0) exit(errno);
-    char** files = parseArgs(argc, argv);
-    if (!files) {
+    int fileNb = -1;
+    char** files = parseArgs(argc, argv, &fileNb);
+    if (!files || fileNb <= 0) {
         int errno_cpy = errno;
-        fprintf(stderr, "%s: Error during argument parsing. Usage: %s folder1 folder2/ destination \n\n", strerror(errno_cpy), argv[0]);
+        fprintf(stderr, "%s: %s\n\t - Usage: %s folder1 folder2/ destination \n\n", argv[0], strerror(errno_cpy), argv[0]);
         return errno_cpy;
     }
 
-    list_dir(argv[1]);
+    for (int i = 0; i < fileNb; i++) {
+        list_dir(files[i]);
+        printf("    ____________________  \n\n\n");
+    }
+    
 
     return EXIT_SUCCESS;
 }
