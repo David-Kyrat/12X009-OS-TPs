@@ -57,18 +57,20 @@ char* computePerm(int mode) {
  * on each subdirectory.
  * 
  * @param dir_name the name of the directory to list
+ * @return Error code. (0 if success else see errno.h for more info)
  */
-static void list_dir(const char *dir_name) {
+static int list_dir(const char *dir_name) {
     //TODO: CHECK IF IS FILE, BASE ON INODE INFO
-    errno = 0;
+    int err = errno;
     DIR *d = opendir(dir_name);
     struct dirent *entry;
     const char *d_name;  // name of entry
 
     // In case of exception on openning
     if (!d) {
-        fprintf(stderr, "Cannot open directory '%s': %s\n", dir_name, strerror(errno));
-        exit(EXIT_FAILURE);
+        err = errno;
+        fprintf(stderr, "Cannot open directory '%s': %s\n", dir_name, strerror(err));
+        return err;
     }
     printf("%s/:\n", dir_name);
 
@@ -85,7 +87,7 @@ static void list_dir(const char *dir_name) {
             // computes the name of the subdirectory and checks if it is not too long
             if (snprintf(path, PATH_MAX, "%s/%s", dir_name, d_name) >= PATH_MAX) {
                 fprintf(stderr, "Path length has gotten too long.\n");  // Check that subdir pathname isnt too long
-                exit(ENAMETOOLONG);
+                return ENAMETOOLONG;//exit(ENAMETOOLONG);
             }
             if (lstat(path, &infos) < 0) fprintf(stderr, "Cannot stat %s: %s\n", d_name, strerror(errno));
             
@@ -97,7 +99,7 @@ static void list_dir(const char *dir_name) {
         if (entry->d_type & DT_DIR) {
             if (!isEntDot) {
                 printf("\n");
-                list_dir(path);
+                err = list_dir(path);
                 printf("\n%s/ (rest):\n", dir_name);
             }
         }
@@ -107,11 +109,13 @@ static void list_dir(const char *dir_name) {
         fprintf(stderr, "Could not close '%s': %s\n", dir_name, strerror(errno));
         exit(EXIT_FAILURE);
     }
+
+    return err;
 }
 
 int main(int argc, char *argv[]) {
     //list_dir("/var/log/");
-    int fileNb = -1;
+    int fileNb = -1, err = 0;
     char** files = parseArgs(argc, argv, &fileNb);
     if (!files || fileNb <= 0) {
         int errno_cpy = errno;
@@ -120,11 +124,11 @@ int main(int argc, char *argv[]) {
     }
 
     for (int i = 0; i < fileNb; i++) {
-        list_dir(files[i]);
+        err = list_dir(files[i]);
+        //if (err != 0) fprintf(stderr, "Error at file %d, %s : %s\n", i, files[i], strerror(err));
         printf("    ____________________  \n\n\n");
     }
     
-
-    return EXIT_SUCCESS;
+    return err;
 }
 
