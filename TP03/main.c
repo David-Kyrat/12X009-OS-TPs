@@ -92,7 +92,9 @@ static int list_dir(const char *dir_name) {
             if (lstat(path, &infos) < 0) fprintf(stderr, "Cannot stat %s: %s\n", d_name, strerror(errno));
             
             char* permissions = computePerm(infos.st_mode);
-            printf(" %s\t%s/%s\n", permissions, dir_name, d_name);
+            size_t ent_size = infos.st_size;
+
+            printf(" %s\t %ld %s/%s\n", permissions, ent_size, dir_name, d_name);
         }
 
         // Is 'entry' a subdirectory ?
