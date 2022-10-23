@@ -6,6 +6,9 @@
 #include <string.h>  //snprintf
 #include <sys/stat.h>
 #include <sys/types.h>
+#include "optprsr.h"
+#include "util.h"
+
 
 /** @return Is 'entry_name' '.' or '..' ? */
 int isDot(const char *entry_name) {
@@ -101,13 +104,12 @@ static void list_dir(const char *dir_name) {
 
 int main(int argc, char *argv[]) {
     //list_dir("/var/log/");
+    //int err = EXIT_SUCCESS;
 
-    if (argc <= 1) {
-        fprintf(stderr, "%s: Not Enough arguments: Expecting at least 1\n", argv[0]);
-        return EXIT_FAILURE;
-    }
-
+    if (checkEnoughArgs(argc, argv[0]) != 0) exit(errno);
+  
     list_dir(argv[1]);
 
     return EXIT_SUCCESS;
 }
+
