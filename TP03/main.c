@@ -6,8 +6,8 @@
 #include <string.h>  //snprintf
 #include <sys/stat.h>
 #include <sys/types.h>
-#include "optprsr.h"
 #include "util.h"
+#include "optprsr.h"
 
 
 /** @return Is 'entry_name' '.' or '..' ? */
@@ -78,7 +78,7 @@ static void list_dir(const char *dir_name) {
             // computes the name of the subdirectory and checks if it is not too long
             if (snprintf(path, PATH_MAX, "%s/%s", dir_name, d_name) >= PATH_MAX) {
                 fprintf(stderr, "Path length has gotten too long.\n");  // Check that subdir pathname isnt too long
-                exit(EXIT_FAILURE);
+                exit(ENAMETOOLONG);
             }
             if (stat(path, &infos) < 0) fprintf(stderr, "Cannot stat %s: %s\n", d_name, strerror(errno));
             
@@ -105,9 +105,14 @@ static void list_dir(const char *dir_name) {
 int main(int argc, char *argv[]) {
     //list_dir("/var/log/");
     //int err = EXIT_SUCCESS;
+    //if (checkEnoughArgs(argc, argv[0]) != 0) exit(errno);
+    char** files = parseArgs(argc, argv);
+    if (!files) {
+        int errno_cpy = errno;
+        fprintf(stderr, "%s: Error during argument parsing. Usage: %s folder1 folder2/ destination \n\n", strerror(errno_cpy), argv[0]);
+        return errno_cpy;
+    }
 
-    if (checkEnoughArgs(argc, argv[0]) != 0) exit(errno);
-  
     list_dir(argv[1]);
 
     return EXIT_SUCCESS;

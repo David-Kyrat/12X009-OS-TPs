@@ -6,3 +6,5 @@
  * @return 0 if success otherwise code 22 (Invalid argument)
  */
 int checkEnoughArgs(int argc, char* file_name);
+
+char** parseArgs(int argc, char* argv[]);
