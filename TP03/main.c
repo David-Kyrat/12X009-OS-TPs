@@ -18,20 +18,27 @@ int isDot(const char *entry_name) {
 char permRepr[] = {'r', 'w', 'x'};
 
 /**
- * Takes the mode (int) and dtype (char) of an inode and returns a string representing the permissions of the file
+ * Takes the mode (int) and dtype (int) of an inode and returns a string representing the permissions of the file
  * 
- * @param mode the mode of the file, which is a bitmask.
- * @param dtype The type of the file. This is a bitmask, so the bitwise AND operator was used to extract the type.
+ * @param mode the mode of the file,
  * 
  * @return Permissions of the file, as a String. (i.e. -rw-r--r-x ...)
  */
-char* computePerm(int mode, char dtype) {
+char* computePerm(int mode) {
       //* 3 groups: owner, group, others, 3 perm: read write execute
     int x = 01, r = 04, w = 02, permNb = 3, dashNb = 10;
     int perms[] = {r, w, x};
     char permsPrty[10];  // Permission as a readable string
     for (int i = 0; i < dashNb; i++) permsPrty[i] = '-';
-    if (dtype & DT_DIR) permsPrty[0] = 'd';
+
+    char typeLetter = '-';
+    if (S_ISDIR(mode)) typeLetter = 'd';
+    else if (S_ISLNK(mode)) typeLetter = 'l';
+    else if (S_ISCHR(mode)) typeLetter = 'c';
+    else if (S_ISBLK(mode)) typeLetter = 'b';
+    else if (S_ISFIFO(mode)) typeLetter = 'p';
+    else if (S_ISSOCK(mode)) typeLetter = 's';
+    permsPrty[0] = typeLetter;
 
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < permNb; j++) {
@@ -53,7 +60,7 @@ char* computePerm(int mode, char dtype) {
  */
 static void list_dir(const char *dir_name) {
     //TODO: CHECK IF IS FILE, BASE ON INODE INFO
-
+    errno = 0;
     DIR *d = opendir(dir_name);
     struct dirent *entry;
     const char *d_name;  // name of entry
@@ -80,9 +87,9 @@ static void list_dir(const char *dir_name) {
                 fprintf(stderr, "Path length has gotten too long.\n");  // Check that subdir pathname isnt too long
                 exit(ENAMETOOLONG);
             }
-            if (stat(path, &infos) < 0) fprintf(stderr, "Cannot stat %s: %s\n", d_name, strerror(errno));
+            if (lstat(path, &infos) < 0) fprintf(stderr, "Cannot stat %s: %s\n", d_name, strerror(errno));
             
-            char* permissions = computePerm(infos.st_mode, entry->d_type);
+            char* permissions = computePerm(infos.st_mode);
             printf(" %s\t%s/%s\n", permissions, dir_name, d_name);
         }
 

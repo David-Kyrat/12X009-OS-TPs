@@ -35,7 +35,7 @@ char** parseArgs(int argc, char* argv[], int* fileNb) {
         // if a given filepath is too long => return error
         parsedArgs[i] = strndup(args[i], argLen + 1);
     }
-    *fileNb = len;
+        *fileNb = len;
 
     return parsedArgs;
 }
