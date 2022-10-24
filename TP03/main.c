@@ -6,6 +6,7 @@
 #include <string.h>  //snprintf
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <time.h>
 #include "util.h"
 #include "optprsr.h"
 
@@ -53,7 +54,7 @@ char* computePerm(int mode) {
 /**
  * Emulates ls -lRa behavior. (except that it doesnt print . and .. because they are always present).  
  * 
- * It Takes a directory name as an argument, opens it, reads its entries, and recursively calls itself
+ * It takes a directory name as an argument, opens it, reads its entries, and recursively calls itself
  * on each subdirectory.
  * 
  * @param dir_name the name of the directory to list
@@ -66,7 +67,7 @@ static int list_dir(const char *dir_name) {
     struct dirent *entry;
     const char *d_name;  // name of entry
 
-    // In case of exception on openning
+    // In case of exception on opening
     if (!d) {
         err = errno;
         fprintf(stderr, "Cannot open directory '%s': %s\n", dir_name, strerror(err));
@@ -87,12 +88,29 @@ static int list_dir(const char *dir_name) {
             // computes the name of the subdirectory and checks if it is not too long
             if (snprintf(path, PATH_MAX, "%s/%s", dir_name, d_name) >= PATH_MAX) {
                 fprintf(stderr, "Path length has gotten too long.\n");  // Check that subdir pathname isnt too long
-                return ENAMETOOLONG;//exit(ENAMETOOLONG);
+                return ENAMETOOLONG; //exit(ENAMETOOLONG);
             }
             if (lstat(path, &infos) < 0) fprintf(stderr, "Cannot stat %s: %s\n", d_name, strerror(errno));
             
             char* permissions = computePerm(infos.st_mode);
-            printf(" %s %*ld   %s/%s\n", permissions, 13, infos.st_size, dir_name, d_name);
+
+            // Save the last modification time given
+            time_t mtime = infos.st_mtime;
+
+            // Initialize where the formatted date will be written
+            char modif_time[50];
+
+            // Initialize the time_info struct to manipulate the date
+            struct tm* time_info;
+
+            // Write the time as the local time of the computer
+            time_info = localtime(&mtime);
+
+            // Copy the formatted time to modif_time
+            strftime(modif_time, 50, "%c", time_info);
+
+            // Output the info
+            printf(" %s %*ld      %s  %s/%s\n", permissions, 13, infos.st_size, modif_time, dir_name, d_name);
         }
 
         // Is 'entry' a subdirectory ?
