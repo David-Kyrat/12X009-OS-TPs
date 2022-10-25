@@ -9,6 +9,7 @@
 #include <time.h>
 #include "util.h"
 #include "optprsr.h"
+#include "copy.h"
 
 
 /** @return Is 'entry_name' '.' or '..' ? */
@@ -77,6 +78,7 @@ static int list_dir(const char *dir_name) {
 
     // Loop on each entry
     while ((entry = readdir(d)) != NULL) {
+
         // Get entry name
         d_name = entry->d_name;
         int isEntDot = isDot(d_name);  //* is 'entry' '..' or '.' ?
@@ -146,7 +148,26 @@ int main(int argc, char *argv[]) {
         //if (err != 0) fprintf(stderr, "Error at file %d, %s : %s\n", i, files[i], strerror(err));
         printf("    ____________________  \n\n\n");
     }
+
+    // TODO: lstat source and dest, compare them
     
     return err;
 }
 
+
+int main( int argc, char **argv ) {
+
+  if( argc != 3 ) {
+    printf( "Usage: %s <infile> <outfile>\n", argv[0] );
+    exit( EXIT_FAILURE );
+  }
+
+  char *in = argv[1];
+  char *out = argv[2];
+  
+  if( copy( in, out ) < 0 ) {
+    exit( EXIT_FAILURE );
+  } else {
+    exit( EXIT_SUCCESS );
+  }
+}

@@ -12,10 +12,10 @@
 void* tryalc(void* allocReturn);
 
 /**
- * Utility function for basic handling of error related to file openning.
+ * Utility function for basic handling of error related to file opening.
  * 
  * Prints an error message to stderr and exits with the error code if needsExit is true, otherwise
- * ust returns -1
+ * just returns -1
  * @param filename Name of the file that could not be opened.
  * @param needsExit int, If non-zero, program will exit with the saved error code from errno. (otherwise do nothing)
  * @return -1 or, exits with saved errno, if needsExit was != 0.
