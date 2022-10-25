@@ -1,3 +1,9 @@
+/**
+ * @file util.c
+ * @brief Utility functions mostly used for error handling
+ * 
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
