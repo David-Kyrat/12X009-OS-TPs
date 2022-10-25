@@ -20,7 +20,7 @@ void* tryalc(void* allocReturn);
  * @param needsExit int, If non-zero, program will exit with the saved error code from errno. (otherwise do nothing)
  * @return -1 or, exits with saved errno, if needsExit was != 0.
  */
-int hdlOpenErr(char* filename, int exit);
+int hdlOpenErr(const char* filename, int exit);
 
 /**
  * Utility function for basic handling of error related to file closing.
@@ -31,7 +31,7 @@ int hdlOpenErr(char* filename, int exit);
  * @param needsExit int, If non-zero, program will exit with the saved error code from errno. (otherwise do nothing)
  * @return -1 or, exits with saved errno, if needsExit was != 0.
  */
-int hdlCloseErr(char* filename, int exit);
+int hdlCloseErr(const char* filename, int exit);
 
 /**
  * Utility function for basic handling of error related to file reading.
@@ -44,7 +44,7 @@ int hdlCloseErr(char* filename, int exit);
  * @param fd int, file descriptor of file being read from (can be null/0 if needsClose is 0)
  * @return -1 or, exits with saved errno, if needsExit was != 0.
  */
-int hdlReadErr(char* filename, int needsExit, int needsClose, int fd);
+int hdlReadErr(const char* filename, int needsExit, int needsClose, int fd);
 
 /**
  * Utility function for basic handling of error related to file writing.
@@ -57,7 +57,7 @@ int hdlReadErr(char* filename, int needsExit, int needsClose, int fd);
  * @param fd int, file descriptor of file being written to (can be null/0 if needsClose is 0)
  * @return -1 or, exits with saved errno, if needsExit was != 0.
  */
-int hdlWriteErr(char* filename, int needsExit, int needsClose, int fd);
+int hdlWriteErr(const char* filename, int needsExit, int needsClose, int fd);
 
 /**
  * Utility function for basic handling of error related to file copying.
@@ -75,4 +75,4 @@ int hdlWriteErr(char* filename, int needsExit, int needsClose, int fd);
  * 
  * @return -1 or, exits with saved errno, if needsExit was != 0.
  */
-int hdlCopyErr(char* from, char* to, int needsExit, int needsClose, int fd_from, int fd_to);
+int hdlCopyErr(const char* from, const char* to, int needsExit, int needsClose, int fd_from, int fd_to);

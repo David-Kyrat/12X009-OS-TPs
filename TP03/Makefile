@@ -10,7 +10,7 @@ CFLAGS = -lm -Wall -Wuninitialized -Wfloat-equal -Wshadow -Wbad-function-cast -W
 #
 DBGFLAGS = -g -DDEBUG
 EXEC = ultra-cp
-OBJS = out/main.o out/optprsr.o out/util.o
+OBJS = out/main.o out/copy.o out/optprsr.o out/util.o
 
 all: $(EXEC)
 
@@ -18,9 +18,14 @@ all: $(EXEC)
 $(EXEC): $(OBJS)
 	$(CC) $(OBJS) -o ultra-cp
 
+copy.out: out/copy.o out/util.o
+	$(CC) out/copy.o out/util.o -o copy.out
 
-out/main.o: main.c optprsr.h util.h
+out/main.o: main.c copy.h optprsr.h util.h
 	$(CC) -c main.c $(CFLAGS) $(DBGFLAGS) -o out/main.o
+
+out/copy.o: copy.c copy.h util.h
+	$(CC) -c copy.c $(CFLAGS) $(DBGFLAGS) -o out/copy.o
 
 out/optprsr.o: optprsr.c optprsr.h util.h
 	$(CC) -c optprsr.c $(CFLAGS) $(DBGFLAGS) -o out/optprsr.o

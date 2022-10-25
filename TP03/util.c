@@ -16,21 +16,21 @@ void* tryalc(void* allocReturn) {
 }
 
 
-int hdlOpenErr(char* filename, int needsExit) {
+int hdlOpenErr(const char* filename, int needsExit) {
     int savedErr = errno;
-    fprintf(stderr, "Could not open file %s : %s\n", filename, strerror(savedErr));
+    fprintf(stderr, "Could not %s file %s : %s\n", savedErr == EEXIST ? "create" : "open", filename, strerror(savedErr));
     if (needsExit) exit(savedErr);
     return -1;
 }
 
-int hdlCloseErr(char* filename, int needsExit) {
+int hdlCloseErr(const char* filename, int needsExit) {
     int savedErr = errno;
     fprintf(stderr, "Could not close file %s : %s\n", filename, strerror(savedErr));
     if (needsExit) exit(savedErr);
     return -1;
 }
 
-int hdlReadErr(char* filename, int needsExit, int needsClose, int fd) {
+int hdlReadErr(const char* filename, int needsExit, int needsClose, int fd) {
     int savedErr = errno;
     fprintf(stderr, "Could not read from file %s : %s\n", filename, strerror(savedErr));
     if (needsClose) {
@@ -41,7 +41,7 @@ int hdlReadErr(char* filename, int needsExit, int needsClose, int fd) {
     return -1;
 }
 
-int hdlWriteErr(char* filename, int needsExit, int needsClose, int fd) {
+int hdlWriteErr(const char* filename, int needsExit, int needsClose, int fd) {
     int savedErr = errno;
     fprintf(stderr, "Could not write to file %s : %s\n", filename, strerror(savedErr));
     if (needsClose) {
@@ -51,7 +51,7 @@ int hdlWriteErr(char* filename, int needsExit, int needsClose, int fd) {
     return -1;
 }
 
-int hdlCopyErr(char* from, char* to, int needsExit, int needsClose, int fd_from, int fd_to) {
+int hdlCopyErr(const char* from, const char* to, int needsExit, int needsClose, int fd_from, int fd_to) {
     int savedErr = errno;
     fprintf(stderr, "Could not copy  %s to %s: %s\n", from, to, strerror(savedErr));
     if (needsClose) {
