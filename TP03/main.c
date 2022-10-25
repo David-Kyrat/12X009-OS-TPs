@@ -9,6 +9,7 @@
 #include <time.h>
 #include "util.h"
 #include "optprsr.h"
+#include "copy.h"
 
 
 /** @return Is 'entry_name' '.' or '..' ? */
@@ -77,6 +78,7 @@ static int list_dir(const char *dir_name) {
 
     // Loop on each entry
     while ((entry = readdir(d)) != NULL) {
+
         // Get entry name
         d_name = entry->d_name;
         int isEntDot = isDot(d_name);  //* is 'entry' '..' or '.' ?
@@ -143,6 +145,13 @@ int main(int argc, char *argv[]) {
 
     for (int i = 0; i < fileNb; i++) {
         err = list_dir(files[i]);
+
+        /*  TODO: add copy.c to makefile to be able to compile it.
+            TODO: check if source file has been modified (is_modified, copy.c). If it has, copy it (copy, copy.c). If not, ignore it
+            TODO: if -a has been passed, change all the permissions, even if the file has not been replaced
+            TODO: if -f has been passed, links should be copied as links and destination link should point to the source link inode (use realpath)
+        */
+
         //if (err != 0) fprintf(stderr, "Error at file %d, %s : %s\n", i, files[i], strerror(err));
         printf("    ____________________  \n\n\n");
     }
@@ -150,3 +159,15 @@ int main(int argc, char *argv[]) {
     return err;
 }
 
+
+// Spare code from example, maybe useful
+
+//   char *in = argv[1];
+//   char *out = argv[2];
+  
+//   if( copy( in, out ) < 0 ) {
+//     exit( EXIT_FAILURE );
+//   } else {
+//     exit( EXIT_SUCCESS );
+//   }
+// }

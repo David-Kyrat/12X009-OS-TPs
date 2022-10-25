@@ -1,16 +1,30 @@
-#include <dirent.h>
-#include <errno.h>
-#include <fcntl.h>   //  idem
-#include <limits.h>  //PATH_MAX
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>     //strerror
+#include <errno.h>
 #include <sys/stat.h>   // open
 #include <sys/types.h>  // idem
+#include <fcntl.h>      //  idem
 #include <unistd.h>     // close
+#include <time.h>
 
 #include "copy.h"
 #include "util.h"
+
+
+int is_modified(char* src, char* dest) {
+
+    // Save the data of both files
+    struct stat infos_src;
+    struct stat infos_dest;
+
+    // Check if the date of the source is older than the destination or the sizes of both are different
+    // TODO: fix the time comparaison (check if the source file is NEWER, not older)
+    if (infos_src.st_mtime != infos_dest.st_mtime || infos_src.st_size != infos_dest.st_size) return 1;
+    
+    return (infos_src.st_mtime != infos_dest.st_mtime || infos_src.st_size != infos_dest.st_size);
+    // Return 0 if the dates are the same and the sizes are the same
+}
 
 int copy(const char* from, const char* to) {
     int fd_from, fd_to;
