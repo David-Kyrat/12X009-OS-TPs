@@ -18,7 +18,7 @@ int copy(const char* from, const char* to) {
     ssize_t readNb;   // number of bytes read
 
     if ((fd_from = open(from, O_RDONLY)) < 0) return hdlOpenErr(from, 0);
-    if ((fd_to = open(to, O_WRONLY | O_CREAT | O_EXCL, 0600) < 0)) return hdlOpenErr(to, 0);
+    if ((fd_to = open(to, O_WRONLY | O_CREAT | O_EXCL, 0600)) < 0) return hdlOpenErr(to, 0);
 
     //* While there are bytes left to be read, reads them 4096 by 4096 (4096 or current size of 'buff' if its not that)
     //* nb: if readNb is < to what we expected we dont really care because the program will retry until having read everything
