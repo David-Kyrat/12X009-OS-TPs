@@ -10,7 +10,7 @@ int is_modified(char* src, char* dest);
 
 /**
  * Copies the files/folders from the source to the destination
- * Example taken from the course (Chapter 7: I/O)
+ * modifed example taken from the course (Chapter 7: I/O)
  * 
  * @param src Source file path
  * @param dest Destination file path
