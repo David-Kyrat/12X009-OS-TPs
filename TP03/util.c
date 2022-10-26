@@ -62,3 +62,9 @@ int hdlCopyErr(const char* from, const char* to, int needsExit, int needsClose, 
     if (needsExit) exit(savedErr);
     return -1;
 }
+
+int hdlCatErr(const char* current) {
+    int savedErr = errno;
+    fprintf(stderr, "Cannot build path containing %s: %s\n", current, strerror(savedErr));
+    return -1;
+}

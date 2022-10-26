@@ -53,6 +53,27 @@ char* computePerm(int mode) {
 }
 
 /**
+ * Takes a parent path and a current path and concatenates them into a buffer. 
+ * 
+ * @param buf The buffer to write the path to.
+ * @param parent The parent directory
+ * @param current the current directory
+ * 
+ * @return 0 if success or -1 if path got too long (sets errno = ENAMETOOLONG).
+ */
+int concat_path(char buf[], const char* parent, const char* current) {
+
+    if (snprintf(buf, PATH_MAX, "%s/%s", parent, current) >= PATH_MAX) {
+        errno = ENAMETOOLONG;
+        return -1;
+    }
+
+    return EXIT_SUCCESS;
+}
+
+//First check if given path is a file by checking inode then maybe useful to give back that inode stat to list_dir
+
+/**
  * Emulates ls -lRa behavior. (except that it doesnt print . and .. because they are always present).  
  * 
  * It takes a directory name as an argument, opens it, reads its entries, and recursively calls itself
@@ -88,10 +109,12 @@ static int list_dir(const char *dir_name) {
         if (!isEntDot) {
             struct stat infos;
             // computes the name of the subdirectory and checks if it is not too long
-            if (snprintf(path, PATH_MAX, "%s/%s", dir_name, d_name) >= PATH_MAX) {
+            /* if (snprintf(path, PATH_MAX, "%s/%s", dir_name, d_name) >= PATH_MAX) {
                 fprintf(stderr, "Path length has gotten too long.\n");  // Check that subdir pathname isnt too long
                 return ENAMETOOLONG; //exit(ENAMETOOLONG);
-            }
+            } */
+            if(concat_path(path, dir_name, d_name) < 0) return hdlCatErr(d_name);
+
             if (lstat(path, &infos) < 0) fprintf(stderr, "Cannot stat %s: %s\n", d_name, strerror(errno));
             
             char* permissions = computePerm(infos.st_mode);

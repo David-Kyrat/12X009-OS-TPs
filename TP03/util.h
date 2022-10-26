@@ -5,8 +5,8 @@
  */
 
 /**
- * Receives the output of the "malloc attempt". If it's null, print an error message to stderr and exit
- * @param allocReturn The return value of malloc.
+ * Checks if alloc (malloc, calloc ...) returned Null, if it did prints error message error message to stderr and exit with error ENOMEM
+ * @param allocReturn The return value of alloc.
  * @return allocReturn if it's not null, exit otherwise
  */
 void* tryalc(void* allocReturn);
@@ -76,3 +76,10 @@ int hdlWriteErr(const char* filename, int needsExit, int needsClose, int fd);
  * @return -1 or, exits with saved errno, if needsExit was != 0.
  */
 int hdlCopyErr(const char* from, const char* to, int needsExit, int needsClose, int fd_from, int fd_to);
+
+/**
+ * Prints error message to stderr and return -1
+ * @param current path of file to be concatenated with some other string (usually parent directory's path)
+ * @return -1
+ */
+int hdlCatErr(const char* current);
