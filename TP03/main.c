@@ -7,6 +7,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <time.h>
+#include <unistd.h>
 #include "util.h"
 #include "optprsr.h"
 #include "copy.h"
@@ -53,13 +54,41 @@ char* computePerm(int mode) {
 }
 
 /**
+ * shortcut for lstat, also handles error
+ * @return stat structure of path's inode
+ */
+struct stat lstat_s(const char* path) {
+    struct stat infos;
+    if (lstat(path, &infos) < 0) fprintf(stderr, "Cannot stat %s: %s\n", path, strerror(errno));
+    return infos;
+}
+
+/**
  * shortcut for stat, also handles error
  * @return stat structure of path's inode
  */
 struct stat stat_s(const char* path) {
     struct stat infos;
-    if (lstat(path, &infos) < 0) fprintf(stderr, "Cannot stat %s: %s\n", path, strerror(errno));
+    if (stat(path, &infos) < 0) fprintf(stderr, "Cannot stat %s: %s\n", path, strerror(errno));
     return infos;
+}
+
+
+
+/**
+ * Checks if a file exists
+ * @param path The filepath to check.
+ * @return Positive Non-zero value if exists, 0 if it doesnt, -1 if error
+ */
+int exists(const char* path) {
+    int exist = access(path, F_OK);
+
+    if (exist < 0) {
+        int savedErr = errno;
+        printf(stderr, "Error happened when calling access on %s: %s", path, strerror(savedErr));
+        return -1;
+    }
+    return exist == 0;
 }
 
 /**
@@ -84,10 +113,11 @@ int concat_path(char buf[], const char* parent, const char* current) {
 
 
 // "overload" if isInodeFile where there is no need to retrive inode stats of path before calling function.
-int isFile(const char* path) {
+// if lstat true will do check with lstat else with stat
+int isFile(const char* path, int lstat) {
     /* struct stat infos;
     if (lstat(path, &infos) < 0) fprintf(stderr, "Cannot stat %s: %s\n", path, strerror(errno)); */
-    struct stat infos = stat_s(path);
+    struct stat infos = lstat ? lstat_s(path) : stat_s(path);
     return S_ISREG(infos.st_mode);
 }
 
@@ -143,7 +173,7 @@ int listEntryNoIn(const char* path) {
     //struct stat infos;
 
     //if (lstat(path, &infos) < 0) fprintf(stderr, "Cannot stat %s: %s\n", path, strerror(errno));
-    return listEntry(path, stat_s(path));
+    return listEntry(path, lstat_s(path));
 }
 
 //First check if given path is a file by checking inode then maybe useful to give back that inode stat to list_dir
@@ -242,16 +272,13 @@ static int list_dir(const char *dir_name, int copy) {
 
 /* 
 *  if filesNb <= 1: just list file
-*    else if filesNb > 1
-*         if destination exists and is a regular file:
-*               if filesNb > 2 => throw error (no more than 1 source if dest is a file)
-*               else backup normally files and folder to dest (handle case if there is a diff then copy if not print "is up to date")
+*  else if filesNb > 1
+*       if destination exists and is a regular file:
+*           if filesNb > 2 => throw error (no more than 1 source if dest is a file)
+*           else backup normally files and folder to dest (handle case if there is a diff then copy if not print "is up to date")
 
-*        else if dest doesnt exist or is a folder : backup normally 
+*       else if dest doesnt exist or is a folder : backup normally 
 
-*            else backup files (handle case if there is a diff then copy if not print "is up to date")
-*
-*         else if 
 *
 *
 *
@@ -262,9 +289,38 @@ static int list_dir(const char *dir_name, int copy) {
 int handleArgs(int fileNb, char** files) {
     if (fileNb <= 1) return listEntryNoIn(files[0]);
     
-    char* dest = files[fileNb - 1];
+    const char* dest = files[fileNb - 1];
 
+    int dest_exists = exists(dest);
+    if (dest_exists < 0) return -1;
 
+    if (dest_exists) {
+        //* if destination is a regular file or link to regular file
+        if (isFile(dest, 0)) {
+            if (fileNb > 2) {
+                errno = EINVAL;
+                fprintf(stderr, "%s: Cannot copy multiple files onto the same destination file", strerror(errno));
+                return -1;
+            }
+
+            //TODO: backup files[0] to dest if newer or size different or print "up to date if not
+        }
+
+        //TODO: backup files to the 'dest' folder while checking which is newer
+
+    } else {
+        //* If program was called with only 2 files and the first is a regular file or link to regular file
+        if (fileNb <= 2 && isFile(files[0], 0)) {
+            //TODO: if its a link -f was passed copy link else just create 1 file at dest and copy files[0] to it
+            //copy(files[0], dest, preserveLink ? 1: 0)
+        } else {
+
+            //TODO: create dest dir & backup normally files (no need to check if files are newer)
+        }
+    }
+    //struct stat dest_infos = lstat_s(dest);
+
+    
 }
 
 int main(int argc, char* argv[]) {
@@ -278,9 +334,9 @@ int main(int argc, char* argv[]) {
     }
     int copy = fileNb > 1;
 
-
-    //if fileNb = 1 => must not copy only list.
-    //* If only 1 file was given, just list it / its content
+    
+    //TODO: replace this with handleArgs
+    
     errno = 0;
     for (int i = 0; i < fileNb; i++) {
         const char* file = files[i];
