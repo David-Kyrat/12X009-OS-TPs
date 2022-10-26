@@ -63,6 +63,7 @@ char* computePerm(int mode) {
  */
 int concat_path(char buf[], const char* parent, const char* current) {
 
+     // Check that subdir pathname isnt too long
     if (snprintf(buf, PATH_MAX, "%s/%s", parent, current) >= PATH_MAX) {
         errno = ENAMETOOLONG;
         return -1;
@@ -70,6 +71,55 @@ int concat_path(char buf[], const char* parent, const char* current) {
 
     return EXIT_SUCCESS;
 }
+
+int isFile(char* path) {
+    struct stat infos;
+    if (lstat(path, &infos) < 0) fprintf(stderr, "Cannot stat %s: %s\n", path, strerror(errno));
+    return S_ISREG(infos.st_mode);
+}
+
+/**
+ * List infos about a directory entry. i.e. Takes a path and a stat struct, 
+ * and prints out the file's permissions, size, last modification time, and path.
+ * 
+ * @param path the path to the file.  (Can also be a folder)
+ * @param infos struct stat containing information about the inode associated to path
+ * 
+ * @return 0 if success else -1
+ */
+int listEntry(char* path, struct stat infos) {
+    //struct stat infos;
+    // computes the name of the subdirectory and checks if it is not too long
+
+    //if (concat_path(path, dir_name, d_name) < 0) return hdlCatErr(d_name);
+
+    //if (lstat(path, &infos) < 0) fprintf(stderr, "Cannot stat %s: %s\n", d_name, strerror(errno));
+    int err = 0;
+    char* permissions = computePerm(infos.st_mode);
+
+    // Save the last modification time given
+    time_t mtime = infos.st_mtime;
+
+    // Initialize where the formatted date will be written
+    char modif_time[50]; 
+
+    // Initialize the time_info struct to manipulate the date
+    struct tm* time_info;
+
+    // Write the time as the local time of the computer
+    time_info = localtime(&mtime);
+    // Copy the formatted time to modif_time
+    if (strftime(modif_time, 50, "%c", time_info) < 50) {
+        fprintf(stderr, "Time could not be completely formatted\n");
+        err = -1;
+    }
+
+    // Output the info
+    //printf(" %s %*ld      %s  %s/%s\n", permissions, 13, infos.st_size, modif_time, dir_name, d_name);
+    printf(" %s %*ld      %s  %s\n", permissions, 13, infos.st_size, modif_time, path);
+    return err;
+}
+
 
 //First check if given path is a file by checking inode then maybe useful to give back that inode stat to list_dir
 
@@ -90,11 +140,9 @@ static int list_dir(const char *dir_name) {
     const char *d_name;  // name of entry
 
     // In case of exception on opening
-    if (!d) {
-        err = errno;
-        fprintf(stderr, "Cannot open directory '%s': %s\n", dir_name, strerror(err));
-        return err;
-    }
+    if (!d) return hdlOpenErr(dir_name, 0);
+
+    //prints which dir is being listed
     printf("%s/:\n", dir_name);
 
     // Loop on each entry
@@ -107,12 +155,9 @@ static int list_dir(const char *dir_name) {
 
         //* Do not print ., .. as they are always here
         if (!isEntDot) {
-            struct stat infos;
+           /*  struct stat infos;
             // computes the name of the subdirectory and checks if it is not too long
-            /* if (snprintf(path, PATH_MAX, "%s/%s", dir_name, d_name) >= PATH_MAX) {
-                fprintf(stderr, "Path length has gotten too long.\n");  // Check that subdir pathname isnt too long
-                return ENAMETOOLONG; //exit(ENAMETOOLONG);
-            } */
+
             if(concat_path(path, dir_name, d_name) < 0) return hdlCatErr(d_name);
 
             if (lstat(path, &infos) < 0) fprintf(stderr, "Cannot stat %s: %s\n", d_name, strerror(errno));
@@ -135,7 +180,15 @@ static int list_dir(const char *dir_name) {
             strftime(modif_time, 50, "%c", time_info);
 
             // Output the info
-            printf(" %s %*ld      %s  %s/%s\n", permissions, 13, infos.st_size, modif_time, dir_name, d_name);
+            printf(" %s %*ld      %s  %s/%s\n", permissions, 13, infos.st_size, modif_time, dir_name, d_name); */
+            struct stat infos;
+            
+            //* computes the name of the subdirectory and checks if it is not too long
+            if (concat_path(path, dir_name, d_name) < 0) return hdlCatErr(d_name);            
+            if (lstat(path, &infos) < 0) fprintf(stderr, "Cannot stat %s: %s\n", d_name, strerror(errno));
+
+            listEntry(path, infos);
+
         }
 
         // Is 'entry' a subdirectory ?
@@ -156,6 +209,7 @@ static int list_dir(const char *dir_name) {
     return err;
 }
 
+
 int main(int argc, char *argv[]) {
     //list_dir("/var/log/");
     int fileNb = -1, err = 0;
@@ -166,9 +220,19 @@ int main(int argc, char *argv[]) {
         return errno_cpy;
     }
     //* If only 1 file was given, just list it / its content
-    else if (fileNb <= 1) return list_dir(*files);
+    else if (fileNb <= 1) {
 
+
+        return list_dir(*files);
+    }
+
+    errno = 0;
     for (int i = 0; i < fileNb; i++) {
+
+        if (isFile(files[i])) {
+
+        }
+
         err = list_dir(files[i]);
 
         /*  TODO: add copy.c to makefile to be able to compile it.
@@ -189,7 +253,7 @@ int main(int argc, char *argv[]) {
         //if (err != 0) fprintf(stderr, "Error at file %d, %s : %s\n", i, files[i], strerror(err));
         printf("    ____________________  \n\n\n");
     }
-    
+
     return err;
 }
 
