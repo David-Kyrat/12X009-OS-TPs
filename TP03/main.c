@@ -53,6 +53,16 @@ char* computePerm(int mode) {
 }
 
 /**
+ * shortcut for stat, also handles error
+ * @return stat structure of path's inode
+ */
+struct stat stat_s(const char* path) {
+    struct stat infos;
+    if (lstat(path, &infos) < 0) fprintf(stderr, "Cannot stat %s: %s\n", path, strerror(errno));
+    return infos;
+}
+
+/**
  * Takes a parent path and a current path and concatenates them into a buffer. 
  * 
  * @param buf The buffer to write the path to.
@@ -75,8 +85,9 @@ int concat_path(char buf[], const char* parent, const char* current) {
 
 // "overload" if isInodeFile where there is no need to retrive inode stats of path before calling function.
 int isFile(const char* path) {
-    struct stat infos;
-    if (lstat(path, &infos) < 0) fprintf(stderr, "Cannot stat %s: %s\n", path, strerror(errno));
+    /* struct stat infos;
+    if (lstat(path, &infos) < 0) fprintf(stderr, "Cannot stat %s: %s\n", path, strerror(errno)); */
+    struct stat infos = stat_s(path);
     return S_ISREG(infos.st_mode);
 }
 
@@ -122,6 +133,18 @@ int listEntry(const char* path, struct stat infos) {
     return err;
 }
 
+/**
+ * "Overload" of listEntry where we do not have to give path's inode info as argument (done in function)
+ * 
+ * @param path the path to the file.  (Can also be a folder)
+ * @return 0 if success, -1 if error
+ */
+int listEntryNoIn(const char* path) {
+    //struct stat infos;
+
+    //if (lstat(path, &infos) < 0) fprintf(stderr, "Cannot stat %s: %s\n", path, strerror(errno));
+    return listEntry(path, stat_s(path));
+}
 
 //First check if given path is a file by checking inode then maybe useful to give back that inode stat to list_dir
 
@@ -218,19 +241,6 @@ static int list_dir(const char *dir_name, int copy) {
 }
 
 /* 
-* before if files[0] is a reg file =>
-*
-* ultra-cp doit pouvoir etre appelé rec ?
-* handle if file 
-*  => if more than 2 file throw error
-* 
-*
-*
-*
-*/
-
-int handleArgs() {
-/* 
 *  if filesNb <= 1: just list file
 *    else if filesNb > 1
 *         if destination exists and is a regular file:
@@ -246,6 +256,15 @@ int handleArgs() {
 *
 *
 */
+
+
+
+int handleArgs(int fileNb, char** files) {
+    if (fileNb <= 1) return listEntryNoIn(files[0]);
+    
+    char* dest = files[fileNb - 1];
+
+
 }
 
 int main(int argc, char* argv[]) {
@@ -283,6 +302,7 @@ int main(int argc, char* argv[]) {
             TODO: if -f has been passed, links should be copied as links and destination link should point to the source link inode (use realpath)
             TODO: implement in copy => copy only reg file, folder and links
             TODO: implement parsing of dest options -a -f
+            TODO: put list_dir & list_entry etc... into another file called ultra-cp or smth else
         */
 
 
