@@ -39,3 +39,4 @@ char** parseArgs(int argc, char* argv[], int* fileNb) {
 
     return parsedArgs;
 }
+  

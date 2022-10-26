@@ -62,8 +62,8 @@ int copy(const char* from, const char* to) {
     return EXIT_SUCCESS;
 }
 
-int main(int argc, char* argv[]) {
+/* int main(int argc, char* argv[]) {
     if (copy(argv[1], argv[2])) return -1;
 
     return EXIT_SUCCESS;
-}
+} */

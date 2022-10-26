@@ -72,7 +72,9 @@ int concat_path(char buf[], const char* parent, const char* current) {
     return EXIT_SUCCESS;
 }
 
-int isFile(char* path) {
+
+// "overload" if isInodeFile where there is no need to retrive inode stats of path before calling function.
+int isFile(const char* path) {
     struct stat infos;
     if (lstat(path, &infos) < 0) fprintf(stderr, "Cannot stat %s: %s\n", path, strerror(errno));
     return S_ISREG(infos.st_mode);
@@ -85,9 +87,9 @@ int isFile(char* path) {
  * @param path the path to the file.  (Can also be a folder)
  * @param infos struct stat containing information about the inode associated to path
  * 
- * @return 0 if success else -1
+ * @return 0 if success, -1 if minor error
  */
-int listEntry(char* path, struct stat infos) {
+int listEntry(const char* path, struct stat infos) {
     //struct stat infos;
     // computes the name of the subdirectory and checks if it is not too long
 
@@ -130,9 +132,11 @@ int listEntry(char* path, struct stat infos) {
  * on each subdirectory.
  * 
  * @param dir_name the name of the directory to list
- * @return Error code. (0 if success else see errno.h for more info)
+ * @param copy int, if non-zero will backup files to destination
+ * 
+ * @return Error code. (0 if success else error code see errno.h for more info)
  */
-static int list_dir(const char *dir_name) {
+static int list_dir(const char *dir_name, int copy) {
     //TODO: CHECK IF IS FILE, BASE ON INODE INFO
     int err = errno;
     DIR *d = opendir(dir_name);
@@ -147,15 +151,14 @@ static int list_dir(const char *dir_name) {
 
     // Loop on each entry
     while ((entry = readdir(d)) != NULL) {
-
         // Get entry name
         d_name = entry->d_name;
         int isEntDot = isDot(d_name);  //* is 'entry' '..' or '.' ?
-        char path[PATH_MAX]; 
+        const char path[PATH_MAX];
 
         //* Do not print ., .. as they are always here
         if (!isEntDot) {
-           /*  struct stat infos;
+            /*  struct stat infos;
             // computes the name of the subdirectory and checks if it is not too long
 
             if(concat_path(path, dir_name, d_name) < 0) return hdlCatErr(d_name);
@@ -182,23 +185,28 @@ static int list_dir(const char *dir_name) {
             // Output the info
             printf(" %s %*ld      %s  %s/%s\n", permissions, 13, infos.st_size, modif_time, dir_name, d_name); */
             struct stat infos;
-            
+
             //* computes the name of the subdirectory and checks if it is not too long
-            if (concat_path(path, dir_name, d_name) < 0) return hdlCatErr(d_name);            
+            if (concat_path(path, dir_name, d_name) < 0) return hdlCatErr(d_name);
             if (lstat(path, &infos) < 0) fprintf(stderr, "Cannot stat %s: %s\n", d_name, strerror(errno));
 
             listEntry(path, infos);
-
+            // Is 'entry' a subdirectory ?
+            if (entry->d_type & DT_DIR) {
+                printf("\n");
+                err = list_dir(path, copy);
+                printf("\n%s/ (rest):\n", dir_name);
+            }
         }
 
         // Is 'entry' a subdirectory ?
-        if (entry->d_type & DT_DIR) {
+       /*  if (entry->d_type & DT_DIR) {
             if (!isEntDot) {
                 printf("\n");
                 err = list_dir(path);
                 printf("\n%s/ (rest):\n", dir_name);
             }
-        }
+        } */
     }
     // closing directory
     if (closedir(d)) {
@@ -209,8 +217,38 @@ static int list_dir(const char *dir_name) {
     return err;
 }
 
+/* 
+* before if files[0] is a reg file =>
+*
+* ultra-cp doit pouvoir etre appelé rec ?
+* handle if file 
+*  => if more than 2 file throw error
+* 
+*
+*
+*
+*/
 
-int main(int argc, char *argv[]) {
+int handleArgs() {
+/* 
+*  if filesNb <= 1: just list file
+*    else if filesNb > 1
+*         if destination exists and is a regular file:
+*               if filesNb > 2 => throw error (no more than 1 source if dest is a file)
+*               else backup normally files and folder to dest (handle case if there is a diff then copy if not print "is up to date")
+
+*        else if dest doesnt exist or is a folder : backup normally 
+
+*            else backup files (handle case if there is a diff then copy if not print "is up to date")
+*
+*         else if 
+*
+*
+*
+*/
+}
+
+int main(int argc, char* argv[]) {
     //list_dir("/var/log/");
     int fileNb = -1, err = 0;
     char** files = parseArgs(argc, argv, &fileNb);
@@ -219,36 +257,34 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "%s: %s\n\t - Usage: %s folder1 folder2/ destination \n\n", argv[0], strerror(errno_cpy), argv[0]);
         return errno_cpy;
     }
+    int copy = fileNb > 1;
+
+
+    //if fileNb = 1 => must not copy only list.
     //* If only 1 file was given, just list it / its content
-    else if (fileNb <= 1) {
-
-
-        return list_dir(*files);
-    }
-
     errno = 0;
     for (int i = 0; i < fileNb; i++) {
+        const char* file = files[i];
+        struct stat infos;
 
-        if (isFile(files[i])) {
+        if (S_ISREG(infos.st_mode)) {
+            if (lstat(file, &infos) < 0) fprintf(stderr, "Cannot stat %s: %s\n", file, strerror(errno));
+            listEntry(file, infos);
+            //TODO: if copy => handle file copying
 
+
+        } else {
+            err = list_dir(file, copy);
         }
 
-        err = list_dir(files[i]);
-
-        /*  TODO: add copy.c to makefile to be able to compile it.
+        /*  -- Done: add copy.c to makefile to be able to compile it.
             TODO: check if source file has been modified (is_modified, copy.c). If it has, copy it (copy, copy.c). If not, ignore it
             TODO: if -a has been passed, change all the permissions, even if the file has not been replaced
             TODO: if -f has been passed, links should be copied as links and destination link should point to the source link inode (use realpath)
-            TODO: if destination is file throw an error if there is more than 1 source
-            TODO: 
+            TODO: implement in copy => copy only reg file, folder and links
+            TODO: implement parsing of dest options -a -f
         */
 
-       /*
-        * "Si le programme est appelé avec deux fichiers dans ce cas le fichier source sera copié vers le fichier de destination. 
-        * Si la destination n'éxiste pas alors elle sera considérée comme un fichier 
-        * à créer (le programme fera alors une erreur dans le cas ou il y plusieurs sources). "
-        * 
-        */
 
         //if (err != 0) fprintf(stderr, "Error at file %d, %s : %s\n", i, files[i], strerror(err));
         printf("    ____________________  \n\n\n");
@@ -256,7 +292,6 @@ int main(int argc, char *argv[]) {
 
     return err;
 }
-
 
 // Spare code from example, maybe useful
 
