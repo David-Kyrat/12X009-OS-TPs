@@ -142,6 +142,8 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "%s: %s\n\t - Usage: %s folder1 folder2/ destination \n\n", argv[0], strerror(errno_cpy), argv[0]);
         return errno_cpy;
     }
+    //* If only 1 file was given, just list it / its content
+    else if (fileNb <= 1) return list_dir(*files);
 
     for (int i = 0; i < fileNb; i++) {
         err = list_dir(files[i]);
@@ -150,6 +152,15 @@ int main(int argc, char *argv[]) {
             TODO: check if source file has been modified (is_modified, copy.c). If it has, copy it (copy, copy.c). If not, ignore it
             TODO: if -a has been passed, change all the permissions, even if the file has not been replaced
             TODO: if -f has been passed, links should be copied as links and destination link should point to the source link inode (use realpath)
+            TODO: if destination is file throw an error if there is more than 1 source
+            TODO: 
+        */
+
+       /*
+        * "Si le programme est appelé avec deux fichiers dans ce cas le fichier source sera copié vers le fichier de destination. 
+        * Si la destination n'éxiste pas alors elle sera considérée comme un fichier 
+        * à créer (le programme fera alors une erreur dans le cas ou il y plusieurs sources). "
+        * 
         */
 
         //if (err != 0) fprintf(stderr, "Error at file %d, %s : %s\n", i, files[i], strerror(err));
