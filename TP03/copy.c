@@ -12,6 +12,7 @@
 #include "util.h"
 
 
+
 int is_modified(char* src, char* dest) {
 
     // Save the data of both files
@@ -19,12 +20,11 @@ int is_modified(char* src, char* dest) {
     struct stat infos_dest;
 
     // Check if the date of the source is older than the destination or the sizes of both are different
-    // TODO: fix the time comparaison (check if the source file is NEWER, not older)
-    // TODO: implement structural comparison for time
     if (infos_src.st_mtime != infos_dest.st_mtime || infos_src.st_size != infos_dest.st_size) return 1;
     
-    return (infos_src.st_mtime != infos_dest.st_mtime || infos_src.st_size != infos_dest.st_size);
     // Return 0 if the dates are the same and the sizes are the same
+    return (infos_src.st_mtime != infos_dest.st_mtime || infos_src.st_size != infos_dest.st_size);
+    
 }
 
 int copy(const char* from, const char* to) {
