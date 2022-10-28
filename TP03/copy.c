@@ -32,8 +32,19 @@ int copy(const char* from, const char* to) {
     char buff[4096];  // size of a block
     ssize_t readNb;   // number of bytes read
 
+    // lstat the source file/folder
+    struct stat infos = lstat_s(from);
+
+    // Error handling if unable to open source in read-only or the destination in write-only, create or excl (error if create but file already exists)
     if ((fd_from = open(from, O_RDONLY)) < 0) return hdlOpenErr(from, 0);
     if ((fd_to = open(to, O_WRONLY | O_CREAT | O_EXCL, 0600)) < 0) return hdlOpenErr(to, 0);
+
+    // Check that it's a regular file, folder or a link
+    if (!(S_ISREG(infos.st_mode) || S_ISDIR(infos.st_mode) || S_ISLNK(infos.st_mode))) {
+        return -1;
+    }
+
+    
 
     //* While there are bytes left to be read, reads them 4096 by 4096 (4096 or current size of 'buff' if its not that)
     //* nb: if readNb is < to what we expected we dont really care because the program will retry until having read everything

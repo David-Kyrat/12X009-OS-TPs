@@ -1,3 +1,4 @@
+
 /**
  * @file util.h
  * @brief Utility functions mostly used for error handling
@@ -83,3 +84,15 @@ int hdlCopyErr(const char* from, const char* to, int needsExit, int needsClose, 
  * @return -1
  */
 int hdlCatErr(const char* current);
+
+/**
+ * shortcut for lstat, also handles error
+ * @return stat structure of path's inode
+ */
+struct stat lstat_s(const char* path);
+
+/**
+ * shortcut for stat, also handles error
+ * @return stat structure of path's inode
+ */
+struct stat stat_s(const char* path);

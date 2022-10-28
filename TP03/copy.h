@@ -15,6 +15,6 @@ int is_modified(char* src, char* dest);
  * @param src Source file path
  * @param dest Destination file path
  * 
- * @return 0 if file have been copied correctly, -1 if it haven't
+ * @return 0 if file has been copied correctly, -1 if it hasn't
  */
 int copy(const char *from, const char *to);

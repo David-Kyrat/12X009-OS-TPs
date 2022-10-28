@@ -7,6 +7,9 @@
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+
 #include "util.h"
 
 void* tryalc(void* allocReturn) {
@@ -68,4 +71,18 @@ int hdlCatErr(const char* current) {
     int savedErr = errno;
     fprintf(stderr, "Cannot build path containing %s: %s\n", current, strerror(savedErr));
     return -1;
+}
+
+
+struct stat lstat_s(const char* path) {
+    struct stat infos;
+    if (lstat(path, &infos) < 0) fprintf(stderr, "Cannot stat %s: %s\n", path, strerror(errno));
+    return infos;
+}
+
+
+struct stat stat_s(const char* path) {
+    struct stat infos;
+    if (stat(path, &infos) < 0) fprintf(stderr, "Cannot stat %s: %s\n", path, strerror(errno));
+    return infos;
 }

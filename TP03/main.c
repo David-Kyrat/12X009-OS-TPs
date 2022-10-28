@@ -8,6 +8,7 @@
 #include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
+
 #include "util.h"
 #include "optprsr.h"
 #include "copy.h"
@@ -51,26 +52,6 @@ char* computePerm(int mode) {
         }
     }
     return strndup(permsPrty, dashNb);
-}
-
-/**
- * shortcut for lstat, also handles error
- * @return stat structure of path's inode
- */
-struct stat lstat_s(const char* path) {
-    struct stat infos;
-    if (lstat(path, &infos) < 0) fprintf(stderr, "Cannot stat %s: %s\n", path, strerror(errno));
-    return infos;
-}
-
-/**
- * shortcut for stat, also handles error
- * @return stat structure of path's inode
- */
-struct stat stat_s(const char* path) {
-    struct stat infos;
-    if (stat(path, &infos) < 0) fprintf(stderr, "Cannot stat %s: %s\n", path, strerror(errno));
-    return infos;
 }
 
 
@@ -303,7 +284,14 @@ int handleArgs(int fileNb, char** files) {
                 return -1;
             }
 
-            //TODO: backup files[0] to dest if newer or size different or print "up to date if not
+            // TEST: backup files[0] to dest if newer or size different or print "up to date" if not
+            if (is_modified(files[0], dest) == 1) {
+               copy(files[0], dest);
+            }
+
+            else {
+                printf("Up to date\n");
+            }
         }
 
         //TODO: backup files to the 'dest' folder while checking which is newer
@@ -356,7 +344,7 @@ int main(int argc, char* argv[]) {
             TODO: check if source file has been modified (is_modified, copy.c). If it has, copy it (copy, copy.c). If not, ignore it
             TODO: if -a has been passed, change all the permissions, even if the file has not been replaced
             TODO: if -f has been passed, links should be copied as links and destination link should point to the source link inode (use realpath)
-            TODO: implement in copy => copy only reg file, folder and links
+            -- Done: implement in copy => copy only reg file, folder and links
             TODO: implement parsing of dest options -a -f
             TODO: put list_dir & list_entry etc... into another file called ultra-cp or smth else
         */
@@ -368,15 +356,3 @@ int main(int argc, char* argv[]) {
 
     return err;
 }
-
-// Spare code from example, maybe useful
-
-//   char *in = argv[1];
-//   char *out = argv[2];
-  
-//   if( copy( in, out ) < 0 ) {
-//     exit( EXIT_FAILURE );
-//   } else {
-//     exit( EXIT_SUCCESS );
-//   }
-// }
