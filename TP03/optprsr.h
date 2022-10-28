@@ -17,3 +17,12 @@ int checkEnoughArgs(int argc, char* file_name);
  * @return Copy of parsed arguments.
  */
 char** parseArgs(int argc, char* argv[], int* fileNb);
+
+/**
+ * Parses the optional arguments (i.e. -f, -a) and returns 'state', an int describing what was given.
+ * @param argc number of argument in main
+ * @param argv arguments given when launching program
+ * @return int : 0 if no optional argument were passed, 
+ *               1 if -f was passed, 2 if -a, were passed, 3 if both were passed. -1 if error
+ */
+int parseOptArgs(int argc, char* argv[]);

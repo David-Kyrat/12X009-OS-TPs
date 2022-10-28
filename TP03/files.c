@@ -3,7 +3,7 @@
 #include <errno.h>
 #include <string.h>  //snprintf
 #include <limits.h>  //PATH_MAX
-#include <dirent.h>     // opendir
+#include <dirent.h>  // opendir
 #include <sys/stat.h>   // open
 #include <sys/types.h> //  idem
 #include <fcntl.h>    //   idem
@@ -18,7 +18,7 @@ int isDot(const char *entry_name) {
     return strcmp(entry_name, "..") == 0 || strcmp(entry_name, ".") == 0;
 }
 
-char permRepr[] = {'r', 'w', 'x'};
+const char permRepr[] = {'r', 'w', 'x'};
 
 
 char* computePerm(int mode) {
