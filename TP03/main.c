@@ -12,6 +12,13 @@
 #include "optprsr.h"
 #include "util.h"
 
+/**
+ * BIT Field for the different behaviors (states) the program must take according to how it was called
+ * and what / how many arguments were given. (i.e. called with 2 files, mulitple folders, just 1 file...)
+ */
+#define ST_JUST_LIST //* ST for 'STATE'
+#define ST_2FILES
+
 /* 
 *  if filesNb <= 1: just list file
 *  else if filesNb > 1
@@ -30,8 +37,9 @@ int handleArgs(int fileNb, char** files, int optional_state) {
     // TODO: Check for
     // 1. Just 1 file/folder -> print contents
     // 2. If only 2 files are given -> create/replace the file
-    // 3. If -a is passed, change the permissions
-    // 4. If -f is passed, links are copied as links (stored in optional state)
+    // 3. If multiple files & folder and 'dest' exists -> create/replace architecture in 'dest'
+    // 4. If -a is passed, change the permissions
+    // 5. If -f is passed, links are copied as links (stored in optional state)
     
     // Set state as 0
     int state = 0;
@@ -45,46 +53,25 @@ int handleArgs(int fileNb, char** files, int optional_state) {
     
     // If there are only 2 files
     if (fileNb <= 2 && isFile(files[0], 0)) {
-            state = 1;
+            state += 1;
     }
 
-    int dest_exists = exists(dest);
-    if (dest_exists < 0) return -1;
-
-    if (dest_exists) {
-        //* if destination is a regular file or link to regular file
-        if (isFile(dest, 0)) {
-            if (fileNb > 2) {
-                errno = EINVAL;
-                fprintf(stderr, "%s: Cannot copy multiple files onto the same destination file", strerror(errno));
-                return -1;
-            }
-
-            // TEST: backup files[0] to dest if newer or size different or print "up to date" if not
-            if (is_modified(files[0], dest) == 1) {
-                //copy(files[0], dest);
-                state = 2;
-            }
-
-            else {
-                state = 3;
-                printf("Up to date\n");
-            }
-        }
-
-        //TODO: backup files to the 'dest' folder while checking which is newer
-
-    } else {
-        //* If program was called with only 2 files and the first is a regular file or link to regular file
-        
-        } else {
-            state = 5;
-            //TODO: create dest dir & backup normally files (no need to check if files are newer)
-        }
+    // If both -f and -a are passed
+    if (optional_state == 3) {
+            state += 2;
     }
-    //struct stat dest_infos = lstat_s(dest);
 
-    return state;
+    // If -f is passed
+    else if (optional_state == 1) {
+            state += 4;
+    }
+
+    // If -a is passed
+    else if (optional_state == 2) {
+            state += 8;
+    }
+
+
 }
 
 int main(int argc, char* argv[]) {
