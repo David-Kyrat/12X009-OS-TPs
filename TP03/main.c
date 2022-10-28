@@ -16,8 +16,25 @@
  * BIT Field for the different behaviors (states) the program must take according to how it was called
  * and what / how many arguments were given. (i.e. called with 2 files, mulitple folders, just 1 file...)
  */
-#define ST_JUST_LIST //* ST for 'STATE'
-#define ST_2FILES
+//* ST for 'STATE'
+#define ST_JUST_LIST (1 << 0)      //! 000001 = 1
+
+//? only 2 files are given as argument both exists
+#define ST_2FILES  (1 << 1)        //! 000010 = 2
+
+//? only 2 files and destination does not exist
+#define ST_2FILES_CREATE (1 << 2)  //! 000100 = 4
+
+//? multiple folders
+#define ST_MULT_FOLDER (1 << 3)    //! 001000 = 8
+
+//? -a was passed Links are copied as Links and resolved to ensure that both points to the same inode 
+#define ST_PRESERVE_LINKS (1 << 4) //! 010000 = 16
+
+//? -f was passed. Permissions of files in destination are changed even if the weren't replaced
+#define ST_MODIF_PERM (1 << 5)     //! 100000 = 32
+
+
 
 /* 
 *  if filesNb <= 1: just list file
@@ -35,7 +52,7 @@ int handleArgs(int fileNb, char** files, int optional_state) {
     
 
     // TODO: Check for
-    // 1. Just 1 file/folder -> print contents
+    // 1. Just 1 file/folder -> print/ls contents
     // 2. If only 2 files are given -> create/replace the file
     // 3. If multiple files & folder and 'dest' exists -> create/replace architecture in 'dest'
     // 4. If -a is passed, change the permissions
@@ -52,11 +69,17 @@ int handleArgs(int fileNb, char** files, int optional_state) {
     const char* dest = files[fileNb - 1];
     
     // If there are only 2 files
-    if (fileNb <= 2 && isFile(files[0], 0)) {
-            state += 1;
-    }
+    if (fileNb <= 2 && isFile(files[0], 0)) state += 1;
 
-    // If both -f and -a are passed
+    switch (optional_state) {
+        case 3: state += 2; // If both -f and -a are passed 
+        break;
+        case 1: state += 4; // If -f is passed
+        break;
+        case 2: state += 8; // If -a is passed
+        break;
+    }
+   /*  // If both -f and -a are passed
     if (optional_state == 3) {
             state += 2;
     }
@@ -69,7 +92,7 @@ int handleArgs(int fileNb, char** files, int optional_state) {
     // If -a is passed
     else if (optional_state == 2) {
             state += 8;
-    }
+    } */
 
 
 }
