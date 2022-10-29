@@ -50,14 +50,6 @@
 
 int handleArgs(int fileNb, char** files, int optional_state) {
     
-
-    // TODO: Check for
-    // 1. Just 1 file/folder -> print/ls contents
-    // 2. If only 2 files are given -> create/replace the file
-    // 3. If multiple files & folder and 'dest' exists -> create/replace architecture in 'dest'
-    // 4. If -a is passed, change the permissions
-    // 5. If -f is passed, links are copied as links (stored in optional state)
-    
     // Set state as 0
     int state = 0;
     
@@ -79,6 +71,8 @@ int handleArgs(int fileNb, char** files, int optional_state) {
         case 2: state += 8; // If -a is passed
         break;
     }
+
+    return state;
    /*  // If both -f and -a are passed
     if (optional_state == 3) {
             state += 2;
@@ -97,6 +91,31 @@ int handleArgs(int fileNb, char** files, int optional_state) {
 
 }
 
+    // Check for
+    // DONE -- 1. Just 1 file/folder -> print/ls contents
+    // DONE -- 2. If only 2 files are given -> create/replace the file
+    // TODO -- 3. If multiple files & folder and 'dest' exists -> create/replace architecture in 'dest'
+    // TODO -- 4. If -a is passed, change the permissions
+    // TODO -- 5. If -f is passed, links are copied as links (stored in optional state)
+
+int ultra_cp(char* src, char* dest, int a, int f) {
+
+    // If the two files are exactly the same, do not copy
+    if (is_modified(src, dest) == 0) return 0;
+    
+    // if -a was passed, change the permissions to 777 (rwx)
+    if (a == 1) chmod(src, 777);
+
+    // if -f was passed, copy from the realpath of the source (point to same inode as source link)
+    if (f == 1) copy(realpath("src", 200), dest);
+    else copy(src, dest);
+
+    return 0;
+
+}
+
+
+
 int main(int argc, char* argv[]) {
     //list_dir("/var/log/");
     int fileNb = -1, err = 0;
@@ -112,28 +131,70 @@ int main(int argc, char* argv[]) {
         return errno_cpy;
     }
 
+    // Destination file/folder is the last one
+    const char* dest = files[fileNb - 1];
 
 
     errno = 0;
     int state = handleArgs(fileNb, files, optional_state);
 
+    // If there is only one argument, simply print the contents of the directory
+    if (fileNb <= 1) return listEntryNoIn(files[0]);
+
     
     switch (state) {
         case 0:
-            return listEntryNoIn(files[0]);
+            // Copy normally
+            for (int i = 0; i < fileNb; i++) {
+                ultra_cp(files[i], dest, 0, 0);
+            }
             break;
 
         case 1:
-
+            // Only 2 files were given
+            ultra_cp(files[0], dest, 0, 0);
             break;
 
         case 2:
+            // -f and -a were passed, multiple files
+            for (int i = 0; i < fileNb; i++) {
+                ultra_cp(files[i], dest, 1, 1);
+            }
+            break;
 
+        case 3:
+            // -f and -a were passed, only 2 files
+            ultra_cp(files[0], dest, 1, 1);
+            break;
+
+         case 4:
+            // -f passed, multiple files
+            for (int i = 0; i < fileNb; i++) {
+                ultra_cp(files[i], dest, 0, 1);
+            }
+            break;
+        
+         case 5:
+            // -f passed, only 2 files
+            ultra_cp(files[0], dest, 0, 1);
+            break;
+
+        case 8:
+            // -a passed, multiple files
+            for (int i = 0; i < fileNb; i++) {
+                ultra_cp(files[i], dest, 1, 0);
+            }
+            break;
+        
+        case 9:
+            // -a passed, only 2 files
+            ultra_cp(files[0], dest, 1, 0);
             break;
 
         default:
+            // return an error since none of these cases
+            return -1;
             break;
-            // default statements
     }
 
     for (int i = 0; i < fileNb; i++) {
@@ -167,9 +228,6 @@ int main(int argc, char* argv[]) {
 
 // ------------------------------ OLD CODE ----------------------------------------
 
-// Destination file/folder is the last one
-// const char* dest = files[fileNb - 1];
-
 // int dest_exists = exists(dest);
 // if (dest_exists < 0) return -1;
 
@@ -193,7 +251,6 @@ int main(int argc, char* argv[]) {
 //     }
 // }
 
-// If there is only one argument, simply print the contents of the directory
-// if (fileNb <= 1) return listEntryNoIn(files[0]);
+
 
 // -----------------------------------------------------------------------------------
