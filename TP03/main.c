@@ -18,22 +18,23 @@
  * and what / how many arguments were given. (i.e. called with 2 files, mulitple folders, just 1 file...)
  */
 //* ST for 'STATE'
-#define ST_JUST_LIST (1 << 0)      //! 000001 = 1
+#define ST_JUST_LIST (0)      //! 000000 = 0
 
-//? only 2 files are given as argument both exists
-#define ST_2FILES  (1 << 1)        //! 000010 = 2
+//! 00001 = 1
+#define ST_PRESERVE_LINKS (1 << 0) //? -a was passed Links are copied as Links and resolved to ensure that both points to the same inode 
 
-//? only 2 files and destination does not exist
-#define ST_2FILES_CREATE (1 << 2)  //! 000100 = 4
+//! 00010 = 2
+#define ST_MODIF_PERM (1 << 1) //? -f was passed. Permissions of files in destination are changed even if the weren't replaced
+//* both -a -f passed => +3 (coherent with value returned by parseOptArgs)
 
-//? multiple folders
-#define ST_MULT_FOLDER (1 << 3)    //! 001000 = 8
+//! 000100 = 4
+#define ST_2FILES  (1 << 2) //? only 2 files are given as argument both exists
 
-//? -a was passed Links are copied as Links and resolved to ensure that both points to the same inode 
-#define ST_PRESERVE_LINKS (1 << 4) //! 010000 = 16
+//! 001000 = 8
+#define ST_2FILES_CREATE (1 << 3)//? only 2 files and destination does not exist  
 
-//? -f was passed. Permissions of files in destination are changed even if the weren't replaced
-#define ST_MODIF_PERM (1 << 5)     //! 100000 = 32
+//! 010000 = 16
+#define ST_MULT_FOLDER (1 << 4) //? multiple folders were given
 
 
 
@@ -50,46 +51,34 @@
 */
 
 int handleArgs(int fileNb, char** files, int optional_state) {
-    
-    // Set state as 0
-    int state = 0;
-    
     // If there is only one argument, simply print the contents of the directory
-    if (fileNb <= 1) return state;
+    if (fileNb <= 1) return ST_JUST_LIST;
 
+    // int returned by optional_state is coherent with the bitfield implemented here
+    // i.e. we just have to add the value of optional_state to get the different case where -a, -f were passed or not.
+    // so we initialize state as "0 + optional_state"
+    int state = optional_state;
 
-    // Destination file/folder is the last one
+    // Destination file/folder is the last argument
     const char* dest = files[fileNb - 1];
-    
-    // If there are only 2 files
-    if (fileNb <= 2 && isFile(files[0], 0)) state += 1;
 
-    switch (optional_state) {
-        case 3: state += 2; // If both -f and -a are passed 
-        break;
-        case 1: state += 4; // If -f is passed
-        break;
-        case 2: state += 8; // If -a is passed
-        break;
+    if (exists(dest)) {
+        // If there are only 2 files
+        if (fileNb <= 2 && isFile(files[0], 0)) {
+            state += ST_2FILES;
+        }
+
+    } else {  //If destination does not exists
+        if (fileNb <= 2 && isFile(files[0], 0)) state += ST_2FILES_CREATE;
+
+        else {  //if user entered multiple files and folder
+            errno = ENOENT;
+            return -1; //Directory does not exists => "throws" no such file or directory error
+        }
     }
 
+    //state += 1;
     return state;
-   /*  // If both -f and -a are passed
-    if (optional_state == 3) {
-            state += 2;
-    }
-
-    // If -f is passed
-    else if (optional_state == 1) {
-            state += 4;
-    }
-
-    // If -a is passed
-    else if (optional_state == 2) {
-            state += 8;
-    } */
-
-
 }
 
     // Check for
@@ -146,9 +135,13 @@ int main(int argc, char* argv[]) {
         mkdir(dest, 0777);
     }
 
-
     errno = 0;
     int state = handleArgs(fileNb, files, optional_state);
+    if (state < 0) {
+        int savedErr = errno;
+        fprintf(stderr, "%s, Cannot Backup to %s: %s\n", argv[0], dest, strerror(savedErr));
+        return EXIT_FAILURE;
+    }
 
     // If there is only one argument, simply print the contents of the directory
     if (fileNb <= 1) return list_dir(files[0], 0, "");

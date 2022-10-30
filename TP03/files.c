@@ -50,10 +50,11 @@ char* computePerm(int mode) {
 
 int exists(const char* path) {
     int exist = access(path, F_OK);
-
-    if (exist < 0) {
+    
+    // If real error happened (ENOENT is not an error because we do want to check for existence or non-existence)
+    if (exist < 0 && errno != ENOENT) {
         int savedErr = errno;
-        printf(stderr, "Error happened when calling access on %s: %s", path, strerror(savedErr));
+        fprintf(stderr, "Cannot check existance of \"%s\" : %s.\n", path, strerror(savedErr));
         return -1;
     }
     return exist == 0;
@@ -72,7 +73,6 @@ int concat_path(char buf[], const char* parent, const char* current) {
 }
 
 
-
 int isFile(const char* path, int lstat) {
     /* struct stat infos;
     if (lstat(path, &infos) < 0) fprintf(stderr, "Cannot stat %s: %s\n", path, strerror(errno)); */
@@ -81,13 +81,7 @@ int isFile(const char* path, int lstat) {
 }
 
 
-
 int listEntry(const char* path, struct stat infos) {
-   
-
-    //if (concat_path(path, dir_name, d_name) < 0) return hdlCatErr(d_name);
-
-    //if (lstat(path, &infos) < 0) fprintf(stderr, "Cannot stat %s: %s\n", d_name, strerror(errno));
     int err = 0;
     char* permissions = computePerm(infos.st_mode);
 
@@ -95,7 +89,7 @@ int listEntry(const char* path, struct stat infos) {
     time_t mtime = infos.st_mtime;
 
     // Initialize where the formatted date will be written
-    char modif_time[50]; 
+    char modif_time[100]; 
 
     // Initialize the time_info struct to manipulate the date
     struct tm* time_info;
@@ -103,19 +97,14 @@ int listEntry(const char* path, struct stat infos) {
     // Write the time as the local time of the computer
     time_info = localtime(&mtime);
     // Copy the formatted time to modif_time
-    strftime(modif_time, 50, "%c", time_info);
+    strftime(modif_time, 100, "%c", time_info);
         
-
     // Output the info
-    //printf(" %s %*ld      %s  %s/%s\n", permissions, 13, infos.st_size, modif_time, dir_name, d_name);
     printf(" %s %*ld      %s  %s\n", permissions, 13, infos.st_size, modif_time, path);
     return err;
 }
 
 int listEntryNoIn(const char* path) {
-    //struct stat infos;
-
-    //if (lstat(path, &infos) < 0) fprintf(stderr, "Cannot stat %s: %s\n", path, strerror(errno));
     return listEntry(path, lstat_s(path));
 }
 
@@ -132,7 +121,6 @@ int listEntryNoIn(const char* path) {
  * @return Error code. (0 if success else error code see errno.h for more info)
  */
 int list_dir(const char *dir_name, int determine_copy, char* copy_to_dest) {
-    //TODO: CHECK IF IS FILE, BASE ON INODE INFO
     int err = errno;
     DIR *d = opendir(dir_name);
     struct dirent *entry;
@@ -151,10 +139,11 @@ int list_dir(const char *dir_name, int determine_copy, char* copy_to_dest) {
         int isEntDot = isDot(d_name);  //* is 'entry' '..' or '.' ?
         const char path[PATH_MAX];
 
-        if (exists(entry) == -1) {
+        //TODO: figure why that was here
+       /*  if (exists(entry) == -1) {
             FILE* f;
             
-        }
+        } */
 
         //* Do not print ., .. as they are always here
         if (!isEntDot) {
