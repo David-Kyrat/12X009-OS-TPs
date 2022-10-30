@@ -28,13 +28,16 @@
 //* both -a -f passed => +3 (coherent with value returned by parseOptArgs)
 
 //! 000100 = 4
-#define ST_2FILES  (1 << 2) //? only 2 files are given as argument both exists
+#define ST_2FILES  (1 << 2)//? only 2 files are given as argument both exists
 
 //! 001000 = 8
 #define ST_2FILES_CREATE (1 << 3)//? only 2 files and destination does not exist  
 
 //! 010000 = 16
-#define ST_MULT_FOLDER (1 << 4) //? multiple folders were given
+#define ST_1FILE_1DIR (1 << 4)//? Only copying 1 file into 1 dir
+
+//! 100000 = 32
+#define ST_MIX (1 << 5)//? Mix of more than 1 folder and/or files (e.g. standard state where just copy entries from one directory to another)
 
 
 
@@ -63,21 +66,45 @@ int handleArgs(int fileNb, char** files, int optional_state) {
     const char* dest = files[fileNb - 1];
 
     if (exists(dest)) {
-        // If there are only 2 files
-        if (fileNb <= 2 && isFile(files[0], 0)) {
-            state += ST_2FILES;
+        struct stat dest_infos = stat_s(dest);
+        struct stat f0_infos = stat_s(files[0]);
+        int isF0File = S_ISREG(f0_infos.st_mode), isDestFile = S_ISREG(dest_infos.st_mode),
+            isF0Dir = S_ISDIR(f0_infos.st_mode), isDestDir = S_ISDIR(dest_infos.st_mode);
+
+        // If there are only 2 file/folder as argument, emulate behavior of 'cp file1 file2' / 'cp file1 folder2'
+        if (fileNb <= 2) {
+            if (isF0File && (isDestDir || isDestFile))
+                state += isDestFile ? ST_2FILES : ST_1FILE_1DIR;
+
+            else if (isF0Dir && isDestDir)
+                state += ST_MIX;
+
+            //* Unauthorized state
+            else {
+                errno = EINVAL;
+                return -1;
+            }
+        } else {
+            if (isDestFile) {
+                fprintf(stderr, "%s: Cannot copy multiple files/folders onto the same destination file.\n");
+                errno = EINVAL;
+                return -1;
+            }
+
+            state += ST_MIX;
         }
 
     } else {  //If destination does not exists
-        if (fileNb <= 2 && isFile(files[0], 0)) state += ST_2FILES_CREATE;
+        //if there is only 2 files on entry, emulate behavior of 'cp file1 file2'
+        if (fileNb <= 2 && isFile(files[0], 0))
+            state += ST_2FILES_CREATE;
 
         else {  //if user entered multiple files and folder
             errno = ENOENT;
-            return -1; //Directory does not exists => "throws" no such file or directory error
+            return -1;  //Directory does not exists => "throws" no such file or directory error
         }
     }
 
-    //state += 1;
     return state;
 }
 
@@ -112,7 +139,6 @@ int ultra_cp(char* src, char* dest, int a, int f) {
 }
 
 
-
 int main(int argc, char* argv[]) {
     //list_dir("/var/log/");
     int fileNb = -1, err = 0;
@@ -120,21 +146,22 @@ int main(int argc, char* argv[]) {
     // Parse the given arguments
     char** files = parseArgs(argc, argv, &fileNb);
     int optional_state = parseOptArgs(argc, argv);
-
     
     // Check if parsing had any error
     if (optional_state < 0 || !files || fileNb <= 0) {
         int errno_cpy = errno;
         fprintf(stderr, "Cannot parse arguments: %s\n\t - Usage: %s folder1 folder2/ destination \n\n", strerror(errno_cpy), argv[0]);
-        return errno_cpy;
+        return EXIT_FAILURE;
     }
-
     // Destination file/folder is the last one
     const char* dest = files[fileNb - 1];
-    if(exists(dest) == -1) {
+
+    //! TODO: FIND WHAT TO DO WITH THIS
+/*     if(exists(dest) == -1) {
         // VS code gives error if perms are given, makefile gives error if not ??????
+        
         mkdir(dest, 0777);
-    }
+    } */
 
     errno = 0;
     int state = handleArgs(fileNb, files, optional_state);
@@ -147,7 +174,14 @@ int main(int argc, char* argv[]) {
     // If there is only one argument, simply print the contents of the directory
     if (fileNb <= 1) return list_dir(files[0], 0, "");
 
-    
+    switch(state) {
+        case ST_JUST_LIST:
+        break;
+
+        //case 
+        
+    }
+
     switch (state) {
         case 0: ;
             // Copy normally

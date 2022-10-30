@@ -80,6 +80,11 @@ int isFile(const char* path, int lstat) {
     return S_ISREG(infos.st_mode);
 }
 
+int isDir(const char* path) {
+    struct stat infos = stat_s(path);
+    return S_ISDIR(infos.st_mode);
+}
+
 
 int listEntry(const char* path, struct stat infos) {
     int err = 0;

@@ -34,6 +34,13 @@ int exists(const char* path);
 int isFile(const char* path, int lstat);
 
 /**
+ * Checks if given path is a Directory
+ * @param path path to entry to check
+ * @return int 0 if not a directory, non-zero otherwise
+ */
+int isDir(const char* path);
+
+/**
  * Takes a parent path and a current path and concatenates them into a buffer. 
  * 
  * @param buf The buffer to write the path to.
