@@ -97,7 +97,7 @@ int handleArgs(int fileNb, char** files, int optional_state) {
     } else {  //If destination does not exists
         //if there is only 2 files on entry, emulate behavior of 'cp file1 file2'
         if (fileNb <= 2 && isFile(files[0], 0))
-            state += ST_2FILES_CREATE;
+            state += ST_2FILES;
 
         else {  //if user entered multiple files and folder
             errno = ENOENT;
@@ -143,8 +143,9 @@ int main(int argc, char* argv[]) {
     int fileNb = -1, err = 0;
 
     // Parse the given arguments
-    char** files = parseArgs(argc, argv, &fileNb);
     int optional_state = parseOptArgs(argc, argv);
+
+    char** files = parseArgs(argc, argv, &fileNb);
 
     // Check if parsing had any error
     if (optional_state < 0 || !files || fileNb <= 0) {
@@ -182,11 +183,13 @@ int main(int argc, char* argv[]) {
             break;
 
         case ST_2FILES:
-            ult_copy(files[0], dest, 0, 0);
-            //ult_copy(files[0], dest, (state << 5), (state << 4));
+        case ST_2FILES | ST_PRESERVE_LINKS:
+        case ST_2FILES | ST_MODIF_PERM:
+        case ST_2FILES | ST_PRESERVE_LINKS | ST_MODIF_PERM:
+            ult_copy(files[0], dest, state & ST_MODIF_PERM,  state & ST_PRESERVE_LINKS);
             break;
 
-        case ST_2FILES | ST_PRESERVE_LINKS:
+        /* case ST_2FILES | ST_PRESERVE_LINKS:
             ult_copy(files[0], dest, 0, 1);
             break;
 
@@ -196,7 +199,7 @@ int main(int argc, char* argv[]) {
 
         case ST_2FILES | ST_PRESERVE_LINKS | ST_MODIF_PERM:
             ult_copy(files[0], dest, 1, 1);
-            break;
+            break; */
 
        /*  case ST_2FILES_CREATE:
             break;

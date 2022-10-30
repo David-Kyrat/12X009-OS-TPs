@@ -41,11 +41,12 @@ char** parseArgs(int argc, char* argv[], int* fileNb) {
             return parsedArgs;
         }
         // argv[i] is not destination i.e. last element and argv[i] does not exists
-        if ((argc - 1 <= 1 || i != argc - 2) && !exists(args[i])) {
+        if ((argc - 1 <= 1 || i != argc - 2) && (*args[i] != '-') && !exists(args[i])) {
             errno = ENOENT;
             fprintf(stderr, "\"%s\" is not valid.\n", args[i]);
-        } else {
-            // if argument is valid => adds it
+
+        } else if (*args[i] != '-') {
+            // if argument is valid => adds it. Only store files not optional arguments.
             parsedArgs[len++] = strndup(args[i], argLen + 1);
         }
         

@@ -18,6 +18,9 @@ all: $(EXEC)
 $(EXEC): $(OBJS)
 	$(CC) $(OBJS) -o ultra-cp
 
+debug: $(OBJS)
+	$(CC) $(OBJS) -o main.out
+
 copy.out: out/copy.o out/util.o
 	$(CC) out/copy.o out/util.o -o copy.out
 

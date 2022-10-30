@@ -8,8 +8,8 @@
 int checkEnoughArgs(int argc, char* file_name);
 
 /**
- * Parses arguments given at main function and return a copy of them.
- * 
+ * Parses & extract files/folder given at main function and return a copy of them.
+ * (do not keep optional arguments)
  * @param argc the number of arguments passed to the program
  * @param argv the array of arguments passed to the program
  * @param fileNb variable into which store the amount of parsed file to process

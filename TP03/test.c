@@ -13,23 +13,27 @@
 #include "optprsr.h"
 #include "copy.h"
 
+//* ST for 'STATE'
 #define ST_JUST_LIST (0)      //! 000000 = 0
 
-//? -a was passed Links are copied as Links and resolved to ensure that both points to the same inode 
-#define ST_PRESERVE_LINKS (1 << 0) //! 00001 = 1
+//! 00001 = 1
+#define ST_PRESERVE_LINKS (1 << 0) //? -a was passed Links are copied as Links and resolved to ensure that both points to the same inode 
 
-//? -f was passed. Permissions of files in destination are changed even if the weren't replaced
-#define ST_MODIF_PERM (1 << 1)     //! 00010 = 2
+//! 00010 = 2
+#define ST_MODIF_PERM (1 << 1) //? -f was passed. Permissions of files in destination are changed even if the weren't replaced
 //* both -a -f passed => +3 (coherent with value returned by parseOptArgs)
 
-//? only 2 files are given as argument both exists
-#define ST_2FILES  (1 << 2)        //! 000100 = 4
+//! 000100 = 4
+#define ST_2FILES  (1 << 2)//? only 2 files are given as argument both exists
 
-//? only 2 files and destination does not exist
-#define ST_2FILES_CREATE (1 << 3)  //! 001000 = 8
+//! 001000 = 8
+#define ST_2FILES_CREATE (1 << 3)//? only 2 files and destination does not exist  
 
-//? multiple folders
-#define ST_MULT_FOLDER (1 << 4)    //! 010000 = 16
+//! 010000 = 16
+#define ST_1FILE_1DIR (1 << 4)//? Only copying 1 file into 1 dir
+
+//! 100000 = 32
+#define ST_MIX (1 << 5)
 
 
 int main(int argc, char* argv[]) {
@@ -41,11 +45,14 @@ int main(int argc, char* argv[]) {
     state += ST_2FILES;
     
     int s2 = 0;
-    s2 |= ST_2FILES | ST_MODIF_PERM | ST_PRESERVE_LINKS;
+    s2 |= ST_MIX | ST_PRESERVE_LINKS;
 
-    printf("%d \n", (0b011101 >> 1));
+    /* printf("%d \n", (0b011101 >> 1));
     printf("%d \n", (0b000110 >> 3));
-    printf("%d \n", (0b000111 >> 2));
+    printf("%d \n", (0b000111 >> 2)); */
+    printf("%d\n", (s2 & ST_PRESERVE_LINKS));
+    printf("%d\n", (s2 & ST_MODIF_PERM));
+
 
 
     return 0;
