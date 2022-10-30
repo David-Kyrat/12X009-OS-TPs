@@ -13,7 +13,7 @@
 
 
 
-int is_modified(char* src, char* dest) {
+int is_modified(const char* src, const char* dest) {
 
     // Save the data of both files
     struct stat infos_src;
@@ -38,10 +38,10 @@ int copy(const char* from, const char* to) {
     // Error handling if unable to open source in read-only or the destination in write-only, create or excl (error if create but file already exists)
     if ((fd_from = open(from, O_RDONLY)) < 0) return hdlOpenErr(from, 0);
 
-    fd_to = open(to, O_WRONLY | O_CREAT | O_EXCL, 0644);
-    if ((fd_to == -1) && (EEXIST == errno)) {
+    fd_to = open(to, O_WRONLY | O_CREAT , 0644);
+    /* if ((fd_to == -1) && (EEXIST == errno)) {
         fd_to = open(from, O_WRONLY);
-    }
+    } */
 
     // Check that it's a regular file, folder or a link
     if (!(S_ISREG(infos.st_mode) || S_ISDIR(infos.st_mode) || S_ISLNK(infos.st_mode))) {
@@ -76,6 +76,20 @@ int copy(const char* from, const char* to) {
     if (close(fd_from) < 0) return hdlCloseErr(from, 0);
 
     return EXIT_SUCCESS;
+}
+
+
+int copy_ifneeded(const char* from, const char* to) {
+    if (is_modified(from, to)) return copy(from, to);
+    return 0;
+}
+
+int ult_copy(const char* from, const char* to, int modif_perm, int preserve_link) {
+    int out = copy_ifneeded(from, to);
+    if (modif_perm) //doit
+    
+
+    return out;
 }
 
 /* int main(int argc, char* argv[]) {

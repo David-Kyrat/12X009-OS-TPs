@@ -43,8 +43,9 @@ int main(int argc, char* argv[]) {
     int s2 = 0;
     s2 |= ST_2FILES | ST_MODIF_PERM | ST_PRESERVE_LINKS;
 
-    printf("%d, %d\n", state, s2);
- 
+    printf("%d \n", (0b011101 >> 1));
+    printf("%d \n", (0b000110 >> 3));
+    printf("%d \n", (0b000111 >> 2));
 
 
     return 0;

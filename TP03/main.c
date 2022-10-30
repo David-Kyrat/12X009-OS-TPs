@@ -170,30 +170,35 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
 
-
     switch (state) {
         case ST_JUST_LIST:
             for (int i = 0; i < fileNb; i++) {
-                list_dir(files[i]);
+                if (!isDir(files[i]))
+                    listEntryNoIn(files[i]);
+                else
+                    list_dir(files[i]);
                 printf("\n");
             }
             break;
 
         case ST_2FILES:
-            //TODO:
+            ult_copy(files[0], dest, 0, 0);
+            //ult_copy(files[0], dest, (state << 5), (state << 4));
             break;
 
         case ST_2FILES | ST_PRESERVE_LINKS:
-            //TODO:
+            ult_copy(files[0], dest, 0, 1);
             break;
 
         case ST_2FILES | ST_MODIF_PERM:
+            ult_copy(files[0], dest, 1, 0);
             break;
 
         case ST_2FILES | ST_PRESERVE_LINKS | ST_MODIF_PERM:
+            ult_copy(files[0], dest, 1, 1);
             break;
 
-        case ST_2FILES_CREATE:
+       /*  case ST_2FILES_CREATE:
             break;
 
         case ST_2FILES_CREATE | ST_PRESERVE_LINKS:
@@ -203,7 +208,7 @@ int main(int argc, char* argv[]) {
         case ST_2FILES_CREATE | ST_MODIF_PERM:
             break;
 
-        case ST_2FILES_CREATE | ST_PRESERVE_LINKS | ST_MODIF_PERM:
+        case ST_2FILES_CREATE | ST_PRESERVE_LINKS | ST_MODIF_PERM: */
             break;
 
         case ST_1FILE_1DIR | ST_PRESERVE_LINKS:
