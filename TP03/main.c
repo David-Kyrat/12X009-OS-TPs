@@ -121,10 +121,11 @@ int main(int argc, char* argv[]) {
     char** files = parseArgs(argc, argv, &fileNb);
     int optional_state = parseOptArgs(argc, argv);
 
+    
     // Check if parsing had any error
     if (optional_state < 0 || !files || fileNb <= 0) {
         int errno_cpy = errno;
-        fprintf(stderr, "%s: %s\n\t - Usage: %s folder1 folder2/ destination \n\n", argv[0], strerror(errno_cpy), argv[0]);
+        fprintf(stderr, "Cannot parse arguments: %s\n\t - Usage: %s folder1 folder2/ destination \n\n", strerror(errno_cpy), argv[0]);
         return errno_cpy;
     }
 

@@ -29,29 +29,26 @@ char** parseArgs(int argc, char* argv[], int* fileNb) {
         return parsedArgs;
     }
 
-    //TODO check error on parseOptArgs
-    fprintf(stderr, USAGE_MSG, argv[0]);
-
     // relevant args i.e. not program name
     char** args = &argv[1];
     int len = 0; // initial length of parsedArgs => will be incremented
     tryalc(parsedArgs = calloc(argc-1, sizeof(char*)));
 
-    for (int i = 0; i < argc-1; i++) {
+    for (int i = 0; i < argc - 1; i++) {
         int argLen = strlen(args[i]);
         if (argLen <= 0 || argLen >= PATH_MAX) {
             errno = EINVAL;
             return parsedArgs;
         }
         // argv[i] is not destination i.e. last element and argv[i] does not exists
-        if (i != argc-2 && !exists(args[i])) {
+        if ((argc - 1 <= 1 || i != argc - 2) && !exists(args[i])) {
             errno = ENOENT;
-            fprintf(stderr, "%s is not valid: %s\n", argv[i], strerror(ENOENT));
+            fprintf(stderr, "\"%s\" is not valid.\n", args[i]);
+        } else {
+            // if argument is valid => adds it
+            parsedArgs[len++] = strndup(args[i], argLen + 1);
         }
-
-        // if a given filepath is too long => return error
-
-        parsedArgs[i] = strndup(args[i], argLen + 1);
+        
     }
     *fileNb = len;
 
