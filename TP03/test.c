@@ -33,18 +33,18 @@
 
 
 int main(int argc, char* argv[]) {
-    /* int x1 = 1 << 1;
+    int x1 = 1 << 1;
     
     int x2 = 1 << 2;
     
-    int state = 3;
+    int state = 0;
     state += ST_2FILES;
     
-    int s2 = 3;
-    s2 |= ST_2FILES;
+    int s2 = 0;
+    s2 |= ST_2FILES | ST_MODIF_PERM | ST_PRESERVE_LINKS;
 
     printf("%d, %d\n", state, s2);
- */
+ 
 
 
     return 0;

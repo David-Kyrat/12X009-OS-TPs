@@ -177,8 +177,60 @@ int main(int argc, char* argv[]) {
     switch(state) {
         case ST_JUST_LIST:
         break;
+        
 
-        //case 
+        case  ST_2FILES:
+        //TODO:
+        break;
+
+        case ST_2FILES | ST_PRESERVE_LINKS:
+        //TODO:
+        break;
+
+        case ST_2FILES | ST_MODIF_PERM:
+        break;
+
+        case ST_2FILES | ST_PRESERVE_LINKS | ST_MODIF_PERM:
+        break;
+
+
+        case ST_2FILES_CREATE:
+        break;
+
+        case ST_2FILES_CREATE | ST_PRESERVE_LINKS:
+        //TODO:
+        break;
+
+        case ST_2FILES_CREATE | ST_MODIF_PERM:
+        break;
+
+        case ST_2FILES_CREATE | ST_PRESERVE_LINKS | ST_MODIF_PERM:
+        break;
+
+
+        case ST_1FILE_1DIR | ST_PRESERVE_LINKS:
+        //TODO:
+        break;
+
+        case ST_1FILE_1DIR | ST_MODIF_PERM:
+        break;
+
+        case ST_1FILE_1DIR | ST_PRESERVE_LINKS | ST_MODIF_PERM:
+        break;
+
+
+        case ST_MIX:
+        break;
+
+        case ST_MIX | ST_PRESERVE_LINKS:
+        //TODO:
+        break;
+
+        case ST_MIX | ST_MODIF_PERM:
+        break;
+
+        case ST_MIX | ST_PRESERVE_LINKS | ST_MODIF_PERM:
+        break;
         
     }
 
