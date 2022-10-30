@@ -13,6 +13,7 @@
 #include "util.h"
 #include "copy.h"
 #include "files.h"
+#pragma clang diagnostic ignored "-Wincompatible-pointer-types-discards-qualifiers"
 
 int isDot(const char *entry_name) {
     return strcmp(entry_name, "..") == 0 || strcmp(entry_name, ".") == 0;
@@ -125,7 +126,81 @@ int listEntryNoIn(const char* path) {
  * 
  * @return Error code. (0 if success else error code see errno.h for more info)
  */
-int list_dir(const char *dir_name, int determine_copy, char* copy_to_dest) {
+int list_dir(const char *dir_name) {
+    int err = errno;
+    DIR *d = opendir(dir_name);
+    struct dirent *entry;
+    const char *d_name;  // name of entry
+
+    // In case of exception on opening
+    if (!d) return hdlOpenErr(dir_name, 0);
+
+    //prints which dir is being listed
+    printf("%s/:\n", dir_name);
+
+    // Loop on each entry
+    while ((entry = readdir(d)) != NULL) {
+        // Get entry name
+        d_name = entry->d_name;
+        int isEntDot = isDot(d_name);  //* is 'entry' '..' or '.' ?
+        const char path[PATH_MAX];
+
+        //* Do not print ., .. as they are always here
+        if (!isEntDot) {
+            
+            struct stat infos;
+            // computes the name of the subdirectory and checks if it is not too long
+
+            if(concat_path(path, dir_name, d_name) < 0) return hdlCatErr(d_name);
+
+            if (lstat(path, &infos) < 0) fprintf(stderr, "Cannot stat %s: %s\n", d_name, strerror(errno));
+            
+            char* permissions = computePerm(infos.st_mode);
+
+            // Save the last modification time given
+            time_t mtime = infos.st_mtime;
+
+            // Initialize where the formatted date will be written
+            char modif_time[50];
+
+            // Initialize the time_info struct to manipulate the date
+            struct tm* time_info;
+
+            // Write the time as the local time of the computer
+            time_info = localtime(&mtime);
+
+            // Copy the formatted time to modif_time
+            strftime(modif_time, 50, "%c", time_info);
+
+            // Output the info
+            printf(" %s %*ld      %s  %s/%s\n", permissions, 13, infos.st_size, modif_time, dir_name, d_name);
+            //* computes the name of the subdirectory and checks if it is not too long
+            if (concat_path(path, dir_name, d_name) < 0) return hdlCatErr(d_name);
+            if (lstat(path, &infos) < 0) fprintf(stderr, "Cannot stat %s: %s\n", d_name, strerror(errno));
+
+        }
+        // Is 'entry' a subdirectory ?
+        if (entry->d_type & DT_DIR) {
+            if (!isEntDot) {
+                printf("\n");
+                err = list_dir(path);
+                printf("\n%s/ (rest):\n", dir_name);
+            }
+        }
+    }
+    // closing directory
+    if (closedir(d)) {
+        err = -1;
+        hdlCloseErr(dir_name, 0);
+    }
+
+    return err;
+}
+
+
+
+//OLD VERSION
+int __list_dir(const char *dir_name, int determine_copy, char* copy_to_dest) {
     int err = errno;
     DIR *d = opendir(dir_name);
     struct dirent *entry;

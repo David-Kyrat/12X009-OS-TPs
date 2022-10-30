@@ -86,7 +86,7 @@ int handleArgs(int fileNb, char** files, int optional_state) {
             }
         } else {
             if (isDestFile) {
-                fprintf(stderr, "%s: Cannot copy multiple files/folders onto the same destination file.\n");
+                fprintf(stderr, "Cannot copy multiple files/folders onto the same destination file \"%s\".\n", dest);
                 errno = EINVAL;
                 return -1;
             }
@@ -126,10 +126,10 @@ int ultra_cp(char* src, char* dest, int a, int f) {
     if (a == 1) chmod(src, 777);
 
     // if -f was passed, copy from the realpath of the source (point to same inode as source link)
-    if (f == 1) copy(realpath("src", 200), dest);
+//    if (f == 1) copy(realpath("src", 200), dest);
 
     if (S_ISDIR(infos.st_mode)) {
-        list_dir(src, 1, dest);
+  //      list_dir(src, 1, dest);
     }
 
     else copy(src, dest);
@@ -138,7 +138,6 @@ int ultra_cp(char* src, char* dest, int a, int f) {
 
 }
 
-
 int main(int argc, char* argv[]) {
     //list_dir("/var/log/");
     int fileNb = -1, err = 0;
@@ -146,7 +145,7 @@ int main(int argc, char* argv[]) {
     // Parse the given arguments
     char** files = parseArgs(argc, argv, &fileNb);
     int optional_state = parseOptArgs(argc, argv);
-    
+
     // Check if parsing had any error
     if (optional_state < 0 || !files || fileNb <= 0) {
         int errno_cpy = errno;
@@ -157,7 +156,7 @@ int main(int argc, char* argv[]) {
     const char* dest = files[fileNb - 1];
 
     //! TODO: FIND WHAT TO DO WITH THIS
-/*     if(exists(dest) == -1) {
+    /*     if(exists(dest) == -1) {
         // VS code gives error if perms are given, makefile gives error if not ??????
         
         mkdir(dest, 0777);
@@ -171,74 +170,70 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
 
-    // If there is only one argument, simply print the contents of the directory
-    if (fileNb <= 1) return list_dir(files[0], 0, "");
-
-    switch(state) {
-        case ST_JUST_LIST:
-        break;
-        
-
-        case  ST_2FILES:
-        //TODO:
-        break;
-
-        case ST_2FILES | ST_PRESERVE_LINKS:
-        //TODO:
-        break;
-
-        case ST_2FILES | ST_MODIF_PERM:
-        break;
-
-        case ST_2FILES | ST_PRESERVE_LINKS | ST_MODIF_PERM:
-        break;
-
-
-        case ST_2FILES_CREATE:
-        break;
-
-        case ST_2FILES_CREATE | ST_PRESERVE_LINKS:
-        //TODO:
-        break;
-
-        case ST_2FILES_CREATE | ST_MODIF_PERM:
-        break;
-
-        case ST_2FILES_CREATE | ST_PRESERVE_LINKS | ST_MODIF_PERM:
-        break;
-
-
-        case ST_1FILE_1DIR | ST_PRESERVE_LINKS:
-        //TODO:
-        break;
-
-        case ST_1FILE_1DIR | ST_MODIF_PERM:
-        break;
-
-        case ST_1FILE_1DIR | ST_PRESERVE_LINKS | ST_MODIF_PERM:
-        break;
-
-
-        case ST_MIX:
-        break;
-
-        case ST_MIX | ST_PRESERVE_LINKS:
-        //TODO:
-        break;
-
-        case ST_MIX | ST_MODIF_PERM:
-        break;
-
-        case ST_MIX | ST_PRESERVE_LINKS | ST_MODIF_PERM:
-        break;
-        
-    }
 
     switch (state) {
-        case 0: ;
+        case ST_JUST_LIST:
+            for (int i = 0; i < fileNb; i++) {
+                list_dir(files[i]);
+                printf("\n");
+            }
+            break;
+
+        case ST_2FILES:
+            //TODO:
+            break;
+
+        case ST_2FILES | ST_PRESERVE_LINKS:
+            //TODO:
+            break;
+
+        case ST_2FILES | ST_MODIF_PERM:
+            break;
+
+        case ST_2FILES | ST_PRESERVE_LINKS | ST_MODIF_PERM:
+            break;
+
+        case ST_2FILES_CREATE:
+            break;
+
+        case ST_2FILES_CREATE | ST_PRESERVE_LINKS:
+            //TODO:
+            break;
+
+        case ST_2FILES_CREATE | ST_MODIF_PERM:
+            break;
+
+        case ST_2FILES_CREATE | ST_PRESERVE_LINKS | ST_MODIF_PERM:
+            break;
+
+        case ST_1FILE_1DIR | ST_PRESERVE_LINKS:
+            //TODO:
+            break;
+
+        case ST_1FILE_1DIR | ST_MODIF_PERM:
+            break;
+
+        case ST_1FILE_1DIR | ST_PRESERVE_LINKS | ST_MODIF_PERM:
+            break;
+
+        case ST_MIX:
+            break;
+
+        case ST_MIX | ST_PRESERVE_LINKS:
+            //TODO:
+            break;
+
+        case ST_MIX | ST_MODIF_PERM:
+            break;
+
+        case ST_MIX | ST_PRESERVE_LINKS | ST_MODIF_PERM:
+            break;
+    }
+
+    /*switch (state) {
+        case 0:
             // Copy normally
             for (int i = 0; i < fileNb; i++) {
-
                 char* dest_path[100];
                 strcpy(dest, dest_path);
                 strcat(files[i], dest_path);
@@ -247,7 +242,7 @@ int main(int argc, char* argv[]) {
             }
             break;
 
-        case 1: ;
+        case 1:
             // Only 2 files were given
             char* dest_path[100];
             strcpy(dest, dest_path);
@@ -268,14 +263,14 @@ int main(int argc, char* argv[]) {
             ultra_cp(files[0], dest, 1, 1);
             break;
 
-         case 4:
+        case 4:
             // -f passed, multiple files
             for (int i = 0; i < fileNb; i++) {
                 ultra_cp(files[i], dest, 0, 1);
             }
             break;
-        
-         case 5:
+
+        case 5:
             // -f passed, only 2 files
             ultra_cp(files[0], dest, 0, 1);
             break;
@@ -286,7 +281,7 @@ int main(int argc, char* argv[]) {
                 ultra_cp(files[i], dest, 1, 0);
             }
             break;
-        
+
         case 9:
             // -a passed, only 2 files
             ultra_cp(files[0], dest, 1, 0);
@@ -296,9 +291,14 @@ int main(int argc, char* argv[]) {
             // return an error since none of these cases
             return -1;
             break;
-    }
+     }*/
 
-    for (int i = 0; i < fileNb; i++) {
+    return EXIT_SUCCESS;
+}
+// ------------------------------ OLD CODE ----------------------------------------
+
+
+    /* for (int i = 0; i < fileNb; i++) {
         const char* file = files[i];
         struct stat infos;
 
@@ -306,9 +306,8 @@ int main(int argc, char* argv[]) {
             infos = lstat_s(file);
             listEntry(file, infos);
             //TODO: if copy => handle file copying
-    
 
-        /*  -- Done: add copy.c to makefile to be able to compile it.
+            /*  -- Done: add copy.c to makefile to be able to compile it.
             TODO: check if source file has been modified (is_modified, copy.c). If it has, copy it (copy, copy.c). If not, ignore it
             TODO: if -a has been passed, change all the permissions, even if the file has not been replaced
             TODO: if -f has been passed, links should be copied as links and destination link should point to the source link inode (use realpath)
@@ -317,15 +316,15 @@ int main(int argc, char* argv[]) {
             TODO: put list_dir & list_entry etc... into another file called ultra-cp or smth else
         */
 
-        //if (err != 0) fprintf(stderr, "Error at file %d, %s : %s\n", i, files[i], strerror(err));
-        printf("    ____________________  \n\n\n");
-    }
+            //if (err != 0) fprintf(stderr, "Error at file %d, %s : %s\n", i, files[i], strerror(err));
+       /*     printf("    ____________________  \n\n\n");
+        }
 
-    return err;
-}
-}
+        return err;
+    } */
 
-// ------------------------------ OLD CODE ----------------------------------------
+
+
 
 // int dest_exists = exists(dest);
 // if (dest_exists < 0) return -1;

@@ -45,10 +45,10 @@ int copy(const char* from, const char* to) {
 
     // Check that it's a regular file, folder or a link
     if (!(S_ISREG(infos.st_mode) || S_ISDIR(infos.st_mode) || S_ISLNK(infos.st_mode))) {
+        errno = EINVAL;
+        fprintf(stderr, "\"%s\": Wrong file type\n", from);
         return -1;
     }
-    
-
     
 
     //* While there are bytes left to be read, reads them 4096 by 4096 (4096 or current size of 'buff' if its not that)

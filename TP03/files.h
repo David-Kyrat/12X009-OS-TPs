@@ -73,15 +73,14 @@ int listEntryNoIn(const char* path);
 /**
  * Emulates ls -lRa behavior. (except that it doesnt print . and .. because they are always present).  
  * 
- * It takes a directory name as an argument, opens it, reads its entries, and recursively calls itself
+ * Takes a directory name as an argument, opens it, reads its entries, and recursively calls itself
  * on each subdirectory.
  * 
  * @param dir_name the name of the directory to list
- * @param determine_copy int, if non-zero will backup files to destination
  * 
  * @return Error code. (0 if success else error code see errno.h for more info)
  */
-int list_dir(const char *dir_name, int determine_copy, char* copy_to_dest);
+int list_dir(const char *dir_name);
 
 
 
