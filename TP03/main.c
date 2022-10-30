@@ -6,7 +6,7 @@
 #include <sys/types.h>  // stat
 #include <time.h>
 #include <unistd.h>  //  stat
-
+#include <limits.h>
 
 #include "copy.h"
 #include "files.h"
@@ -133,9 +133,13 @@ int ultra_cp(char* src, char* dest, int a, int f) {
     }
 
     else copy(src, dest);
-
+    
     return 0;
 
+}
+
+void onefile_onedir(char* from, char* dest){
+    char dest_childpath[4096] = concat_path(dest_childpath, dest, from);
 }
 
 int main(int argc, char* argv[]) {
@@ -200,22 +204,11 @@ int main(int argc, char* argv[]) {
         case ST_2FILES | ST_PRESERVE_LINKS | ST_MODIF_PERM:
             ult_copy(files[0], dest, 1, 1);
             break; */
-
-       /*  case ST_2FILES_CREATE:
-            break;
-
-        case ST_2FILES_CREATE | ST_PRESERVE_LINKS:
-            //TODO:
-            break;
-
-        case ST_2FILES_CREATE | ST_MODIF_PERM:
-            break;
-
-        case ST_2FILES_CREATE | ST_PRESERVE_LINKS | ST_MODIF_PERM: */
-            break;
-
+        case ST_1FILE_1DIR:
+            
         case ST_1FILE_1DIR | ST_PRESERVE_LINKS:
-            //TODO:
+            printf("");
+
             break;
 
         case ST_1FILE_1DIR | ST_MODIF_PERM:
@@ -315,21 +308,21 @@ int main(int argc, char* argv[]) {
             listEntry(file, infos);
             //TODO: if copy => handle file copying
 
-            /*  -- Done: add copy.c to makefile to be able to compile it.
+              -- Done: add copy.c to makefile to be able to compile it.
             TODO: check if source file has been modified (is_modified, copy.c). If it has, copy it (copy, copy.c). If not, ignore it
             TODO: if -a has been passed, change all the permissions, even if the file has not been replaced
             TODO: if -f has been passed, links should be copied as links and destination link should point to the source link inode (use realpath)
             -- Done: implement in copy => copy only reg file, folder and links
             TODO: implement parsing of dest options -a -f
             TODO: put list_dir & list_entry etc... into another file called ultra-cp or smth else
-        */
+        
 
             //if (err != 0) fprintf(stderr, "Error at file %d, %s : %s\n", i, files[i], strerror(err));
-       /*     printf("    ____________________  \n\n\n");
+           printf("    ____________________  \n\n\n");
         }
 
         return err;
-    } */
+    } 
 
 
 
