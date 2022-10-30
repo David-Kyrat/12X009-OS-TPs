@@ -37,7 +37,11 @@ int copy(const char* from, const char* to) {
 
     // Error handling if unable to open source in read-only or the destination in write-only, create or excl (error if create but file already exists)
     if ((fd_from = open(from, O_RDONLY)) < 0) return hdlOpenErr(from, 0);
-    if ((fd_to = open(to, O_WRONLY | O_CREAT | O_EXCL, 0600)) < 0) return hdlOpenErr(to, 0);
+
+    fd_to = open(to, O_WRONLY | O_CREAT | O_EXCL, 0644);
+    if ((fd_to == -1) && (EEXIST == errno)) {
+        fd_to = open(from, O_WRONLY);
+    }
 
     // Check that it's a regular file, folder or a link
     if (!(S_ISREG(infos.st_mode) || S_ISDIR(infos.st_mode) || S_ISLNK(infos.st_mode))) {

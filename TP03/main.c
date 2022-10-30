@@ -141,6 +141,10 @@ int main(int argc, char* argv[]) {
 
     // Destination file/folder is the last one
     const char* dest = files[fileNb - 1];
+    if(exists(dest) == -1) {
+        // VS code gives error if perms are given, makefile gives error if not ??????
+        mkdir(dest, 0777);
+    }
 
 
     errno = 0;
@@ -151,16 +155,25 @@ int main(int argc, char* argv[]) {
 
     
     switch (state) {
-        case 0:
+        case 0: ;
             // Copy normally
             for (int i = 0; i < fileNb; i++) {
-                ultra_cp(files[i], dest, 0, 0);
+
+                char* dest_path[100];
+                strcpy(dest, dest_path);
+                strcat(files[i], dest_path);
+
+                ultra_cp(files[i], dest_path, 0, 0);
             }
             break;
 
-        case 1:
+        case 1: ;
             // Only 2 files were given
-            ultra_cp(files[0], dest, 0, 0);
+            char* dest_path[100];
+            strcpy(dest, dest_path);
+            strcat(files[0], dest_path);
+
+            ultra_cp(files[0], dest_path, 0, 0);
             break;
 
         case 2:

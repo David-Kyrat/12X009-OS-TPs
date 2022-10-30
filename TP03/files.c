@@ -151,6 +151,11 @@ int list_dir(const char *dir_name, int determine_copy, char* copy_to_dest) {
         int isEntDot = isDot(d_name);  //* is 'entry' '..' or '.' ?
         const char path[PATH_MAX];
 
+        if (exists(entry) == -1) {
+            FILE* f;
+            
+        }
+
         //* Do not print ., .. as they are always here
         if (!isEntDot) {
             
