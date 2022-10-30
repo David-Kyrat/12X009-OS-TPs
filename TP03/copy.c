@@ -43,6 +43,7 @@ int copy(const char* from, const char* to) {
     if (!(S_ISREG(infos.st_mode) || S_ISDIR(infos.st_mode) || S_ISLNK(infos.st_mode))) {
         return -1;
     }
+    
 
     
 

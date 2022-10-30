@@ -7,6 +7,7 @@
 #include <time.h>
 #include <unistd.h>  //  stat
 
+
 #include "copy.h"
 #include "files.h"
 #include "optprsr.h"
@@ -100,6 +101,8 @@ int handleArgs(int fileNb, char** files, int optional_state) {
 
 int ultra_cp(char* src, char* dest, int a, int f) {
 
+    struct stat infos = lstat_s(src);
+
     // If the two files are exactly the same, do not copy
     if (is_modified(src, dest) == 0) return 0;
     
@@ -108,6 +111,11 @@ int ultra_cp(char* src, char* dest, int a, int f) {
 
     // if -f was passed, copy from the realpath of the source (point to same inode as source link)
     if (f == 1) copy(realpath("src", 200), dest);
+
+    if (S_ISDIR(infos.st_mode)) {
+        list_dir(src, 1, dest);
+    }
+
     else copy(src, dest);
 
     return 0;
@@ -139,7 +147,7 @@ int main(int argc, char* argv[]) {
     int state = handleArgs(fileNb, files, optional_state);
 
     // If there is only one argument, simply print the contents of the directory
-    if (fileNb <= 1) return listEntryNoIn(files[0]);
+    if (fileNb <= 1) return list_dir(files[0], 0, "");
 
     
     switch (state) {
@@ -205,10 +213,7 @@ int main(int argc, char* argv[]) {
             infos = lstat_s(file);
             listEntry(file, infos);
             //TODO: if copy => handle file copying
-
-        } else {
-            err = list_dir(file, copy);
-        }
+    
 
         /*  -- Done: add copy.c to makefile to be able to compile it.
             TODO: check if source file has been modified (is_modified, copy.c). If it has, copy it (copy, copy.c). If not, ignore it
@@ -224,6 +229,7 @@ int main(int argc, char* argv[]) {
     }
 
     return err;
+}
 }
 
 // ------------------------------ OLD CODE ----------------------------------------

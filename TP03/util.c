@@ -57,7 +57,7 @@ int hdlWriteErr(const char* filename, int needsExit, int needsClose, int fd) {
 
 int hdlCopyErr(const char* from, const char* to, int needsExit, int needsClose, int fd_from, int fd_to) {
     int savedErr = errno;
-    fprintf(stderr, "Could not copy  %s to %s: %s\n", from, to, strerror(savedErr));
+    fprintf(stderr, "Could not copy %s to %s: %s\n", from, to, strerror(savedErr));
     if (needsClose) {
         if (close(fd_from)) hdlCloseErr(from, needsExit);
         if (close(fd_to)) hdlCloseErr(to, needsExit);

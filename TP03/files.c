@@ -103,10 +103,8 @@ int listEntry(const char* path, struct stat infos) {
     // Write the time as the local time of the computer
     time_info = localtime(&mtime);
     // Copy the formatted time to modif_time
-    if (strftime(modif_time, 50, "%c", time_info) < 50) {
-        fprintf(stderr, "Time could not be completely formatted\n");
-        err = -1;
-    }
+    strftime(modif_time, 50, "%c", time_info);
+        
 
     // Output the info
     //printf(" %s %*ld      %s  %s/%s\n", permissions, 13, infos.st_size, modif_time, dir_name, d_name);
@@ -133,7 +131,7 @@ int listEntryNoIn(const char* path) {
  * 
  * @return Error code. (0 if success else error code see errno.h for more info)
  */
-static int list_dir(const char *dir_name, int copy) {
+int list_dir(const char *dir_name, int determine_copy, char* copy_to_dest) {
     //TODO: CHECK IF IS FILE, BASE ON INODE INFO
     int err = errno;
     DIR *d = opendir(dir_name);
@@ -155,7 +153,8 @@ static int list_dir(const char *dir_name, int copy) {
 
         //* Do not print ., .. as they are always here
         if (!isEntDot) {
-            /*  struct stat infos;
+            
+            struct stat infos;
             // computes the name of the subdirectory and checks if it is not too long
 
             if(concat_path(path, dir_name, d_name) < 0) return hdlCatErr(d_name);
@@ -180,18 +179,20 @@ static int list_dir(const char *dir_name, int copy) {
             strftime(modif_time, 50, "%c", time_info);
 
             // Output the info
-            printf(" %s %*ld      %s  %s/%s\n", permissions, 13, infos.st_size, modif_time, dir_name, d_name); */
-            struct stat infos;
+            printf(" %s %*ld      %s  %s/%s\n", permissions, 13, infos.st_size, modif_time, dir_name, d_name);
+
+            if (determine_copy == 1) {
+                copy(d_name, copy_to_dest);
+            }
 
             //* computes the name of the subdirectory and checks if it is not too long
             if (concat_path(path, dir_name, d_name) < 0) return hdlCatErr(d_name);
             if (lstat(path, &infos) < 0) fprintf(stderr, "Cannot stat %s: %s\n", d_name, strerror(errno));
 
-            listEntry(path, infos);
             // Is 'entry' a subdirectory ?
             if (entry->d_type & DT_DIR) {
                 printf("\n");
-                err = list_dir(path, copy);
+                // err = list_dir(path);
                 printf("\n%s/ (rest):\n", dir_name);
             }
         }
