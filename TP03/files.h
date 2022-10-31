@@ -96,3 +96,16 @@ const char* getFileName(const char* path);
  */
 const char* absPath(const char* path);
 
+
+/**
+ * Takes a path and creates all the subpaths (starting from 'dest') that are not created yet
+ * i.e. in 'dest'/foo/bar/to => will create /foo and /foo/bar if they do not exists
+ * 
+ * @param from the source file or directory
+ * @param to the destination path
+ * @param dest parent folder of 'to' that must exist.
+ * 
+ * @return 0 on success, -1 if error
+ */
+int create_subpaths_ifneeded(const char* from, const char* to, const char* dest);
+

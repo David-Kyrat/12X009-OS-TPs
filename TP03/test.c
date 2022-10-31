@@ -23,69 +23,7 @@
 
 //! if (create_intermed) then create missing folder in to i.e. in /foo/bar/to => will create /foo and /foo/bar if they do not exists
 //! dest **has** to exist if create_intermed is true
-int create_subpaths_ifneeded(const char* from, const char* to, const char* dest) {
-    //In copy folders dest has exist so we can resolve abs path of dest then append rest
-    //printf("from: %s,\n to:%s,\n dest:%s\n\n", from, to, dest);
-    if (!exists(dest)) {
-        errno = ENOENT;
-        fprintf(stderr, "Cannot copy %s to %s, Dest: %s: %s\n", from, to, dest, strerror(ENOENT));
-        return -1;
-    }
-    
-    int destlen = strlen(dest);
-    int path_after_len = strlen(to) - destlen;
-    char* abs_dest = absPath(dest); //abs_dest for sure exists => will try to locate folders from this path
-    int abs_dest_len = strlen(abs_dest);
 
-    //if dest is not parent dir of 'to'
-    if (strstr(to, dest) == NULL) {
-        errno = EINVAL;
-        fprintf(stderr, "Cannot copy %s : %s is not a parent of %s\n", from, dest, to);
-        return -1;
-    }
-
-    //extract where dest and to differ (we have that 'dest' is included in 'to')
-    char* path_after = &to[destlen+1];
-    //printf("dest:%s, destlen: %d,  to:%s, strlen(to): %d, strlen(path_after): %d \n", dest, destlen, to, strlen(to), path_after_len);
-
-    const char* path = calloc(PATH_MAX, sizeof(char));
-
-    if (concat_path(path, abs_dest, path_after) < 0) {
-        hdlCatErr(to);
-        return -1;
-    }
-    int path_len = strlen(path);
-    //printf("abs_dest: %s,\n path_after:%s,\n path:%s,\n", abs_dest, path_after, path);
-    printf("len:%d, Path: %s\n", path_len, path);
-
-    int* sp_idxs = calloc(path_len, sizeof(int)); //indices of each end of subpath i.e. 4 and 8  for /foo/bar/to
-    int sp_len = 0;
-    
-    for (int i = abs_dest_len+1; i < path_len; i++) {
-        if (path[i] == '/') {
-            if (sp_len == -1 && 0) sp_len == 0;
-            else {
-                sp_idxs[sp_len++] = i;
-            }
-        }
-    }
-    //* Iterate on each subpath and create them if they do not exists
-    for (int i = 0; i < sp_len; i++) {
-        //printf("arr[%d] = %d\n", i, sp_idxs[i]);
-        char *crt_subpath = strsub(path, sp_idxs[i]);
-        if (!exists(crt_subpath)) {
-            struct stat info = stat_s(from);
-            if (mkdir(crt_subpath, 0700) < 0) {
-                int savedErr = errno;
-                fprintf(stderr, "Cannot create %s: %s\n", crt_subpath, strerror(savedErr));
-            } else printf("-- Created %s -- \n\n", crt_subpath);
-            
-        }
-        //printf("crt_subpath: %s\n", crt_subpath);
-    }
-
-    return EXIT_SUCCESS;
-}
 
 int main(int argc, char* argv[]) {
     /* char* path = argv[1];
@@ -98,7 +36,6 @@ int main(int argc, char* argv[]) {
     char* msg = m == -1 ? "older" : (m == 0 ? "equal" : "newer");
     printf("%s %s %s\n", path, msg, argv[2]); */
     create_subpaths_ifneeded(argv[1], argv[2], argv[3]);
-
 
     return 0;
 }
