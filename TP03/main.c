@@ -139,7 +139,6 @@ int ultra_cp(const char* src, const char* dest, int a, int f) {
 
 }
 
-
 int main(int argc, char* argv[]) {
     //list_dir("/var/log/");
     int fileNb = -1, err = 0;
@@ -176,7 +175,6 @@ int main(int argc, char* argv[]) {
             }
             break;
 
-
         //* Only 2 files were given
         case ST_2FILES:
         case ST_2FILES | ST_PRESERVE_LINKS:
@@ -187,7 +185,6 @@ int main(int argc, char* argv[]) {
             ult_copy(src, dest, modif_perm, preserve_links);
             break;
         }
-
 
         //* Only 1 file and a folder were given
         case ST_1FILE_1DIR:
@@ -202,7 +199,6 @@ int main(int argc, char* argv[]) {
             break;
         }  //TODO: check if break must be in or out
 
-
         case ST_MIX:
         case ST_MIX | ST_PRESERVE_LINKS:
         case ST_MIX | ST_MODIF_PERM:
@@ -216,6 +212,9 @@ int main(int argc, char* argv[]) {
             }
             break;
     }
+
+    return EXIT_SUCCESS;
+}
 
     /*switch (state) {
         case ST_2FILES | ST_PRESERVE_LINKS:
@@ -292,62 +291,14 @@ int main(int argc, char* argv[]) {
             break;
      }*/
 
-    return EXIT_SUCCESS;
-}
 // ------------------------------ OLD CODE ----------------------------------------
 
-
-    /* for (int i = 0; i < fileNb; i++) {
-        const char* file = files[i];
-        struct stat infos;
-
-        if (S_ISREG(infos.st_mode)) {
-            infos = lstat_s(file);
-            listEntry(file, infos);
-            //TODO: if copy => handle file copying
-
-              -- Done: add copy.c to makefile to be able to compile it.
-            TODO: check if source file has been modified (is_modified, copy.c). If it has, copy it (copy, copy.c). If not, ignore it
-            TODO: if -a has been passed, change all the permissions, even if the file has not been replaced
-            TODO: if -f has been passed, links should be copied as links and destination link should point to the source link inode (use realpath)
-            -- Done: implement in copy => copy only reg file, folder and links
-            TODO: implement parsing of dest options -a -f
-            TODO: put list_dir & list_entry etc... into another file called ultra-cp or smth else
-        
-
-            //if (err != 0) fprintf(stderr, "Error at file %d, %s : %s\n", i, files[i], strerror(err));
-           printf("    ____________________  \n\n\n");
-        }
-
-        return err;
-    }*/ 
-
-
-
-
-// int dest_exists = exists(dest);
-// if (dest_exists < 0) return -1;
-
-// TEST: backup files[0] to dest if newer or size different or print "up to date" if not
-// if (is_modified(files[0], dest) == 1) {
-//    copy(files[0], dest);
-
-// else {
-//     printf("Up to date\n");
-//     }
-
-// if (dest_exists) {
-//     //* if destination is a regular file or link to regular file
-//     if (isFile(dest, 0)) {
-//         if (fileNb > 2) {
-//             errno = EINVAL;
-//             fprintf(stderr, "%s: Cannot copy multiple files onto the same destination file", strerror(errno));
-//             return -1;
-//         }
-
-//     }
-// }
-
-
-
-// -----------------------------------------------------------------------------------
+/*              
+    -- Done: add copy.c to makefile to be able to compile it.
+    TODO: check if source file has been modified (is_modified, copy.c). If it has, copy it (copy, copy.c). If not, ignore it
+    DONE: if -a has been passed, change all the permissions, even if the file has not been replaced
+    TODO: if -f has been passed, links should be copied as links and destination link should point to the source link inode (use realpath)
+    -- Done: implement in copy => copy only reg file, folder and links
+    -- Done: implement parsing of dest options -a -f
+    -- Done: put list_dir & list_entry etc... into another file called ultra-cp or smth else      
+*/
