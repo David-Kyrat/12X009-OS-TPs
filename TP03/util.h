@@ -107,3 +107,13 @@ struct stat stat_s(const char* path);
  * @return 1, 0 or -1 if ts2 is respectively Greater, Equal to or Less than ts1.
  */
 int dateCmpr(struct timespec ts2, struct timespec ts1);
+
+/**
+ * Extract substring of 'src' from 0 to substring_length . Memory for substring was allocated with strdup.
+ * 
+ * @param src The string to extract the substring from.
+ * @param stop_idx End of substring. i.e. idx of char after last one
+ * 
+ * @return src[0 : stop_idx] i.e. substring of length 'stop_idx'
+ */
+char* strsub(char* src, int stop_idx);

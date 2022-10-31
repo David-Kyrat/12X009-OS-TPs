@@ -209,7 +209,7 @@ const char* getFileName(const char* path) {
 
     while(absPath[len] != '/' && len >= 0) len--;
     //* Now absPath[len] points to first '/' in absPath (starting from the end)
-    char* out = &(absPath[len+1]); //extract a view on a sublist of absPath. (i.e. pointer to some element in it)
+    const char* out = &(absPath[len+1]); //extract a view on a sublist of absPath. (i.e. pointer to some element in it)
     return out;
 }
 
@@ -220,7 +220,6 @@ const char* absPath(const char* path) {
         fprintf(stderr, "%s, Cannot get absolute-path: %s\n", path, strerror(savedErr));
         return NULL;
     }
-    
     return out;
 }
 

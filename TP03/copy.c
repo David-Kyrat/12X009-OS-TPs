@@ -10,7 +10,7 @@
 
 #include "copy.h"
 #include "util.h"
-
+#include "files.h"
 
 int is_modified(const char* src, const char* dest) {
     if (!exists(dest)) return 1; //* If destination does not exists => src is obviously newer

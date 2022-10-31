@@ -6,10 +6,12 @@
 #include <string.h>  //snprintf
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <limits.h>
 #include <time.h>
 #include <unistd.h>
 
 #include "util.h"
+#include "files.h"
 
 #define ST_JUST_LIST (0)            //! 000000 = 0
 #define ST_PRESERVE_LINKS (1 << 0)  //? -a was passed Links are copied as Links and resolved to ensure that both points to the same inode
@@ -19,72 +21,74 @@
 #define ST_1FILE_1DIR (1 << 4)      //? Only copying 1 file into 1 dir
 #define ST_MIX (1 << 5)
 
-int exists(const char* path) {
-    int exist = access(path, F_OK);
-
-    // If real error happened (ENOENT is not an error because we do want to check for existence or non-existence)
-    if (exist < 0 && errno != ENOENT) {
-        int savedErr = errno;
-        fprintf(stderr, "Cannot check existance of \"%s\" : %s.\n", path, strerror(savedErr));
+//! if (create_intermed) then create missing folder in to i.e. in /foo/bar/to => will create /foo and /foo/bar if they do not exists
+//! dest **has** to exist if create_intermed is true
+int create_subpaths_ifneeded(const char* from, const char* to, const char* dest) {
+    //In copy folders dest has exist so we can resolve abs path of dest then append rest
+    //printf("from: %s,\n to:%s,\n dest:%s\n\n", from, to, dest);
+    if (!exists(dest)) {
+        errno = ENOENT;
+        fprintf(stderr, "Cannot copy %s to %s, Dest: %s: %s\n", from, to, dest, strerror(ENOENT));
         return -1;
     }
-    return exist == 0;
-}
+    
+    int destlen = strlen(dest);
+    int path_after_len = strlen(to) - destlen;
+    char* abs_dest = absPath(dest); //abs_dest for sure exists => will try to locate folders from this path
+    int abs_dest_len = strlen(abs_dest);
 
-/**
- * Computes actual name of a file. This function does a malloc, rembember to free result when done!
- * @param path path to file to relove name from.
- * @return char* Actual resolved name of file located at path. (Use real path to get the absolute path, then extract the name).
- */
-char* getFileName(char* path) {
-    char* absPath = realpath(path, NULL);
-    if (absPath == NULL) {
-        int savedErr = errno;
-        fprintf(stderr, "%s, Cannot get fileName: %s\n", path, strerror(savedErr));
-        return NULL;
+    //if dest is not parent dir of 'to'
+    if (strstr(to, dest) == NULL) {
+        errno = EINVAL;
+        fprintf(stderr, "Cannot copy %s : %s is not a parent of %s\n", from, dest, to);
+        return -1;
     }
-    int len = strlen(absPath) - 1;
-    while (absPath[len] != '/' && len >= 0) len--;
-    //* Now absPath[len] points to first '/' in absPath (starting from the end)
 
-    char* out = &(absPath[len + 1]);  //extract a view on a sublist of absPath. (i.e. pointer to some element in it)
-    return out;
-}
+    //extract where dest and to differ (we have that 'dest' is included in 'to')
+    char* path_after = &to[destlen+1];
+    //printf("dest:%s, destlen: %d,  to:%s, strlen(to): %d, strlen(path_after): %d \n", dest, destlen, to, strlen(to), path_after_len);
 
-/**
- * Comparator of date. i.e. compare time 'ts2' and 'ts1' and return an integer (1, 0, -1)
- * describing if ts2 > ts1, ts2 == ts1 or if ts2 < ts1.
- 
- * @param ts2 Second timestamp to compare
- * @param ts1 First timestamp to compare
- * 
- * @return 1, 0 or -1 if ts2 is respectively Greater, Equal to or Less than ts1.
- */
-int dateCmpr(struct timespec ts2, struct timespec ts1) {
-    const time_t t1 = ts1.tv_sec, t2 = ts2.tv_sec;
-    const time_t elapsed = difftime(t2, t1);
-    return elapsed < 0 ? -1 : (elapsed > 0);
-    //? If elapsed < 0 then ts2 < ts1. Else (elapsed > 0) will return 1 Iif ts2 > ts0, and 0, if elapsed == 0. (because the only case left is elapsed == 0)
-}
+    const char* path = calloc(PATH_MAX, sizeof(char));
 
-/**
- * Used when backing up files to check if 'src' has been modified since last backup at 'dest'.
- * 
- * @param src source file (potentially newer)
- * @param dest destination file (file to check against)
- * @return 1 if and only if src is newer, if dest does not exist or if sizes are different. Otherwise it returns 0
- */
-int is_modified(const char* src, const char* dest) {
-    if (!exists(dest)) return 1; //* If destination does not exists => src is obviously newer
+    if (concat_path(path, abs_dest, path_after) < 0) {
+        hdlCatErr(to);
+        return -1;
+    }
+    int path_len = strlen(path);
+    //printf("abs_dest: %s,\n path_after:%s,\n path:%s,\n", abs_dest, path_after, path);
+    printf("len:%d, Path: %s\n", path_len, path);
+
+    int* sp_idxs = calloc(path_len, sizeof(int)); //indices of each end of subpath i.e. 4 and 8  for /foo/bar/to
+    int sp_len = 0;
     
-    struct stat src_infos = stat_s(src), dest_infos = stat_s(dest); //struct timespec src_ts = src_infos.st_mtim, dest_ts = dest_infos.st_mtim;
-    int cmprison = dateCmpr(src_infos.st_mtim, dest_infos.st_mtim);
-    
-    return cmprison > 0 || src_infos.st_size != dest_infos.st_size;
+    for (int i = abs_dest_len+1; i < path_len; i++) {
+        if (path[i] == '/') {
+            if (sp_len == -1 && 0) sp_len == 0;
+            else {
+                sp_idxs[sp_len++] = i;
+            }
+        }
+    }
+    //* Iterate on each subpath and create them if they do not exists
+    for (int i = 0; i < sp_len; i++) {
+        //printf("arr[%d] = %d\n", i, sp_idxs[i]);
+        char *crt_subpath = strsub(path, sp_idxs[i]);
+        if (!exists(crt_subpath)) {
+            struct stat info = stat_s(from);
+            if (mkdir(crt_subpath, 0700) < 0) {
+                int savedErr = errno;
+                fprintf(stderr, "Cannot create %s: %s\n", crt_subpath, strerror(savedErr));
+            } else printf("-- Created %s -- \n\n", crt_subpath);
+            
+        }
+        //printf("crt_subpath: %s\n", crt_subpath);
+    }
+
+    return EXIT_SUCCESS;
 }
 
 int main(int argc, char* argv[]) {
-    char* path = argv[1];
+    /* char* path = argv[1];
     char* absPath = realpath(path, NULL);
     const char* p1 = absPath;
     printf("path1: %s\n", p1);
@@ -92,7 +96,9 @@ int main(int argc, char* argv[]) {
     printf("path2: %s\n", p2);
     int m = is_modified(p1, p2);
     char* msg = m == -1 ? "older" : (m == 0 ? "equal" : "newer");
-    printf("%s %s %s\n", path, msg, argv[2]);
+    printf("%s %s %s\n", path, msg, argv[2]); */
+    create_subpaths_ifneeded(argv[1], argv[2], argv[3]);
+
 
     return 0;
 }

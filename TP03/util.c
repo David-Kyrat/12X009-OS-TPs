@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <time.h>
 
 #include "util.h"
 
@@ -94,4 +95,23 @@ int dateCmpr(struct timespec ts2, struct timespec ts1) {
     //return elapsed > 0 ? 1 : (elapsed == 0 ? 0 : -1);
     return elapsed < 0 ? -1 : (elapsed > 0);
     //? If elapsed < 0 then ts2 < ts1. Else (elapsed > 0) will return 1 Iif ts2 > ts0, and 0, if elapsed == 0. (because the only case left is elapsed == 0)
+}
+
+
+
+char* strsub(char* src, int stop_idx) {
+    int sublen = stop_idx;
+    char* sub = NULL;
+    if (sublen < 0) errno = EINVAL;
+    //will copy at most 'sublen' bytes and append a \0 if necesary at the end.
+    else sub = strndup(src, sublen); 
+    if (sub == NULL) {
+        int savedErr = errno;
+        fprintf(stderr, "Cannot extract substring from \"%s\": %s\n", src, strerror(savedErr));
+        //If we ran out of memory we cannot do anything. The only thing to do in this situation is to just exit.
+        if (savedErr == ENOMEM) exit(ENOMEM); 
+        return NULL;
+    }
+    
+    return sub;
 }
