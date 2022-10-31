@@ -41,19 +41,6 @@
 #define ST_MIX (1 << 5)//? Mix of more than 1 folder and/or files (e.g. standard state where just copy entries from one directory to another)
 
 
-
-/* 
-*  if filesNb <= 1: just list file
-*  else if filesNb > 1
-*       if destination exists and is a regular file:
-*           if filesNb > 2 => throw error (no more than 1 source if dest is a file)
-*           else backup normally files and folder to dest (handle case if there is a diff then copy if not print "is up to date")
-*       else if dest doesnt exist or is a folder : backup normally 
-*
-*
-*
-*/
-
 int handleArgs(int fileNb, char** files, int optional_state) {
     // If there is only one argument, simply print the contents of the directory
     if (fileNb <= 1) return ST_JUST_LIST;
@@ -109,29 +96,6 @@ int handleArgs(int fileNb, char** files, int optional_state) {
     return state;
 }
 
-    
-/*int ultra_cp(const char* src, const char* dest, int a, int f) {
-
-    struct stat infos = lstat_s(src);
- 
-     // If the two files are exactly the same, do not copy
-    if (is_modified(src, dest) == 0) return 0;
-    
-    // if -a was passed, change the permissions to 777 (rwx)
-    if (a) chmod(src, 0777);
-
-    // if -f was passed, copy from the realpath of the source (point to same inode as source link)
-     if (f == 1) copy(absPath(src), dest);
-
-    if (S_ISDIR(infos.st_mode)) {
-  //      list_dir(src, 1, dest);
-    }
-
-    else copy(src, dest);
-     
-    return 0;
-
-}*/
 
 // Check for
     // 1. Just 1 file/folder -> print/ls contents
@@ -227,90 +191,3 @@ int main(int argc, char* argv[]) {
 
     return EXIT_SUCCESS;
 }
-
-    /*switch (state) {
-        case ST_2FILES | ST_PRESERVE_LINKS:
-            ultra_cp_single(files[0], dest, 0, 1);
-            break;
-
-        case ST_2FILES | ST_MODIF_PERM:
-            ultra_cp_single(files[0], dest, 1, 0);
-            break;
-
-        case ST_2FILES | ST_PRESERVE_LINKS | ST_MODIF_PERM:
-            ultra_cp_single(files[0], dest, 1, 1);
-            break; 
-
-        case 0:
-            // Copy normally
-            for (int i = 0; i < fileNb; i++) {
-                char* dest_path[100];
-                strcpy(dest, dest_path);
-                strcat(files[i], dest_path);
-
-                ultra_cp(files[i], dest_path, 0, 0);
-            }
-            break;
-
-        case 1:
-            // Only 2 files were given
-            char* dest_path[100];
-            strcpy(dest, dest_path);
-            strcat(files[0], dest_path);
-
-            ultra_cp(files[0], dest_path, 0, 0);
-            break;
-
-        case 2:
-            // -f and -a were passed, multiple files
-            for (int i = 0; i < fileNb; i++) {
-                ultra_cp(files[i], dest, 1, 1);
-            }
-            break;
-
-        case 3:
-            // -f and -a were passed, only 2 files
-            ultra_cp(files[0], dest, 1, 1);
-            break;
-
-        case 4:
-            // -f passed, multiple files
-            for (int i = 0; i < fileNb; i++) {
-                ultra_cp(files[i], dest, 0, 1);
-            }
-            break;
-
-        case 5:
-            // -f passed, only 2 files
-            ultra_cp(files[0], dest, 0, 1);
-            break;
-
-        case 8:
-            // -a passed, multiple files
-            for (int i = 0; i < fileNb; i++) {
-                ultra_cp(files[i], dest, 1, 0);
-            }
-            break;
-
-        case 9:
-            // -a passed, only 2 files
-            ultra_cp(files[0], dest, 1, 0);
-            break;
-
-        default:
-            // return an error since none of these cases
-            return -1;
-            break;
-     }*/
-
-// ------------------------------ OLD CODE ----------------------------------------
-
-/*              
-    -- Done: add copy.c to makefile to be able to compile it.
-    TODO: check if source file has been modified (is_modified, copy.c). If it has, copy it (copy, copy.c). If not, ignore it
-    DONE: if -a has been passed, change all the permissions, even if the file has not been replaced
-    TODO: if -f has been passed, links should be copied as links and destination link should point to the source link inode (use realpath)
-    -- Done: implement in copy => copy only reg file, folder and links
-    -- Done: implement parsing of dest options -a -f
-    -- Done: put list_dir & list_entry etc... into another file called ultra-cp or smth else      
-*/

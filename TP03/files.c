@@ -75,8 +75,6 @@ int concat_path(char buf[], const char* parent, const char* current) {
 
 
 int isFile(const char* path, int lstat) {
-    /* struct stat infos;
-    if (lstat(path, &infos) < 0) fprintf(stderr, "Cannot stat %s: %s\n", path, strerror(errno)); */
     struct stat infos = lstat ? lstat_s(path) : stat_s(path);
     return S_ISREG(infos.st_mode);
 }
@@ -221,88 +219,4 @@ const char* absPath(const char* path) {
         return NULL;
     }
     return out;
-}
-
-//OLD VERSION
-int __list_dir(const char *dir_name, int determine_copy, char* copy_to_dest) {
-    int err = errno;
-    DIR *d = opendir(dir_name);
-    struct dirent *entry;
-    const char *d_name;  // name of entry
-
-    // In case of exception on opening
-    if (!d) return hdlOpenErr(dir_name, 0);
-
-    //prints which dir is being listed
-    printf("%s/:\n", dir_name);
-
-    // Loop on each entry
-    while ((entry = readdir(d)) != NULL) {
-        // Get entry name
-        d_name = entry->d_name;
-        int isEntDot = isDot(d_name);  //* is 'entry' '..' or '.' ?
-        const char path[PATH_MAX];
-
-        //* Do not print ., .. as they are always here
-        if (!isEntDot) {
-            
-            struct stat infos;
-            // computes the name of the subdirectory and checks if it is not too long
-
-            if(concat_path(path, dir_name, d_name) < 0) return hdlCatErr(d_name);
-
-            if (lstat(path, &infos) < 0) fprintf(stderr, "Cannot stat %s: %s\n", d_name, strerror(errno));
-            
-            char* permissions = computePerm(infos.st_mode);
-
-            // Save the last modification time given
-            time_t mtime = infos.st_mtime;
-
-            // Initialize where the formatted date will be written
-            char modif_time[50];
-
-            // Initialize the time_info struct to manipulate the date
-            struct tm* time_info;
-
-            // Write the time as the local time of the computer
-            time_info = localtime(&mtime);
-
-            // Copy the formatted time to modif_time
-            strftime(modif_time, 50, "%c", time_info);
-
-            // Output the info
-            printf(" %s %*ld      %s  %s/%s\n", permissions, 13, infos.st_size, modif_time, dir_name, d_name);
-
-            if (determine_copy == 1) {
-                copy(d_name, copy_to_dest);
-            }
-
-            //* computes the name of the subdirectory and checks if it is not too long
-            if (concat_path(path, dir_name, d_name) < 0) return hdlCatErr(d_name);
-            if (lstat(path, &infos) < 0) fprintf(stderr, "Cannot stat %s: %s\n", d_name, strerror(errno));
-
-            // Is 'entry' a subdirectory ?
-            if (entry->d_type & DT_DIR) {
-                printf("\n");
-                // err = list_dir(path);
-                printf("\n%s/ (rest):\n", dir_name);
-            }
-        }
-
-        // Is 'entry' a subdirectory ?
-       /*  if (entry->d_type & DT_DIR) {
-            if (!isEntDot) {
-                printf("\n");
-                err = list_dir(path);
-                printf("\n%s/ (rest):\n", dir_name);
-            }
-        } */
-    }
-    // closing directory
-    if (closedir(d)) {
-        fprintf(stderr, "Could not close '%s': %s\n", dir_name, strerror(errno));
-        exit(EXIT_FAILURE);
-    }
-
-    return err;
 }

@@ -26,7 +26,6 @@ int is_modified(const char* src, const char* dest) {
 
 int create_subpaths_ifneeded(const char* from, const char* to, const char* dest) {
     //In copy folders dest has exist so we can resolve abs path of dest then append rest
-    //printf("from: %s,\n to:%s,\n dest:%s\n\n", from, to, dest);
     if (!exists(dest)) {
         errno = ENOENT;
         fprintf(stderr, "Cannot copy %s to %s, Dest: %s: %s\n", from, to, dest, strerror(ENOENT));
@@ -39,7 +38,6 @@ int create_subpaths_ifneeded(const char* from, const char* to, const char* dest)
     // search where dest and to differ (we have that 'dest' is included in 'to')
     // if dest is not parent dir of 'to'
     const char* dest_name = getFileName(dest);
-    //printf("destname: %s\n", dest_name);
     char* dest_in_to_idx = strstr(to, dest_name);
     if (dest_in_to_idx == NULL) {
         errno = EINVAL;
@@ -56,8 +54,6 @@ int create_subpaths_ifneeded(const char* from, const char* to, const char* dest)
     }
 
     int path_len = strlen(path);
-    //printf("abs_dest: %s,\n path_after:%s,\n path:%s,\n", abs_dest, path_after, path);
-    //printf("len:%d, Path: %s\n", path_len, path);
 
     int* sp_idxs = calloc(path_len, sizeof(int));  //indices of each end of subpath i.e. 4 and 8  for /foo/bar/to
     int sp_len = 0;
@@ -79,7 +75,6 @@ int create_subpaths_ifneeded(const char* from, const char* to, const char* dest)
             } else
                 printf("-- Created %s -- \n\n", crt_subpath);
         }
-        //printf("crt_subpath: %s\n", crt_subpath);
     }
 
     return EXIT_SUCCESS;
