@@ -82,6 +82,17 @@ int listEntryNoIn(const char* path);
  */
 int list_dir(const char *dir_name);
 
+/**
+ * Computes actual name of a file.
+ * @param path path to file to relove name from.
+ * @return char* Actual resolved name of file located at path. (Use real path to get the absolute path, then extract the name).
+ */
+char* getFileName(char* path);
 
-
+/**
+ * Takes a path and returns the absolute path
+ * @param path The path to the file or directory.
+ * @return The absolute path of the file.
+ */
+char* absPath(char* path);
 

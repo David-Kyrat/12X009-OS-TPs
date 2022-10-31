@@ -139,7 +139,8 @@ int ultra_cp(char* src, char* dest, int a, int f) {
 }
 
 void onefile_onedir(char* from, char* dest){
-    char dest_childpath[4096] = concat_path(dest_childpath, dest, from);
+    char path[PATH_MAX];
+    concat_path(path, dest, from);
 }
 
 int main(int argc, char* argv[]) {
@@ -174,7 +175,7 @@ int main(int argc, char* argv[]) {
         fprintf(stderr, "%s, Cannot Backup to %s: %s\n", argv[0], dest, strerror(savedErr));
         return EXIT_FAILURE;
     }
-
+    int modif_perm = state & ST_MODIF_PERM, preserve_links = state & ST_PRESERVE_LINKS;
     switch (state) {
         case ST_JUST_LIST:
             for (int i = 0; i < fileNb; i++) {
@@ -182,40 +183,33 @@ int main(int argc, char* argv[]) {
                     listEntryNoIn(files[i]);
                 else
                     list_dir(files[i]);
-                printf("\n");
+                printf("-----\n");
             }
             break;
 
+        //* Only 2 files were given
         case ST_2FILES:
         case ST_2FILES | ST_PRESERVE_LINKS:
         case ST_2FILES | ST_MODIF_PERM:
-        case ST_2FILES | ST_PRESERVE_LINKS | ST_MODIF_PERM:
-            ult_copy(files[0], dest, state & ST_MODIF_PERM,  state & ST_PRESERVE_LINKS);
+        case ST_2FILES | ST_PRESERVE_LINKS | ST_MODIF_PERM: {
+            char* src = absPath(files[0]);
+            if (src == NULL) return EXIT_FAILURE;
+            ult_copy(src, dest, modif_perm, preserve_links);
             break;
+        }
 
-        /* case ST_2FILES | ST_PRESERVE_LINKS:
-            ult_copy(files[0], dest, 0, 1);
-            break;
-
-        case ST_2FILES | ST_MODIF_PERM:
-            ult_copy(files[0], dest, 1, 0);
-            break;
-
-        case ST_2FILES | ST_PRESERVE_LINKS | ST_MODIF_PERM:
-            ult_copy(files[0], dest, 1, 1);
-            break; */
+        //* Only 1 file and a folder were given
         case ST_1FILE_1DIR:
-            
         case ST_1FILE_1DIR | ST_PRESERVE_LINKS:
-            printf("");
-
-            break;
-
         case ST_1FILE_1DIR | ST_MODIF_PERM:
+        case ST_1FILE_1DIR | ST_PRESERVE_LINKS | ST_MODIF_PERM: {
+            char path[PATH_MAX];
+            char* src = getFileName(files[0]);
+            if (src == NULL) return EXIT_FAILURE;
+            concat_path(path, dest, src);
+            ult_copy(files[0], path, modif_perm, preserve_links);
             break;
-
-        case ST_1FILE_1DIR | ST_PRESERVE_LINKS | ST_MODIF_PERM:
-            break;
+        }//TODO: check if break must be in or out   
 
         case ST_MIX:
             break;
@@ -232,6 +226,18 @@ int main(int argc, char* argv[]) {
     }
 
     /*switch (state) {
+        case ST_2FILES | ST_PRESERVE_LINKS:
+            ult_copy(files[0], dest, 0, 1);
+            break;
+
+        case ST_2FILES | ST_MODIF_PERM:
+            ult_copy(files[0], dest, 1, 0);
+            break;
+
+        case ST_2FILES | ST_PRESERVE_LINKS | ST_MODIF_PERM:
+            ult_copy(files[0], dest, 1, 1);
+            break; 
+
         case 0:
             // Copy normally
             for (int i = 0; i < fileNb; i++) {
@@ -322,7 +328,7 @@ int main(int argc, char* argv[]) {
         }
 
         return err;
-    } 
+    }*/ 
 
 
 

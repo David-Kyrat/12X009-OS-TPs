@@ -198,6 +198,31 @@ int list_dir(const char *dir_name) {
 }
 
 
+char* getFileName(char* path) {
+    char* absPath = realpath(path, NULL);
+    if (absPath == NULL) {
+        int savedErr = errno;
+        fprintf(stderr, "%s, Cannot get fileName: %s\n", path, strerror(savedErr));
+        return NULL;
+    }
+    int len = strlen(absPath)-1;
+
+    while(absPath[len] != '/' && len >= 0) len--;
+    //* Now absPath[len] points to first '/' in absPath (starting from the end)
+    char* out = &(absPath[len+1]); //extract a view on a sublist of absPath. (i.e. pointer to some element in it)
+    return out;
+}
+
+char* absPath(char* path) {
+    char* out = realpath(path, NULL);
+    if (out == NULL) {
+        int savedErr = errno;
+        fprintf(stderr, "%s, Cannot get absolute-path: %s\n", path, strerror(savedErr));
+        return NULL;
+    }
+    
+    return out;
+}
 
 //OLD VERSION
 int __list_dir(const char *dir_name, int determine_copy, char* copy_to_dest) {
