@@ -22,11 +22,11 @@ int checkEnoughArgs(int argc, char* file_name) {
     return 0;
 }
 
-char** parseArgs(int argc, char* argv[], int* fileNb) {
-    char** parsedArgs = NULL;
+const char** parseArgs(int argc, char* argv[], int* fileNb) {
+    const char** parsedArgs;
     if (checkEnoughArgs(argc, argv[0]) != 0) {
         errno = EINVAL;
-        return parsedArgs;
+        return NULL;
     }
 
     // relevant args i.e. not program name
@@ -49,10 +49,8 @@ char** parseArgs(int argc, char* argv[], int* fileNb) {
             // if argument is valid => adds it. Only store files not optional arguments.
             parsedArgs[len++] = strndup(args[i], argLen + 1);
         }
-        
     }
     *fileNb = len;
-
     return parsedArgs;
 }
 

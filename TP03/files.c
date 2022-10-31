@@ -198,8 +198,8 @@ int list_dir(const char *dir_name) {
 }
 
 
-char* getFileName(char* path) {
-    char* absPath = realpath(path, NULL);
+const char* getFileName(const char* path) {
+    const char* absPath = realpath(path, NULL);
     if (absPath == NULL) {
         int savedErr = errno;
         fprintf(stderr, "%s, Cannot get fileName: %s\n", path, strerror(savedErr));
@@ -213,8 +213,8 @@ char* getFileName(char* path) {
     return out;
 }
 
-char* absPath(char* path) {
-    char* out = realpath(path, NULL);
+const char* absPath(const char* path) {
+    const char* out = realpath(path, NULL);
     if (out == NULL) {
         int savedErr = errno;
         fprintf(stderr, "%s, Cannot get absolute-path: %s\n", path, strerror(savedErr));

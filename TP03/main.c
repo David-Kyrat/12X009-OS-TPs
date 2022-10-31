@@ -18,7 +18,8 @@
  * and what / how many arguments were given. (i.e. called with 2 files, mulitple folders, just 1 file...)
  */
 //* ST for 'STATE'
-#define ST_JUST_LIST (0)      //! 000000 = 0
+//! 000000 = 0
+#define ST_JUST_LIST (0) //? Just list content of directory
 
 //! 00001 = 1
 #define ST_PRESERVE_LINKS (1 << 0) //? -a was passed Links are copied as Links and resolved to ensure that both points to the same inode 
@@ -115,7 +116,7 @@ int handleArgs(int fileNb, char** files, int optional_state) {
     // TODO -- 4. If -a is passed, change the permissions
     // TODO -- 5. If -f is passed, links are copied as links (stored in optional state)
 
-int ultra_cp(char* src, char* dest, int a, int f) {
+int ultra_cp(const char* src, const char* dest, int a, int f) {
 
     struct stat infos = lstat_s(src);
 
@@ -123,10 +124,10 @@ int ultra_cp(char* src, char* dest, int a, int f) {
     if (is_modified(src, dest) == 0) return 0;
     
     // if -a was passed, change the permissions to 777 (rwx)
-    if (a == 1) chmod(src, 777);
+    if (a) chmod(src, 0777);
 
     // if -f was passed, copy from the realpath of the source (point to same inode as source link)
-//    if (f == 1) copy(realpath("src", 200), dest);
+     if (f == 1) copy(absPath(src), dest);
 
     if (S_ISDIR(infos.st_mode)) {
   //      list_dir(src, 1, dest);
@@ -138,10 +139,6 @@ int ultra_cp(char* src, char* dest, int a, int f) {
 
 }
 
-void onefile_onedir(char* from, char* dest){
-    char path[PATH_MAX];
-    concat_path(path, dest, from);
-}
 
 int main(int argc, char* argv[]) {
     //list_dir("/var/log/");
@@ -149,8 +146,7 @@ int main(int argc, char* argv[]) {
 
     // Parse the given arguments
     int optional_state = parseOptArgs(argc, argv);
-
-    char** files = parseArgs(argc, argv, &fileNb);
+    const char** files = parseArgs(argc, argv, &fileNb);
 
     // Check if parsing had any error
     if (optional_state < 0 || !files || fileNb <= 0) {
@@ -160,13 +156,6 @@ int main(int argc, char* argv[]) {
     }
     // Destination file/folder is the last one
     const char* dest = files[fileNb - 1];
-
-    //! TODO: FIND WHAT TO DO WITH THIS
-    /*     if(exists(dest) == -1) {
-        // VS code gives error if perms are given, makefile gives error if not ??????
-        
-        mkdir(dest, 0777);
-    } */
 
     errno = 0;
     int state = handleArgs(fileNb, files, optional_state);
@@ -187,6 +176,7 @@ int main(int argc, char* argv[]) {
             }
             break;
 
+
         //* Only 2 files were given
         case ST_2FILES:
         case ST_2FILES | ST_PRESERVE_LINKS:
@@ -198,30 +188,32 @@ int main(int argc, char* argv[]) {
             break;
         }
 
+
         //* Only 1 file and a folder were given
         case ST_1FILE_1DIR:
         case ST_1FILE_1DIR | ST_PRESERVE_LINKS:
         case ST_1FILE_1DIR | ST_MODIF_PERM:
         case ST_1FILE_1DIR | ST_PRESERVE_LINKS | ST_MODIF_PERM: {
             char path[PATH_MAX];
-            char* src = getFileName(files[0]);
+            const char* src = getFileName(files[0]);
             if (src == NULL) return EXIT_FAILURE;
             concat_path(path, dest, src);
             ult_copy(files[0], path, modif_perm, preserve_links);
             break;
-        }//TODO: check if break must be in or out   
+        }  //TODO: check if break must be in or out
+
 
         case ST_MIX:
-            break;
-
         case ST_MIX | ST_PRESERVE_LINKS:
-            //TODO:
-            break;
-
         case ST_MIX | ST_MODIF_PERM:
-            break;
-
         case ST_MIX | ST_PRESERVE_LINKS | ST_MODIF_PERM:
+            //TODO: call ultra-cp correctly
+
+            for (int i = 0; i < fileNb; i++) {
+                const char* file = absPath(files[i]);
+
+                ultra_cp(file, dest, modif_perm, preserve_links);
+            }
             break;
     }
 

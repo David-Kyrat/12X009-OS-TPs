@@ -16,7 +16,7 @@ int checkEnoughArgs(int argc, char* file_name);
  * 
  * @return Copy of parsed arguments.
  */
-char** parseArgs(int argc, char* argv[], int* fileNb);
+const char** parseArgs(int argc, char* argv[], int* fileNb);
 
 /**
  * Parses the optional arguments (i.e. -f, -a) and returns 'state', an int describing what was given.

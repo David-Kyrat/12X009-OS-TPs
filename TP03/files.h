@@ -87,12 +87,12 @@ int list_dir(const char *dir_name);
  * @param path path to file to relove name from.
  * @return char* Actual resolved name of file located at path. (Use real path to get the absolute path, then extract the name).
  */
-char* getFileName(char* path);
+const char* getFileName(const char* path);
 
 /**
  * Takes a path and returns the absolute path
  * @param path The path to the file or directory.
  * @return The absolute path of the file.
  */
-char* absPath(char* path);
+const char* absPath(const char* path);
 
