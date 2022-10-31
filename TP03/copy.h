@@ -1,10 +1,9 @@
 /**
- * Checks if a file has been modified
+ * Used when backing up files to check if 'src' has been modified since last backup at 'dest'.
  * 
- * @param src Source file path
- * @param dest Destination file path
- * 
- * @return 0 if it hasn't been modified, 1 if it has
+ * @param src source file (potentially newer)
+ * @param dest destination file (file to check against)
+ * @return 1 if and only if src is newer, if dest does not exist or if sizes are different. Otherwise it returns 0
  */
 int is_modified(const char* src, const char* dest);
 

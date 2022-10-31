@@ -14,17 +14,12 @@
 
 
 int is_modified(const char* src, const char* dest) {
-
-    // Save the data of both files
-    struct stat infos_src;
-    struct stat infos_dest;
-
-    // Check if the date of the source is older than the destination or the sizes of both are different
-    if (infos_src.st_mtime != infos_dest.st_mtime || infos_src.st_size != infos_dest.st_size) return 1;
+    if (!exists(dest)) return 1; //* If destination does not exists => src is obviously newer
     
-    // Return 0 if the dates are the same and the sizes are the same
-    return (infos_src.st_mtime != infos_dest.st_mtime || infos_src.st_size != infos_dest.st_size);
+    struct stat src_infos = stat_s(src), dest_infos = stat_s(dest);
+    int cmprison = dateCmpr(src_infos.st_mtim, dest_infos.st_mtim);
     
+    return cmprison > 0 || src_infos.st_size != dest_infos.st_size;
 }
 
 int copy(const char* from, const char* to) {
