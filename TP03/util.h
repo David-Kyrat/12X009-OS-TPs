@@ -96,3 +96,14 @@ struct stat lstat_s(const char* path);
  * @return stat structure of path's inode
  */
 struct stat stat_s(const char* path);
+
+/**
+ * Comparator of date. i.e. compare time 'ts2' and 'ts1' and return an integer (1, 0, -1)
+ * describing if ts2 > ts1, ts2 == ts1 or if ts2 < ts1.
+ 
+ * @param ts2 Second timestamp to compare
+ * @param ts1 First timestamp to compare
+ * 
+ * @return 1, 0 or -1 if ts2 is respectively Greater, Equal to or Less than ts1.
+ */
+int dateCmpr(struct timespec ts2, struct timespec ts1);
