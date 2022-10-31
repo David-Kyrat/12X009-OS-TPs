@@ -63,7 +63,6 @@ char* getFileName(char* path) {
 int dateCmpr(struct timespec ts2, struct timespec ts1) {
     const time_t t1 = ts1.tv_sec, t2 = ts2.tv_sec;
     const time_t elapsed = difftime(t2, t1);
-    //return elapsed > 0 ? 1 : (elapsed == 0 ? 0 : -1);
     return elapsed < 0 ? -1 : (elapsed > 0);
     //? If elapsed < 0 then ts2 < ts1. Else (elapsed > 0) will return 1 Iif ts2 > ts0, and 0, if elapsed == 0. (because the only case left is elapsed == 0)
 }

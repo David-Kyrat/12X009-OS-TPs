@@ -37,7 +37,6 @@ int copy(const char* from, const char* to) {
         hdlOpenErr(from, 0);
         return -1;
     }
-
     // Check that it's a regular file, folder or a link
     if (!(S_ISREG(infos.st_mode) || S_ISDIR(infos.st_mode) || S_ISLNK(infos.st_mode))) {
         errno = EINVAL;
@@ -45,7 +44,6 @@ int copy(const char* from, const char* to) {
         return -1;
     }
     
-
     //* While there are bytes left to be read, reads them 4096 by 4096 (4096 or current size of 'buff' if its not that)
     //* nb: if readNb is < to what we expected we dont really care because the program will retry until having read everything
     while ((readNb = read(fd_from, buff, sizeof buff)) > 0) {
@@ -86,9 +84,3 @@ int ult_copy(const char* from, const char* to, int modif_perm, int preserve_link
 
     return out;
 }
-
-/* int main(int argc, char* argv[]) {
-    if (copy(argv[1], argv[2])) return -1;
-
-    return EXIT_SUCCESS;
-} */
