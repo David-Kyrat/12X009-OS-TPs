@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>     //strerror
 #include <errno.h>
+#include <dirent.h>
 #include <sys/stat.h>   // open
 #include <sys/types.h>  // idem
 #include <fcntl.h>      //  idem
@@ -138,13 +139,117 @@ int copy(const char* from, const char* to) {
 
 int copy_ifneeded(const char* from, const char* to) {
     if (is_modified(from, to)) return copy(from, to);
+    else printf("%s -- up to date\n", to);
     return 0;
 }
 
-int ult_copy(const char* from, const char* to, int modif_perm, int preserve_link) {
+int ultra_cp_single(const char* from, const char* to, int modif_perm, int preserve_link) {
     int out = copy_ifneeded(from, to);
-    if (modif_perm) //doit
-    
-
+    if (modif_perm) chmod(to, 0777);
+    if (copy_ifneeded(from , to) < 0) {
+        int savedErr = errno;
+        printf("Cannot ultra cp : %s\n", strerror(savedErr));
+        return -1;
+    }
     return out;
 }
+
+//return where backuped file should be in dest
+const char* compute_backup_dest(const char* src_parent, const char* src_path, const char* dest){
+    const char* parent_name = getFileName(src_parent);
+    char* parent_in_src_idx = strstr(src_path, parent_name);
+    //extract where dest and to differ
+    char* path_after = &parent_in_src_idx[strlen(parent_name) + 1];
+    //built absolute version of path 'to' even if it doesn't exists
+    const char* path = calloc(PATH_MAX, sizeof(char));
+    concat_path(path, dest, path_after);
+    return path;
+}
+
+/**
+ * Backup files from 'parent/' to 'dest'
+ * @param parent parent directory of files to backup
+ * @param dir_name current directory to backup
+ * @return 0 if success else error
+ */
+int ultra_cp(const char* parent, const char *dir_name, const char* dest, int modif_perm, int preserve_link) {
+    int err = errno;
+    DIR *d = opendir(dir_name);
+    struct dirent *entry;
+    const char *d_name;  // name of entry
+
+    // In case of exception on opening
+    if (!d) return hdlOpenErr(dir_name, 0);
+
+    //prints which dir is being listed
+    printf("%s/:\n", dir_name);
+    int is_created_subfolder = 0;
+    // Loop on each entry
+    while ((entry = readdir(d)) != NULL) {
+        // Get entry name
+        d_name = entry->d_name;
+        int isEntDot = isDot(d_name);  //* is 'entry' '..' or '.' ?
+        const char path[PATH_MAX];
+        
+        //* Do not print ., .. as they are always here
+        if (!isEntDot) {
+            
+            struct stat infos;
+            // computes the name of the subdirectory and checks if it is not too long
+
+            if(concat_path(path, dir_name, d_name) < 0) return hdlCatErr(d_name);
+
+            if (lstat(path, &infos) < 0) fprintf(stderr, "Cannot stat %s: %s\n", d_name, strerror(errno));
+            
+            char* permissions = computePerm(infos.st_mode);
+
+            // Save the last modification time given
+            time_t mtime = infos.st_mtime;
+
+            // Initialize where the formatted date will be written
+            char modif_time[50];
+
+            // Initialize the time_info struct to manipulate the date
+            struct tm* time_info;
+
+            // Write the time as the local time of the computer
+            time_info = localtime(&mtime);
+
+            // Copy the formatted time to modif_time
+            strftime(modif_time, 50, "%c", time_info);
+
+            // Output the info
+            //printf(" %s %*ld      %s  %s\n", permissions, 13, infos.st_size, modif_time, d_name);
+            //* computes the name of the subdirectory and checks if it is not too long
+            if (concat_path(path, dir_name, d_name) < 0) return hdlCatErr(d_name);
+            if (lstat(path, &infos) < 0) fprintf(stderr, "Cannot stat %s: %s\n", d_name, strerror(errno));
+
+        }
+        // Is 'entry' a subdirectory ?
+        if (entry->d_type & DT_DIR) {
+            if (!isEntDot) {
+                printf("\n");
+                err = ultra_cp(parent, path, dest, modif_perm, preserve_link);
+                printf("\n%s/ (rest):\n", dir_name);
+            }
+        } else {
+           // if entry is a file => copy it if needed 
+           const char* backup_loc = compute_backup_dest(parent, path, dest);
+           printf("Copying %s to %s.\n\n", path, backup_loc);
+            if (!is_created_subfolder) {
+                create_subpaths_ifneeded(path, backup_loc, dest);
+                is_created_subfolder = 1;
+            }
+            if (ultra_cp_single(path, backup_loc, modif_perm, preserve_link) < 0) return -1;
+            //ultra-cp single already handle error
+        }
+    }
+    // closing directory
+    if (closedir(d)) {
+        err = -1;
+        hdlCloseErr(dir_name, 0);
+    }
+
+    return err;
+}
+

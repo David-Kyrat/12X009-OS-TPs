@@ -42,4 +42,13 @@ int copy(const char *from, const char *to);
  */
 int copy_ifneeded(const char* from, const char* to);
 
-int ult_copy(const char* from, const char* to, int modif_perm, int preserve_link);
+int ultra_cp_single(const char* from, const char* to, int modif_perm, int preserve_link);
+
+/**
+ * Backup files from 'parent/' to 'dest'
+ * 
+ * @param parent parent directory of files to backup
+ * @param dir_name current directory to backup
+ * @return 0 if success else error
+ */
+int ultra_cp(const char* parent, const char *dir_name, const char* dest, int modif_perm, int preserve_link);

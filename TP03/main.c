@@ -109,18 +109,12 @@ int handleArgs(int fileNb, char** files, int optional_state) {
     return state;
 }
 
-    // Check for
-    // DONE -- 1. Just 1 file/folder -> print/ls contents
-    // DONE -- 2. If only 2 files are given -> create/replace the file
-    // TODO -- 3. If multiple files & folder and 'dest' exists -> create/replace architecture in 'dest'
-    // TODO -- 4. If -a is passed, change the permissions
-    // TODO -- 5. If -f is passed, links are copied as links (stored in optional state)
-
-int ultra_cp(const char* src, const char* dest, int a, int f) {
+    
+/*int ultra_cp(const char* src, const char* dest, int a, int f) {
 
     struct stat infos = lstat_s(src);
-
-    // If the two files are exactly the same, do not copy
+ 
+     // If the two files are exactly the same, do not copy
     if (is_modified(src, dest) == 0) return 0;
     
     // if -a was passed, change the permissions to 777 (rwx)
@@ -134,10 +128,17 @@ int ultra_cp(const char* src, const char* dest, int a, int f) {
     }
 
     else copy(src, dest);
-    
+     
     return 0;
 
-}
+}*/
+
+// Check for
+    // 1. Just 1 file/folder -> print/ls contents
+    // 2. If only 2 files are given -> create/replace the file
+    // 3. If multiple files & folder and 'dest' exists -> create/replace architecture in 'dest'
+    // 4. If -a is passed, change the permissions
+    // 5. If -f is passed, links are copied as links (stored in optional state)
 
 int main(int argc, char* argv[]) {
     //list_dir("/var/log/");
@@ -182,7 +183,7 @@ int main(int argc, char* argv[]) {
         case ST_2FILES | ST_PRESERVE_LINKS | ST_MODIF_PERM: {
             char* src = absPath(files[0]);
             if (src == NULL) return EXIT_FAILURE;
-            ult_copy(src, dest, modif_perm, preserve_links);
+            ultra_cp_single(src, dest, modif_perm, preserve_links);
             break;
         }
 
@@ -195,22 +196,22 @@ int main(int argc, char* argv[]) {
             const char* src = getFileName(files[0]);
             if (src == NULL) return EXIT_FAILURE;
             concat_path(path, dest, src);
-            ult_copy(files[0], path, modif_perm, preserve_links);
+            ultra_cp_single(files[0], path, modif_perm, preserve_links);
             break;
         }  //TODO: check if break must be in or out
 
         case ST_MIX:
         case ST_MIX | ST_PRESERVE_LINKS:
         case ST_MIX | ST_MODIF_PERM:
-        case ST_MIX | ST_PRESERVE_LINKS | ST_MODIF_PERM:
-            //TODO: call ultra-cp correctly
-
+        case ST_MIX | ST_PRESERVE_LINKS | ST_MODIF_PERM: {
+            const char* _dest = absPath(dest);
             for (int i = 0; i < fileNb; i++) {
                 const char* file = absPath(files[i]);
 
-                ultra_cp(file, dest, modif_perm, preserve_links);
+                ultra_cp(file, file, _dest, modif_perm, preserve_links);
             }
             break;
+        }
     }
 
     return EXIT_SUCCESS;
@@ -218,15 +219,15 @@ int main(int argc, char* argv[]) {
 
     /*switch (state) {
         case ST_2FILES | ST_PRESERVE_LINKS:
-            ult_copy(files[0], dest, 0, 1);
+            ultra_cp_single(files[0], dest, 0, 1);
             break;
 
         case ST_2FILES | ST_MODIF_PERM:
-            ult_copy(files[0], dest, 1, 0);
+            ultra_cp_single(files[0], dest, 1, 0);
             break;
 
         case ST_2FILES | ST_PRESERVE_LINKS | ST_MODIF_PERM:
-            ult_copy(files[0], dest, 1, 1);
+            ultra_cp_single(files[0], dest, 1, 1);
             break; 
 
         case 0:
