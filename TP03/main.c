@@ -211,9 +211,10 @@ int main(int argc, char* argv[]) {
                 //* if its not a directory file just copy it 
                 const char* file = absPath(files[i]);
                 if (!isDir(file)) {
-                    char backup_dest[PATH_MAX];
-                    concat_path(backup_dest, dest, file);
+                    char* backup_dest = calloc((2*strlen(dest)+ strlen(file))+1, sizeof(char));
+                    concat_path(backup_dest, dest, getFileName(file));
                     ultra_cp_single(file, backup_dest, modif_perm, preserve_links);
+                    free(backup_dest);
                 }
                 //* if not recurisvely copy each one
                 else ultra_cp(file, file, _dest, modif_perm, preserve_links);

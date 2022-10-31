@@ -99,7 +99,7 @@ int copy(const char* from, const char* to) {
 
     fd_to = open(to, O_WRONLY | O_CREAT , 0644);
     if (fd_to < 0) {
-        hdlOpenErr(from, 0);
+        hdlOpenErr(to, 0);
         return -1;
     }
     // Check that it's a regular file, folder or a link
