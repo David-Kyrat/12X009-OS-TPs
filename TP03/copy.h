@@ -42,6 +42,17 @@ int copy(const char *from, const char *to);
  */
 int copy_ifneeded(const char* from, const char* to);
 
+/**
+ * Ultra cp for a single file (usually regular file)
+ * It copies a file from one location to another, and if the copy is successful, 
+ * 
+ * @param from the source file
+ * @param to the destination file
+ * @param modif_perm if set to 1, the permissions of the file will be set to 0777.
+ * @param preserve_link if set to 1, the file will be copied as a link, if it is a link.
+ * 
+ * @return 0 if success, -1 if error.
+ */
 int ultra_cp_single(const char* from, const char* to, int modif_perm, int preserve_link);
 
 /**

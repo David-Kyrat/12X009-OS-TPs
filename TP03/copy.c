@@ -137,10 +137,9 @@ int copy_ifneeded(const char* from, const char* to) {
         int out = copy(from, to);
         return out;
     }
-    
-    //else printf("%s -- up to date\n", to);
     return 0;
 }
+
 
 int ultra_cp_single(const char* from, const char* to, int modif_perm, int preserve_link) {
     int out = copy_ifneeded(from, to);
