@@ -205,11 +205,21 @@ int main(int argc, char* argv[]) {
         case ST_MIX | ST_MODIF_PERM:
         case ST_MIX | ST_PRESERVE_LINKS | ST_MODIF_PERM: {
             const char* _dest = absPath(dest);
-            for (int i = 0; i < fileNb; i++) {
+            //for each file as argument
+            for (int i = 0; i < fileNb - 1; i++) {
+                
+                //* if its not a directory file just copy it 
                 const char* file = absPath(files[i]);
-
-                ultra_cp(file, file, _dest, modif_perm, preserve_links);
+                if (!isDir(file)) {
+                    char backup_dest[PATH_MAX];
+                    concat_path(backup_dest, dest, file);
+                    ultra_cp_single(file, backup_dest, modif_perm, preserve_links);
+                }
+                //* if not recurisvely copy each one
+                else ultra_cp(file, file, _dest, modif_perm, preserve_links);
             }
+            printf("\n --- Backed up files ---\n\n");
+            list_dir(_dest);
             break;
         }
     }

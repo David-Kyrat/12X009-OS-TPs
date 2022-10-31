@@ -39,7 +39,7 @@ int create_subpaths_ifneeded(const char* from, const char* to, const char* dest)
     // search where dest and to differ (we have that 'dest' is included in 'to')
     // if dest is not parent dir of 'to'
     const char* dest_name = getFileName(dest);
-    printf("destname: %s\n", dest_name);
+    //printf("destname: %s\n", dest_name);
     char* dest_in_to_idx = strstr(to, dest_name);
     if (dest_in_to_idx == NULL) {
         errno = EINVAL;
@@ -138,8 +138,12 @@ int copy(const char* from, const char* to) {
 
 
 int copy_ifneeded(const char* from, const char* to) {
-    if (is_modified(from, to)) return copy(from, to);
-    else printf("%s -- up to date\n", to);
+    if (is_modified(from, to)) {
+        int out = copy(from, to);
+        return out;
+    }
+    
+    //else printf("%s -- up to date\n", to);
     return 0;
 }
 
@@ -181,8 +185,6 @@ int ultra_cp(const char* parent, const char *dir_name, const char* dest, int mod
     // In case of exception on opening
     if (!d) return hdlOpenErr(dir_name, 0);
 
-    //prints which dir is being listed
-    printf("%s/:\n", dir_name);
     int is_created_subfolder = 0;
     // Loop on each entry
     while ((entry = readdir(d)) != NULL) {
@@ -228,9 +230,8 @@ int ultra_cp(const char* parent, const char *dir_name, const char* dest, int mod
         // Is 'entry' a subdirectory ?
         if (entry->d_type & DT_DIR) {
             if (!isEntDot) {
-                printf("\n");
+                //printf("\n");
                 err = ultra_cp(parent, path, dest, modif_perm, preserve_link);
-                printf("\n%s/ (rest):\n", dir_name);
             }
         } else {
            // if entry is a file => copy it if needed 

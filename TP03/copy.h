@@ -46,6 +46,7 @@ int ultra_cp_single(const char* from, const char* to, int modif_perm, int preser
 
 /**
  * Backup files from 'parent/' to 'dest'
+ * does not copy empty directory because they contain no files
  * 
  * @param parent parent directory of files to backup
  * @param dir_name current directory to backup
