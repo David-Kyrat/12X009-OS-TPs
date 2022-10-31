@@ -12,7 +12,6 @@
 #include "util.h"
 
 
-
 int is_modified(const char* src, const char* dest) {
     if (!exists(dest)) return 1; //* If destination does not exists => src is obviously newer
     
@@ -34,9 +33,10 @@ int copy(const char* from, const char* to) {
     if ((fd_from = open(from, O_RDONLY)) < 0) return hdlOpenErr(from, 0);
 
     fd_to = open(to, O_WRONLY | O_CREAT , 0644);
-    /* if ((fd_to == -1) && (EEXIST == errno)) {
-        fd_to = open(from, O_WRONLY);
-    } */
+    if (fd_to < 0) {
+        hdlOpenErr(from, 0);
+        return -1;
+    }
 
     // Check that it's a regular file, folder or a link
     if (!(S_ISREG(infos.st_mode) || S_ISDIR(infos.st_mode) || S_ISLNK(infos.st_mode))) {
