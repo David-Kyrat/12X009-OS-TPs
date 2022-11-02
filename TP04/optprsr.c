@@ -9,52 +9,57 @@
 #include "util.h"
 #include "files.h"
 
-const char* OPT_STRING = "fa";
-const int MIN_ARG_NB = 1;
+//const char* OPT_STRING = "fa";
+const int MIN_ARG_NB = 1, MAX_ARG_NB = 1;
 const char* USAGE_MSG = "Usage: %s folder1 folder2/ destination \n";
 
-int checkEnoughArgs(int argc, char* file_name) {
-    if (argc < MIN_ARG_NB + 1) {
-        //fprintf(stderr, "%s: Not Enough arguments: Expecting at least %d.\n", file_name, MIN_ARG_NB);
+/**
+ * @brief Check if there is at least 1 argument.
+ * @param argc same as argc in main
+ * @return 0 if success otherwise code 22 (Invalid argument)
+ */
+int checkArgsNb(int argc) {
+    int relevantNb = argc-1;
+    if (relevantNb < MIN_ARG_NB || relevantNb > MAX_ARG_NB) {
         errno = EINVAL;
         return EINVAL;
     }
     return 0;
 }
 
-const char** parseArgs(int argc, char* argv[], int* fileNb) {
-    const char** parsedArgs;
-    if (checkEnoughArgs(argc, argv[0]) != 0) {
-        errno = EINVAL;
+const char* parseArgs(int argc, char* argv[]) {
+    const char* parsedArg;
+    if (checkArgsNb(argc) != 0) {
+        fprintf(stderr, "%s: Not Enough arguments: Expecting at least %d.\n", argv[0], MIN_ARG_NB);
         return NULL;
     }
 
-    // relevant args i.e. not program name
-    char** args = &argv[1];
-    int len = 0; // initial length of parsedArgs => will be incremented
-    tryalc(parsedArgs = calloc(argc-1, sizeof(char*)));
-
-    for (int i = 0; i < argc - 1; i++) {
-        int argLen = strlen(args[i]);
-        if (argLen <= 0 || argLen >= PATH_MAX) {
-            errno = EINVAL;
-            return parsedArgs;
-        }
-        // argv[i] is not destination i.e. last element and argv[i] does not exists
-        if ((argc - 1 <= 1 || i != argc - 2) && (*args[i] != '-') && !exists(args[i])) {
-            errno = ENOENT;
-            fprintf(stderr, "\"%s\" is not valid.\n", args[i]);
-
-        } else if (*args[i] != '-') {
-            // if argument is valid => adds it. Only store files not optional arguments.
-            parsedArgs[len++] = strndup(args[i], argLen + 1);
-        }
+    // relevant arg i.e. not program name. (Waiting only 1 arg)
+    char* arg = argv[1];
+    
+    int argLen = strlen(arg);
+    if (argLen <= 0 || argLen >= PATH_MAX) {
+        errno = EINVAL;
+        return NULL;
     }
-    *fileNb = len;
-    return parsedArgs;
+        // argv[i] is not destination i.e. last element and argv[i] does not exists
+    if (!exists(arg)) {
+        errno = ENOENT;
+        fprintf(stderr, "\"%s\" Invalid argument: %s", arg, strerror(ENOENT));
+        return NULL;
+    }
+    //returns absolute path if it was computed correctly.
+    parsedArg = realpath(arg, NULL);
+    if (parsedArg == NULL) {
+        int savedErr = errno;
+        fprintf(stderr, "Cannot resolve file %s: %s\n", arg, strerror(savedErr));
+        return NULL;
+    }
+
+    return parsedArg;
 }
 
-int parseOptArgs(int argc, char* argv[]) {
+/* int parseOptArgs(int argc, char* argv[]) {
     int state = 0, opt;
 
     while ((opt = getopt(argc, argv, OPT_STRING)) != -1) {
@@ -73,4 +78,5 @@ int parseOptArgs(int argc, char* argv[]) {
         }
     }
     return state;
-}
+}*/
+

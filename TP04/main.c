@@ -1,18 +1,26 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <errno.h>
 
 #include "util.h"
 #include "optprsr.h"
 #include "files.h"
 
-int main() {
 
-    printf("Hello World\n");
+//TODO: recomment correctly optparser.h
 
-    int ex = exists("main.c");
-    if (ex < 0 ) fprintf(stderr, "you fukced up\n");
-    if (ex == 0) printf("still fucked up\n");
-    else printf("Sucess\n");
+int main(int argc, char* argv[]) {
 
-    return 0;
+    const char* file = parseArgs(argc, argv);
+    if (file == NULL) {
+        int savedErr = errno;
+        //if error message was not added to stderr
+        if (savedErr != -1) fprintf(stderr, "%s\n", strerror(savedErr));
+        return EXIT_FAILURE;
+    }
+
+    printf("file is %s\n", file);
+
+    return EXIT_SUCCESS;
 }
