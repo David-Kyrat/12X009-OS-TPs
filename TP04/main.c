@@ -24,6 +24,8 @@ int main(int argc, char* argv[]) {
     printf("file is %s\n", file);
 
     Inp* inp = inp_askUser();
+    if (inp == NULL) return EXIT_FAILURE;
+    
     inp_print(inp);
 
     return EXIT_SUCCESS;
