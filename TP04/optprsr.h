@@ -1,15 +1,3 @@
-//char VALID_CMD[3], VALID_LTYPE[3], VALID_WHENCE[3];
-
-//#ifndef __OPTPRSR_H__
-//#define __OPTPRSR_H__
-
-/**
- * @brief Check if there is at least 1 argument.
- * @param argc same as argc in main
- * @return 0 if success otherwise code 22 (Invalid argument)
- */
-//int checkArgsNb(int argc, char* file_name);
-
 /**
  * Parses & extract path of file given at main function and return a copy of it.
  * (does a malloc remember to free.)
@@ -32,8 +20,7 @@ const char* parseArgs(int argc, char* argv[]);
  * @param stop end of lock location
  * @param whence relatively to what are start and end computed ? (s, c, e)
  * 
- * @return 0 if success, -1 if error (errno is set accordingly).
+ * @return 0 if success, -1 if error (errno is set accordingly). Or 2 if user entered an '?' to get help.
  */
 int parseInput(const char* INP_FORMAT, char* cmd, char* ltype, int* start, int* stop, char* whence);
 
-//#endif

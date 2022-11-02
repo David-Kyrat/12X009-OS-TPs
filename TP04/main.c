@@ -4,13 +4,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "util.h"
-#include "optprsr.h"
 #include "files.h"
 #include "inp.h"
+#include "optprsr.h"
+#include "util.h"
 
 //TODO: recomment correctly optparser.h
-
 
 int main(int argc, char* argv[]) {
     const char* file = parseArgs(argc, argv);
@@ -22,10 +21,13 @@ int main(int argc, char* argv[]) {
     }
 
     printf("file is %s\n", file);
+    Inp* inp = NULL;
 
-    Inp* inp = inp_askUser();
-    if (inp == NULL) return EXIT_FAILURE;
-    
+    do {
+        inp = inp_askUser();
+        printf("--------\n\n");
+    } while (inp == NULL);
+
     inp_print(inp);
 
     return EXIT_SUCCESS;

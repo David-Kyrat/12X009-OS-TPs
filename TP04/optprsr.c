@@ -9,9 +9,8 @@
 #include "optprsr.h"
 #include "util.h"
 
-static const char VALID_CMD[3] = {'g', 's', 'w'};
-static const char VALID_LTYPE[3] = {'r', 'w', 'u'};
-static const char VALID_WHENCE[3] = {'s', 'c', 'e'};
+static const char VALID_CMD[3] = {'g', 's', 'w'}, VALID_LTYPE[3] = {'r', 'w', 'u'}, VALID_WHENCE[3] = {'s', 'c', 'e'};
+static const char HELP_CHAR = '?', QUIT_CHAR = 'Q';
 
 //const char* OPT_STRING = "fa";
 const int MIN_ARG_NB = 1, MAX_ARG_NB = 1;
@@ -63,7 +62,6 @@ const char* parseArgs(int argc, char* argv[]) {
     return parsedArg;
 }
 
-
 int parseInput(const char* INP_FORMAT, char* cmd, char* ltype, int* start, int* stop, char* whence) {
     char* buf = calloc(MAX_INPUT, sizeof(char));
     fgets(buf, MAX_INPUT, stdin);
@@ -78,6 +76,18 @@ int parseInput(const char* INP_FORMAT, char* cmd, char* ltype, int* start, int* 
             isWhenceGiven = 1;
             printf("whence given\n");
             break;
+
+        case 1:
+            //*if user did not entered '?' or 'quit_char' then having only 1 parameter is not valid.
+            //* then the program will then not enter the if clause, i.e. => not break => continue to default branch => finally return -1 with errno set to EINVAL.
+            if (*cmd == HELP_CHAR) {
+                //if user seeked for help (entered ?) => returns 2 to indicate that. else does what was described above.
+                free(buf);
+                return 2;
+            } else if (*cmd == QUIT_CHAR) {
+                printf("%c was pressed, exiting...\n", QUIT_CHAR);
+                exit(EXIT_SUCCESS);
+            }
 
         default:
             errno = EINVAL;
@@ -110,8 +120,6 @@ int parseInput(const char* INP_FORMAT, char* cmd, char* ltype, int* start, int* 
         free(buf);
         return -1;
     }
-
-    //TODO: check for correctness of each input
 
     free(buf);
     return EXIT_SUCCESS;
