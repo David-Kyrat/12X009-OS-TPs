@@ -26,7 +26,7 @@ int main(int argc, char* argv[]) {
     do {
         inp = inp_askUser();
         printf("--------\n\n");
-    } while (inp == NULL);
+    } while (inp == NULL || 1);
 
     inp_print(inp);
 

@@ -70,11 +70,12 @@ int parseInput(const char* INP_FORMAT, char* cmd, char* ltype, int* start, int* 
 
     switch (an) {
         case 4:
-            printf("whence not given\n");
+            //TODO: handle case
+
             break;
         case 5:
+            //TODO: handle case
             isWhenceGiven = 1;
-            printf("whence given\n");
             break;
 
         case 1:
