@@ -10,6 +10,18 @@
 
 //TODO: recomment correctly optparser.h
 
+/**
+ * basic user input can enter between 4 and 5 thing
+ * -- 1. Command (1 char) ’g’ (F_GETLK), ’s’ (F_SETLK), or ’w’ (F_SETLKW)
+ *
+ * -- 2. Lock type (1 char) ’r’ (F_RDLCK), ’w’ (F_WRLCK), or ’u’ (F_UNLCK)
+ * 
+ * -- 3. start (int)
+ * -- 4. stop (int)
+ * 
+ * -- 5. whence (1 char) 's’ (SEEK_SET , default), ’c’ (SEEK_CUR), or ’e’ (SEEK_END)
+ */
+
 int main(int argc, char* argv[]) {
 
     const char* file = parseArgs(argc, argv);
