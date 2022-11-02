@@ -88,7 +88,7 @@ int parseInput(const char* INP_FORMAT, char* cmd, char* ltype, int* start, int* 
                 printf("%c was pressed, exiting...\n", QUIT_CHAR);
                 exit(EXIT_SUCCESS);
             }
-
+            //else: just go into default branch because there is no break/return ...
         default:
             errno = EINVAL;
             fprintf(stderr, "%s: Expecting between 4 and 5 inputs\n", strerror(EINVAL));
