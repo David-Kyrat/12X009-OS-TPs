@@ -11,7 +11,6 @@
 #include <time.h>
 
 #include "util.h"
-#include "copy.h"
 #include "files.h"
 #pragma clang diagnostic ignored "-Wincompatible-pointer-types-discards-qualifiers"
 
@@ -22,7 +21,7 @@ int isDot(const char *entry_name) {
 const char permRepr[] = {'r', 'w', 'x'};
 
 
-char* computePerm(int mode) {
+/* char* computePerm(int mode) {
       //* 3 groups: owner, group, others, 3 perm: read write execute
     int x = 01, r = 04, w = 02, permNb = 3, dashNb = 10;
     int perms[] = {r, w, x};
@@ -46,7 +45,7 @@ char* computePerm(int mode) {
         }
     }
     return strndup(permsPrty, dashNb);
-}
+} */
 
 
 int exists(const char* path) {
@@ -84,7 +83,7 @@ int isDir(const char* path) {
     return S_ISDIR(infos.st_mode);
 }
 
-
+/* 
 int listEntry(const char* path, struct stat infos) {
     int err = 0;
     char* permissions = computePerm(infos.st_mode);
@@ -113,17 +112,6 @@ int listEntryNoIn(const char* path) {
 }
 
 
-/**
- * Emulates ls -lRa behavior. (except that it doesnt print . and .. because they are always present).  
- * 
- * It takes a directory name as an argument, opens it, reads its entries, and recursively calls itself
- * on each subdirectory.
- * 
- * @param dir_name the name of the directory to list
- * @param copy int, if non-zero will backup files to destination
- * 
- * @return Error code. (0 if success else error code see errno.h for more info)
- */
 int list_dir(const char *dir_name) {
     int err = errno;
     DIR *d = opendir(dir_name);
@@ -194,7 +182,7 @@ int list_dir(const char *dir_name) {
 
     return err;
 }
-
+*/
 
 const char* getFileName(const char* path) {
     const char* absPath = realpath(path, NULL);

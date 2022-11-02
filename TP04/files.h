@@ -14,7 +14,7 @@ int isDot(const char *entry_name);
  * @param mode the mode of the file,
  * @return Permissions of the file, as a String. (i.e. -rw-r--r-x ...)
  */
-char* computePerm(int mode);
+//char* computePerm(int mode);
 
 /**
  * Checks if a file exists
@@ -60,7 +60,7 @@ int concat_path(char buf[], const char* parent, const char* current);
  * 
  * @return 0 if success, -1 if minor error
  */
-int listEntry(const char* path, struct stat infos);
+//int listEntry(const char* path, struct stat infos);
 
 /**
  * "Overload" of listEntry where we do not have to give path's inode info as argument (done in function)
@@ -68,7 +68,7 @@ int listEntry(const char* path, struct stat infos);
  * @param path the path to the file.  (Can also be a folder)
  * @return 0 if success, -1 if error
  */
-int listEntryNoIn(const char* path);
+//int listEntryNoIn(const char* path);
 
 /**
  * Emulates ls -lRa behavior. (except that it doesnt print . and .. because they are always present).  
@@ -80,7 +80,7 @@ int listEntryNoIn(const char* path);
  * 
  * @return Error code. (0 if success else error code see errno.h for more info)
  */
-int list_dir(const char *dir_name);
+//int list_dir(const char *dir_name);
 
 /**
  * Computes actual name of a file.
