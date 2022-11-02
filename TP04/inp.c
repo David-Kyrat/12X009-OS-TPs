@@ -15,7 +15,29 @@ const char* INP_FORMAT = "%c %c %d %d %c";
 //* default message displayed when beginning program
 const char DEF_MSG[] = "Enter ? for help or Q to exit.";
 
+const char* HELP_MSG = "Format: cmd l_type start length [whence(optional)] \
+'cmd' --- 'g' (F_GETLK), 's' (F_SETLK), or 'w' (F_SETLKW) \
+'l_type' --- 'r' (F_RDLCK), 'w' (F_WRLCK), or 'u' (F_UNLCK) \
+'start' --- lock starting offset \
+'length' --- number of bytes to lock \
+'whence' --- 's' (SEEK_SET, default), 'c' (SEEK_CUR), or 'e' (SEEK_END)";
+
+char* HELP_MSGS[6] = {
+    "asd", 
+    "bcd"
+};
+
 const int strArgNb = 3;  //* nb of char argument stored in field 'props'
+
+void initHelpMess() {
+    //for(int i = 0; i < sizeof HELP_MSGS; i++) HELP_MSGS[i] = calloc(512, sizeof(char));
+    HELP_MSGS[0] = strdup("\n\t Format: cmd l_type start length [whence]");
+    HELP_MSGS[1] = strdup("\n\t 'cmd' --- 'g' (F_GETLK), 's' (F_SETLK), or 'w' (F_SETLKW)");
+    HELP_MSGS[2] = strdup("\n\t 'start' --- lock starting offset");
+    HELP_MSGS[3] = strdup("\n\t 'length' --- number of bytes to lock");
+    HELP_MSGS[4] = strdup("\n\t 'whence' --- 's' (SEEK_SET, default), 'c' (SEEK_CUR), or 'e' (SEEK_END)");
+    
+}
 
 struct Inp {
     /**
@@ -27,7 +49,14 @@ struct Inp {
     int start, stop;
 };
 
-void printPid() { printf("PID=%d> ", getpid()); }
+/**
+ * Prints process id in specific manner
+ * @param in, if ('in') then prints formatted as waiting output (i.e. PID=%d> ), else as printing ouput (i.e. [PID=%d] )
+ */
+void printPid(int in) {
+    char* msg = in ? "PID=%d> " : "[PID=%d] ";
+    printf(msg, getpid());
+}
 
 int isWhenceGiven(char* props) {
     return props[2] && props[2] != '\0';
@@ -44,7 +73,7 @@ Inp* inp_askUser() {
     inp->props = calloc(strArgNb + 1, sizeof(char));
 
     printf("%s\n", DEF_MSG);
-    printPid();
+    printPid(1);
     errno = 0;
     int exitCode = parseInput(INP_FORMAT, &inp->props[0], &inp->props[1], &inp->start, &inp->stop, &inp->props[2]);
     if (exitCode < 0) {
@@ -55,7 +84,9 @@ Inp* inp_askUser() {
     if (exitCode == 2) {
         //user entered '?' 
         //TODO: display help message
+        //printPid(0);
         printf(" -- temporary help message --\n");
+        printf("%s\n", HELP_MSG);
         //if usered entered only '?' the attributes wont be correctly initialized, hence why we're doing it here.
         for (int i = 1; i < strArgNb; i++) inp->props[i] = '\0'; //terminating 'props' string at first char which should be '?'
         inp->start = -1; 
@@ -79,3 +110,7 @@ void inp_free(Inp* inp) {
     free(inp->props);
     free(inp);
 }
+
+
+// ---- Initializing long string like the help message to display on '?' is very cumbersome and can produce various 
+// ---- really dumb errors, so it is hard coded here in an not very elegant way.
