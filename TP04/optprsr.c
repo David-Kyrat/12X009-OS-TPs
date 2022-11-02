@@ -9,9 +9,9 @@
 #include "optprsr.h"
 #include "util.h"
 
-const char VALID_CMD[3] = {'g', 's', 'w'};
-const char VALID_LTYPE[3] = {'r', 'w', 'u'};
-const char VALID_WHENCE[3] = {'s', 'c', 'e'};
+static const char VALID_CMD[3] = {'g', 's', 'w'};
+static const char VALID_LTYPE[3] = {'r', 'w', 'u'};
+static const char VALID_WHENCE[3] = {'s', 'c', 'e'};
 
 //const char* OPT_STRING = "fa";
 const int MIN_ARG_NB = 1, MAX_ARG_NB = 1;
