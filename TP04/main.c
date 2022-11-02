@@ -24,6 +24,7 @@
 
 int askInput(char* cmd, char* ltype, int* start, int* stop, char* whence) {
     printf("enter cmd ltype start stop whence\n");
+    printf("PID=256> ");
     errno = 0;
     scanf("%c %c %d %d %c", cmd, ltype, start, stop, whence);
     if (errno != 0) {
