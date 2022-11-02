@@ -5,9 +5,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "files.h"
 #include "optprsr.h"
 #include "util.h"
-#include "files.h"
+
+const char VALID_CMD[3] = {'g', 's', 'w'};
+const char VALID_LTYPE[3] = {'r', 'w', 'u'};
+const char VALID_WHENCE[3] = {'s', 'c', 'e'};
 
 //const char* OPT_STRING = "fa";
 const int MIN_ARG_NB = 1, MAX_ARG_NB = 1;
@@ -19,7 +23,7 @@ const char* USAGE_MSG = "Usage: %s folder1 folder2/ destination \n";
  * @return 0 if success otherwise code 22 (Invalid argument)
  */
 int checkArgsNb(int argc) {
-    int relevantNb = argc-1;
+    int relevantNb = argc - 1;
     if (relevantNb < MIN_ARG_NB || relevantNb > MAX_ARG_NB) {
         errno = EINVAL;
         return EINVAL;
@@ -36,13 +40,13 @@ const char* parseArgs(int argc, char* argv[]) {
 
     // relevant arg i.e. not program name. (Waiting only 1 arg)
     char* arg = argv[1];
-    
+
     int argLen = strlen(arg);
     if (argLen <= 0 || argLen >= PATH_MAX) {
         errno = EINVAL;
         return NULL;
     }
-        // argv[i] is not destination i.e. last element and argv[i] does not exists
+    // argv[i] is not destination i.e. last element and argv[i] does not exists
     if (!exists(arg)) {
         errno = ENOENT;
         fprintf(stderr, "\"%s\" Invalid argument: %s", arg, strerror(ENOENT));
@@ -59,24 +63,56 @@ const char* parseArgs(int argc, char* argv[]) {
     return parsedArg;
 }
 
-/* int parseOptArgs(int argc, char* argv[]) {
-    int state = 0, opt;
 
-    while ((opt = getopt(argc, argv, OPT_STRING)) != -1) {
-        switch (opt) {
-            case 'f':
-                state += 1;
-                break;
-            case 'a': {
-                //* check if state is != 0 (in 'state ?'), i.e. if -f was passed before
-                state += 2;
-                break;
-            }
-            default:
-                errno = EINVAL;
-                return -1;
+int parseInput(const char* INP_FORMAT, char* cmd, char* ltype, int* start, int* stop, char* whence) {
+    char* buf = calloc(MAX_INPUT, sizeof(char));
+    fgets(buf, MAX_INPUT, stdin);
+    int an = sscanf(buf, INP_FORMAT, cmd, ltype, start, stop, whence);
+    int isWhenceGiven = 0;
+
+    switch (an) {
+        case 4:
+            printf("whence not given\n");
+            break;
+        case 5:
+            isWhenceGiven = 1;
+            printf("whence given\n");
+            break;
+
+        default:
+            errno = EINVAL;
+            fprintf(stderr, "%s: Expecting between 4 and 5 inputs\n", strerror(EINVAL));
+            free(buf);
+            return -1;
+            break;
+    }
+
+    //* checks if each char paramter is valid i.e. if each belongs to the corresponding array 'VALID_<param_name>' in optprsr.c
+    int match = 3;
+    //* if match attain 0 then one of the param is not any of the declared valid values => hence our input is invalid.
+    for (int i = 0; i < sizeof VALID_CMD; i++) {
+        if (*cmd != VALID_CMD[i]) match--;
+    }
+    if (match > 0) {
+        match = 3;
+        for (int i = 0; i < sizeof VALID_LTYPE; i++) {
+            if (*ltype != VALID_LTYPE[i]) match--;
         }
     }
-    return state;
-}*/
+    if (match > 0 && isWhenceGiven) {
+        match = 3;
+        for (int i = 0; i < sizeof VALID_WHENCE; i++) {
+            if (*whence != VALID_WHENCE[i]) match--;
+        }
+    }
+    if (match <= 0) {
+        errno = EINVAL;
+        free(buf);
+        return -1;
+    }
 
+    //TODO: check for correctness of each input
+
+    free(buf);
+    return EXIT_SUCCESS;
+}

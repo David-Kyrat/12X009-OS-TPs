@@ -9,4 +9,3 @@ AlwaysBreakAfterReturnType: None
 AllowShortIfStatementsOnASingleLine: true
 NamespaceIndentation: All
 FixNamespaceComments: false
----

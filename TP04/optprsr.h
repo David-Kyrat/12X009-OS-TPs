@@ -1,3 +1,7 @@
+//char VALID_CMD[3], VALID_LTYPE[3], VALID_WHENCE[3];
+
+//#ifndef __OPTPRSR_H__
+//#define __OPTPRSR_H__
 
 /**
  * @brief Check if there is at least 1 argument.
@@ -16,11 +20,20 @@
  */
 const char* parseArgs(int argc, char* argv[]);
 
+
 /**
- * Parses the optional arguments (i.e. -f, -a) and returns 'state', an int describing what was given.
- * @param argc number of argument in main
- * @param argv arguments given when launching program
- * @return int : 0 if no optional argument were passed, 
- *               1 if -f was passed, 2 if -a, were passed, 3 if both were passed. -1 if error
+ * Reads a line from stdin, and parses it into the given variables, then checks if the parsed values
+ * are valid
+ * 
+ * @param INP_FORMAT The format string for the input.
+ * @param cmd command to be executed (g, s, w)
+ * @param ltype type of lock to be placed. (r, w, u)
+ * @param start start of lock location 
+ * @param stop end of lock location
+ * @param whence relatively to what are start and end computed ? (s, c, e)
+ * 
+ * @return 0 if success, -1 if error (errno is set accordingly).
  */
-//int parseOptArgs(int argc, char* argv[]);
+int parseInput(const char* INP_FORMAT, char* cmd, char* ltype, int* start, int* stop, char* whence);
+
+//#endif
