@@ -63,8 +63,14 @@ const char* parseArgs(int argc, char* argv[]) {
 }
 
 int parseInput(const char* INP_FORMAT, char* cmd, char* ltype, int* start, int* stop, char* whence) {
-    char* buf = calloc(10000, sizeof(char));
-    fgets(buf, 10000, stdin);
+    char* buf = calloc(MAX_INPUT, sizeof(char));
+    buf = fgets(buf, MAX_INPUT, stdin);
+    if (buf == NULL) {
+        int savedErr = errno;
+        fprintf(stderr, "Cannot read from standard input or input was empty: %s.\n", strerror(savedErr));
+    }
+    // TODO: CHECK IF STDIN IS NOT EMPTY I.E. IF FGETS READ ENTIERTY OF INPUT ELSE => REREAD
+
     int an = sscanf(buf, INP_FORMAT, cmd, ltype, start, stop, whence);
     int isWhenceGiven = 0;
 
