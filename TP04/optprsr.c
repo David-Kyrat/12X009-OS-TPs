@@ -63,8 +63,8 @@ const char* parseArgs(int argc, char* argv[]) {
 }
 
 int parseInput(const char* INP_FORMAT, char* cmd, char* ltype, int* start, int* stop, char* whence) {
-    char* buf = calloc(MAX_INPUT, sizeof(char));
-    fgets(buf, MAX_INPUT, stdin);
+    char* buf = calloc(10000, sizeof(char));
+    fgets(buf, 10000, stdin);
     int an = sscanf(buf, INP_FORMAT, cmd, ltype, start, stop, whence);
     int isWhenceGiven = 0;
 

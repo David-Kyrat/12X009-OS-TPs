@@ -15,29 +15,39 @@ const char* INP_FORMAT = "%c %c %d %d %c";
 //* default message displayed when beginning program
 const char DEF_MSG[] = "Enter ? for help or Q to exit.";
 
-const char* HELP_MSG = "Format: cmd l_type start length [whence(optional)] \
+ char* HELP_MSG /* ="Format: cmd l_type start length [whence(optional)] \
 'cmd' --- 'g' (F_GETLK), 's' (F_SETLK), or 'w' (F_SETLKW) \
 'l_type' --- 'r' (F_RDLCK), 'w' (F_WRLCK), or 'u' (F_UNLCK) \
 'start' --- lock starting offset \
 'length' --- number of bytes to lock \
-'whence' --- 's' (SEEK_SET, default), 'c' (SEEK_CUR), or 'e' (SEEK_END)";
+'whence' --- 's' (SEEK_SET, default), 'c' (SEEK_CUR), or 'e' (SEEK_END)"*/;
 
-char* HELP_MSGS[6] = {
-    "asd", 
-    "bcd"
-};
+char* HELP_MSGS[6];
 
 const int strArgNb = 3;  //* nb of char argument stored in field 'props'
 
+int isHelpMessInit = 0;
+
 void initHelpMess() {
-    //for(int i = 0; i < sizeof HELP_MSGS; i++) HELP_MSGS[i] = calloc(512, sizeof(char));
+
+    for(int i = 0; i < sizeof HELP_MSGS; i++) HELP_MSGS[i] = calloc(512, sizeof(char));
+
     HELP_MSGS[0] = strdup("\n\t Format: cmd l_type start length [whence]");
     HELP_MSGS[1] = strdup("\n\t 'cmd' --- 'g' (F_GETLK), 's' (F_SETLK), or 'w' (F_SETLKW)");
     HELP_MSGS[2] = strdup("\n\t 'start' --- lock starting offset");
     HELP_MSGS[3] = strdup("\n\t 'length' --- number of bytes to lock");
-    HELP_MSGS[4] = strdup("\n\t 'whence' --- 's' (SEEK_SET, default), 'c' (SEEK_CUR), or 'e' (SEEK_END)");
-    
+    HELP_MSGS[4] = strdup("\n\t 'whence' --- 's' (SEEK_SET, default), 'c' (SEEK_CUR), or 'e' (SEEK_END)\n");
+
+    HELP_MSG = calloc(sizeof HELP_MSGS * 512 + 1, sizeof(char));
+
+
+    for (int i = 0; i < 5; i++) {
+        strncat(HELP_MSG, HELP_MSGS[i], 512);
+    }
+
 }
+
+
 
 struct Inp {
     /**
@@ -83,11 +93,10 @@ Inp* inp_askUser() {
     }
     if (exitCode == 2) {
         //user entered '?' 
-        //TODO: display help message
+        if (! isHelpMessInit){ initHelpMess(); isHelpMessInit = 1;}
         
-        //printPid(0);
-        printf(" -- temporary help message --\n");
         printf("%s\n", HELP_MSG);
+
         //if usered entered only '?' the attributes wont be correctly initialized, hence why we're doing it here.
         for (int i = 1; i < strArgNb; i++) inp->props[i] = '\0'; //terminating 'props' string at first char which should be '?'
         inp->start = -1; 

@@ -18,8 +18,6 @@ struct flock {
 */
 };
 
-// TODO: finish lock function
-
 
 // example from lecture 7: I/O
 
