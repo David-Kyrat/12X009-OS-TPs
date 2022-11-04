@@ -42,7 +42,7 @@ void initHelpMess() {
 struct Inp {
     /**
      * Contains concatenation of mode etc...
-     * props[0] to properties[2] contains each 'command' 'lock type' 'whence'. 
+     * props[0] to props[2] contains each 'command' 'lock type' 'whence'. 
      * Inp struct is opaque to enable "setting 'props' private".
      */
     char* props;

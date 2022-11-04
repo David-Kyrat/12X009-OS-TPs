@@ -5,6 +5,7 @@
 #include <sys/file.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include "inp.h"
 
 
 // From TP4 (4.1. Utilisation)
@@ -17,15 +18,19 @@ struct flock {
 */
 };
 
-
 // TODO: finish lock function
 
+
 // example from lecture 7: I/O
-int LOCK(int fd, int file) {
+int lock(int fd, int file, struct Inp input) {
+    
+    // props[0] to props[2] of Inp contains each 'command' 'lock type' 'whence'
     struct flock fl;
-    fl.l_type = F_WRLCK;
-    fl.l_whence = SEEK_SET;
-    fl.l_start = file;
-    fl.l_len = 1;
-    return fcntl(fd, F_SETLKW, &fl);
+
+    fl.l_type = input.props[1];
+    fl.l_whence = input.props[2];
+    fl.l_start = input.start;
+    fl.l_len = input.stop - input.start;
+
+    return fcntl(fd, input.props[0], &fl);
 }
