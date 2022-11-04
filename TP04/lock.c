@@ -22,15 +22,16 @@ struct flock {
 
 
 // example from lecture 7: I/O
-int lock(int fd, int file, struct Inp input) {
+
+int lock(int fd, Inp* input) {
     
     // props[0] to props[2] of Inp contains each 'command' 'lock type' 'whence'
     struct flock fl;
 
-    fl.l_type = input.props[1];
-    fl.l_whence = input.props[2];
-    fl.l_start = input.start;
-    fl.l_len = input.stop - input.start;
+    fl.l_type = inp_ltp(input);
+    fl.l_whence = inp_whc(input);
+    fl.l_start = inp_start(input);
+    fl.l_len = inp_stop(input) - inp_start(input);
 
-    return fcntl(fd, input.props[0], &fl);
+    return fcntl(fd, inp_cmd(input), &fl);
 }

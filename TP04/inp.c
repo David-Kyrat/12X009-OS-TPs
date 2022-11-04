@@ -84,6 +84,7 @@ Inp* inp_askUser() {
     if (exitCode == 2) {
         //user entered '?' 
         //TODO: display help message
+        
         //printPid(0);
         printf(" -- temporary help message --\n");
         printf("%s\n", HELP_MSG);

@@ -29,6 +29,5 @@ int main(int argc, char* argv[]) {
     } while (inp == NULL || 1);
 
     inp_print(inp);
-
     return EXIT_SUCCESS;
 }
