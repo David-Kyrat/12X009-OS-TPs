@@ -15,17 +15,11 @@ const char* INP_FORMAT = "%c %c %d %d %c";
 //* default message displayed when beginning program
 const char DEF_MSG[] = "Enter ? for help or Q to exit.";
 
- char* HELP_MSG /* ="Format: cmd l_type start length [whence(optional)] \
-'cmd' --- 'g' (F_GETLK), 's' (F_SETLK), or 'w' (F_SETLKW) \
-'l_type' --- 'r' (F_RDLCK), 'w' (F_WRLCK), or 'u' (F_UNLCK) \
-'start' --- lock starting offset \
-'length' --- number of bytes to lock \
-'whence' --- 's' (SEEK_SET, default), 'c' (SEEK_CUR), or 'e' (SEEK_END)"*/;
-
-char* HELP_MSGS[6];
-
 const int strArgNb = 3;  //* nb of char argument stored in field 'props'
 
+// Prints the help message in case of '?' entered
+char* HELP_MSG;
+char* HELP_MSGS[6];
 int isHelpMessInit = 0;
 
 void initHelpMess() {
@@ -33,15 +27,16 @@ void initHelpMess() {
     for(int i = 0; i < sizeof HELP_MSGS; i++) HELP_MSGS[i] = calloc(512, sizeof(char));
 
     HELP_MSGS[0] = strdup("\n\t Format: cmd l_type start length [whence]");
-    HELP_MSGS[1] = strdup("\n\t 'cmd' --- 'g' (F_GETLK), 's' (F_SETLK), or 'w' (F_SETLKW)");
-    HELP_MSGS[2] = strdup("\n\t 'start' --- lock starting offset");
-    HELP_MSGS[3] = strdup("\n\t 'length' --- number of bytes to lock");
-    HELP_MSGS[4] = strdup("\n\t 'whence' --- 's' (SEEK_SET, default), 'c' (SEEK_CUR), or 'e' (SEEK_END)\n");
+    HELP_MSGS[1] = strdup("\n\t 'cmd'       ---     'g' (F_GETLK), 's' (F_SETLK), or 'w' (F_SETLKW)");
+    HELP_MSGS[2] = strdup("\n\t 'l_type'    ---     'r' (F_RDLCK), 'w' (F_WRLCK), or 'u' (F_UNLCK)");
+    HELP_MSGS[3] = strdup("\n\t 'start'     ---     lock starting offset");
+    HELP_MSGS[4] = strdup("\n\t 'length'    ---     number of bytes to lock");
+    HELP_MSGS[5] = strdup("\n\t 'whence'    ---     's' (SEEK_SET, default), 'c' (SEEK_CUR), or 'e' (SEEK_END)\n");
 
     HELP_MSG = calloc(sizeof HELP_MSGS * 512 + 1, sizeof(char));
 
 
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 6; i++) {
         strncat(HELP_MSG, HELP_MSGS[i], 512);
     }
 

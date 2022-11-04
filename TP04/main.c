@@ -8,6 +8,8 @@
 #include "inp.h"
 #include "optprsr.h"
 #include "util.h"
+#include "lock.h"
+
 
 //TODO: recomment correctly optparser.h
 
@@ -29,5 +31,8 @@ int main(int argc, char* argv[]) {
     } while (inp == NULL || 1);
 
     inp_print(inp);
+
+    // lock(file, inp);
+
     return EXIT_SUCCESS;
 }

@@ -8,6 +8,7 @@
 #include "files.h"
 #include "optprsr.h"
 #include "util.h"
+#include "lock.h"
 
 static const char VALID_CMD[3] = {'g', 's', 'w'}, VALID_LTYPE[3] = {'r', 'w', 'u'}, VALID_WHENCE[3] = {'s', 'c', 'e'};
 static const char HELP_CHAR = '?', QUIT_CHAR = 'Q';
@@ -51,7 +52,7 @@ const char* parseArgs(int argc, char* argv[]) {
         fprintf(stderr, "\"%s\" Invalid argument: %s", arg, strerror(ENOENT));
         return NULL;
     }
-    //returns absolute path if it was computed correctly.
+    // returns absolute path if it was computed correctly.
     parsedArg = realpath(arg, NULL);
     if (parsedArg == NULL) {
         int savedErr = errno;
@@ -69,30 +70,68 @@ int parseInput(const char* INP_FORMAT, char* cmd, char* ltype, int* start, int* 
     int isWhenceGiven = 0;
 
     switch (an) {
-        case 4:
-            //TODO: handle case
 
+        // If sscanf says that there are 4 arguments (whence was NOT given)
+        case 4:
+            printf("INP_FORMAT: %s\n", INP_FORMAT);
+
+            printf("Cmd: %c\n", *cmd);
+            if (*cmd == 'g'); // F_GETLK
+            else if (*cmd == 's'); // F_SETLK
+            else if (*cmd == 'w'); // F_SETLKW
+
+            printf("ltype: %c\n", *ltype);
+            if (*ltype == 'r'); // F_RDLCK
+            else if (*ltype == 'w'); // F_WRLCK
+            else if (*ltype == 'u'); // F_UNLCK
+
+            printf("Start: %d\n", *start);
+            printf("Stop: %d\n", *stop);
+        
             break;
+
+        // If sscanf says that there are 5 arguments (whence was given)
         case 5:
-            //TODO: handle case
             isWhenceGiven = 1;
+
+            printf("INP_FORMAT: %s\n", INP_FORMAT);
+
+            printf("Cmd: %c\n", *cmd);
+            if (*cmd == 'g'); // F_GETLK
+            else if (*cmd == 's'); // F_SETLK
+            else if (*cmd == 'w'); // F_SETLKW
+
+            printf("ltype: %c\n", *ltype);
+            if (*ltype == 'r'); // F_RDLCK
+            else if (*ltype == 'w'); // F_WRLCK
+            else if (*ltype == 'u'); // F_UNLCK
+
+            printf("Start: %d\n", *start);
+            printf("Stop: %d\n", *stop);
+
+            printf("Whence %c\n", *whence);
+            if (*whence == 's'); // SEEK_SET
+            else if (*whence == 'c'); // SEEK_CUR
+            else if (*whence == 'e'); // SEEK_END
+
             break;
 
         case 1:
-            //*if user did not entered '?' or 'quit_char' then having only 1 parameter is not valid.
-            //* then the program will then not enter the if clause, i.e. => not break => continue to default branch => finally return -1 with errno set to EINVAL.
+            //* If user did not enter '?' or 'Q (quit_char)' then having only 1 parameter is not valid.
+            //* The program will then not enter the if clause, i.e. => not break => continue to default branch => finally return -1 with errno set to EINVAL.
             if (*cmd == HELP_CHAR) {
                 //if user seeked for help (entered ?) => returns 2 to indicate that. else does what was described above.
                 free(buf);
                 return 2;
+
             } else if (*cmd == QUIT_CHAR) {
                 printf("%c was pressed, exiting...\n", QUIT_CHAR);
                 exit(EXIT_SUCCESS);
             }
-            //else: just go into default branch because there is no break/return ...
+            // else: just go into default branch because there is no break/return ...
         default:
             errno = EINVAL;
-            fprintf(stderr, "%s: Expecting between 4 and 5 inputs\n", strerror(EINVAL));
+            fprintf(stderr, "%s: Expecting 4 or 5 inputs\n", strerror(EINVAL));
             free(buf);
             return -1;
             break;
