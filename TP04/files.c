@@ -112,12 +112,12 @@ char* buffread(const char* fileToRead) {
     //* While there are bytes left to be read, reads them 4096 by 4096 (4096 or current size of 'buff' if its not that)
     //* nb: if readNb is < to what we expected we dont really care because the program will retry until having read everything
     while ((readNb = read(fd, buff, sizeof buff)) > 0) {
-        char* crtToCopy = buff;  // pointer to start of current 'portion of data' to copy
+        char* crtToCopy = &buff[readTotNb];  // pointer to start of current 'portion of data' to copy
         readTotNb += readNb;
         //update allocated memory to the size of whats been read until now.
         bBuff = realloc(bBuff, (readTotNb+1)*sizeof(char));
         //copy at most readNb bytes fileToRead buff to bBuff i.e. append current content of the small buffer 'buff'.
-        strncat(bBuff, buff, readNb);
+        strncat(bBuff, crtToCopy, readNb);
     }
     if (readNb < 0) {
         hdlReadErr(fileToRead, 0, 1, fd);

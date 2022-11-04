@@ -10,7 +10,7 @@
 #include "optprsr.h"
 #include "util.h"
 
-const char* INP_FORMAT = "%c %c %d %d %c";
+const char* INP_FORMAT = "%c %c %ld %d %c";
 //static const char HELP_CHAR = '?';
 //* default message displayed when beginning program
 const char DEF_MSG[] = "Enter ? for help or Q to exit.";
@@ -56,7 +56,7 @@ struct Inp {
      * Inp struct is opaque to enable "setting 'props' private".
      */
     char* props;
-    int start, stop;
+    long start, stop;
 };
 
 /**
@@ -73,7 +73,7 @@ int isWhenceGiven(char* props) {
 }
 
 void inp_print(Inp* inp) {
-    printf("[ cm:%c, tp:%c, st:%d, sp:%d", inp->props[0], inp->props[1], inp->start, inp->stop);
+    printf("[ cm:%c, tp:%c, st:%ld, sp:%ld", inp->props[0], inp->props[1], inp->start, inp->stop);
     if (isWhenceGiven(inp->props)) printf(", wh:%c", inp->props[2]);
     printf(" ]\n");
 }
