@@ -22,5 +22,5 @@ const char* parseArgs(int argc, char* argv[]);
  * 
  * @return 0 if success, -1 if error (errno is set accordingly). Or 2 if user entered an '?' to get help.
  */
-int parseInput(const char* INP_FORMAT, char* cmd, char* ltype, int* start, int* stop, char* whence);
+int parseInput(const char* INP_FORMAT, char* cmd, char* ltype, long* start, long* stop, char* whence);
 

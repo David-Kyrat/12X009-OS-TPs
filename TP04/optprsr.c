@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "files.h"
 #include "optprsr.h"
@@ -63,9 +64,17 @@ const char* parseArgs(int argc, char* argv[]) {
     return parsedArg;
 }
 
-int parseInput(const char* INP_FORMAT, char* cmd, char* ltype, int* start, int* stop, char* whence) {
-    char* buf = calloc(10000, sizeof(char));
-    fgets(buf, 10000, stdin);
+
+int parseInput(const char* INP_FORMAT, char* cmd, char* ltype, long* start, long* stop, char* whence) {
+    size_t buflen = LINE_MAX;
+    char* buf = calloc(buflen, sizeof(char));
+    buf = fgets(buf, buflen, stdin);
+    if (buf == NULL) {
+        free(buf);
+        return hdlReadInErr(0);
+    }   
+
+    //successfully parsed argument number
     int an = sscanf(buf, INP_FORMAT, cmd, ltype, start, stop, whence);
     int isWhenceGiven = 0;
 
@@ -131,7 +140,7 @@ int parseInput(const char* INP_FORMAT, char* cmd, char* ltype, int* start, int* 
             // else: just go into default branch because there is no break/return ...
         default:
             errno = EINVAL;
-            fprintf(stderr, "%s: Expecting 4 or 5 inputs\n", strerror(EINVAL));
+            fprintf(stderr, "%s: Expecting between 4 and 5 inputs, received:%d\n", strerror(EINVAL), an);
             free(buf);
             return -1;
             break;

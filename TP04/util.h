@@ -47,6 +47,17 @@ int hdlCloseErr(const char* filename, int exit);
  */
 int hdlReadErr(const char* filename, int needsExit, int needsClose, int fd);
 
+
+
+/**
+ * Utility function for basic handling of error related to reading from stdin.
+ * Reading from standard input failed => print an error message to standard error and return -1
+ * @param needsExit If non-zero, the program will exit with the error code of the error that
+ * occurred.
+ * @return -1 or, exits with saved errno, if needsExit was != 0.
+ */
+int hdlReadInErr(int needsExit);
+
 /**
  * Utility function for basic handling of error related to file writing.
  * Prints an error message to stderr, closes the file descriptor if needed, and exits if needed
