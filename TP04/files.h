@@ -51,36 +51,6 @@ int isDir(const char* path);
  */
 int concat_path(char buf[], const char* parent, const char* current);
 
-/**
- * List infos about a directory entry. i.e. Takes a path and a stat struct, 
- * and prints out the file's permissions, size, last modification time, and path.
- * 
- * @param path the path to the file.  (Can also be a folder)
- * @param infos struct stat containing information about the inode associated to path
- * 
- * @return 0 if success, -1 if minor error
- */
-//int listEntry(const char* path, struct stat infos);
-
-/**
- * "Overload" of listEntry where we do not have to give path's inode info as argument (done in function)
- * 
- * @param path the path to the file.  (Can also be a folder)
- * @return 0 if success, -1 if error
- */
-//int listEntryNoIn(const char* path);
-
-/**
- * Emulates ls -lRa behavior. (except that it doesnt print . and .. because they are always present).  
- * 
- * Takes a directory name as an argument, opens it, reads its entries, and recursively calls itself
- * on each subdirectory.
- * 
- * @param dir_name the name of the directory to list
- * 
- * @return Error code. (0 if success else error code see errno.h for more info)
- */
-//int list_dir(const char *dir_name);
 
 /**
  * Computes actual name of a file.
@@ -88,6 +58,14 @@ int concat_path(char buf[], const char* parent, const char* current);
  * @return char* Actual resolved name of file located at path. (Use real path to get the absolute path, then extract the name).
  */
 const char* getFileName(const char* path);
+
+/**
+ * @brief Get the File Size of entry at given path
+ * 
+ * @param path, path to file to check size of
+ * @return size_t size of file return by stat or -1 if an error happened
+ */
+ssize_t getFileSize(const char* path);
 
 /**
  * Takes a path and returns the absolute path

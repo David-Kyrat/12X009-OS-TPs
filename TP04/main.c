@@ -14,7 +14,7 @@
 //TODO: recomment correctly optparser.h
 
 int main(int argc, char* argv[]) {
-    const char* file = parseArgs(argc, argv);
+    const char* file = parseArgv(argc, argv);
     if (file == NULL) {
         int savedErr = errno;
         //if error message was not added to stderr
@@ -22,7 +22,7 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
 
-    printf("file is %s\n", file);
+    printf("\nOperating on file: \"%s\"\n", file);
     Inp* inp = NULL;
 
     do {

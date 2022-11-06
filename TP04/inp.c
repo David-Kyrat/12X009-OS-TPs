@@ -10,8 +10,7 @@
 #include "optprsr.h"
 #include "util.h"
 
-const char* INP_FORMAT = "%c %c %ld %d %c";
-//static const char HELP_CHAR = '?';
+const char* INP_FORMAT = "%1s %1s %ld %ld %1s"; //read max 1 char by "string position" (used %s and not %c for mode... to prevent user to enter an int instead of char)
 //* default message displayed when beginning program
 const char DEF_MSG[] = "Enter ? for help or Q to exit.";
 
@@ -21,9 +20,10 @@ const int strArgNb = 3;  //* nb of char argument stored in field 'props'
 
 const char* HELP_MSG = "\n\t Format:  cmd\tl_type\tstart\tlength\t [whence]" \
 "\n\t 'cmd'       ---     'g' (F_GETLK), 's' (F_SETLK), or 'w' (F_SETLKW)" \
+"\n\t 'l_type'    ---     'r' (F_RDLCK), 'w' (F_WRLCK), or 'u' (F_UNLCK)" \
 "\n\t 'start'     ---     lock starting offset" \
 "\n\t 'length'    ---     number of bytes to lock" \
-"\n\t 'whence'    ---     's' (SEEK_SET, default), 'c' (SEEK_CUR), or 'e' (SEEK_END)\n";
+"\n\t 'whence'    ---     's' (SEEK_SET, default), 'c' (SEEK_CUR), or 'e' (SEEK_END)";
 
 
 struct Inp {
@@ -56,7 +56,6 @@ Inp* inp_askUser() {
     inp->props = calloc(strArgNb + 1, sizeof(char));
 
     printf("%s\n", DEF_MSG);
-    printPid(1);
     errno = 0;
     int exitCode = parseInput(INP_FORMAT, &inp->props[0], &inp->props[1], &inp->start, &inp->stop, &inp->props[2]);
     if (exitCode < 0) {
@@ -66,6 +65,7 @@ Inp* inp_askUser() {
     }
     if (exitCode == 2) {
         //user entered '?' 
+        printPid(0);
         printf("%s\n", HELP_MSG);
 
         //if usered entered only '?' the attributes wont be correctly initialized, hence why we're doing it manually here.

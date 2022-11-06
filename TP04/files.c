@@ -81,10 +81,17 @@ const char* absPath(const char* path) {
     return out;
 }
 
+ssize_t getFileSize(const char* path) {
+    struct stat infos = stat_s(path);
+    ssize_t out = infos.st_size;
+    if (out < 0) return -1; // st_size was set to value < 0 ==> way of telling us that an error happened in stat_s
+    return out;
+}
+
 /**
- * Attempt at bufferized implementation of "read file and returns its content"
+ * Rread file and returns its content
  * 
- * @return Content of 'fileToRead' (returned string is obviously malloc'd => remember to free().)
+ * @return Content of 'fileToRead' (returned string is malloc'd => remember to free().)
  */
 char* buffread(const char* fileToRead) {
     int fd;

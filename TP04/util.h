@@ -98,13 +98,13 @@ int hdlCatErr(const char* current);
 
 /**
  * shortcut for lstat, also handles error
- * @return stat structure of path's inode
+ * @return stat structure of path's inode. If an error happened => the 'st_size' attribute is set to -1
  */
 struct stat lstat_s(const char* path);
 
 /**
  * shortcut for stat, also handles error
- * @return stat structure of path's inode
+ * @return stat structure of path's inode. If an error happened => the 'st_size' attribute is set to -1
  */
 struct stat stat_s(const char* path);
 

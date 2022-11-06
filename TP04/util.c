@@ -84,13 +84,21 @@ int hdlCatErr(const char* current) {
 
 struct stat lstat_s(const char* path) {
     struct stat infos;
-    if (lstat(path, &infos) < 0) fprintf(stderr, "Cannot stat %s: %s\n", path, strerror(errno));
+    if (lstat(path, &infos) < 0) {
+        int savedErr = errno;
+        fprintf(stderr, "Cannot stat %s: %s\n", path, strerror(savedErr));
+        infos.st_size = -1;
+    }
     return infos;
 }
 
 struct stat stat_s(const char* path) {
     struct stat infos;
-    if (stat(path, &infos) < 0) fprintf(stderr, "Cannot stat %s: %s\n", path, strerror(errno));
+    if (stat(path, &infos) < 0) {
+        int savedErr = errno;
+        fprintf(stderr, "Cannot stat %s: %s\n", path, strerror(savedErr));
+        infos.st_size = -1;
+    }
     return infos;
 }
 
