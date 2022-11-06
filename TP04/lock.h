@@ -2,7 +2,7 @@
 
 /**
  * Takes a file descriptor and an input struct, and returns the result of calling fcntl with the
- * file descriptor and the input struct's command, lock type, whence, start, and stop
+ * file descriptor and the input struct's command, lock type, whence, start, and length
  * 
  * @param fd file descriptor
  * @param input a pointer to a struct Inp

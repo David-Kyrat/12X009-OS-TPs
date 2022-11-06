@@ -6,7 +6,7 @@
  * -- 2. Lock type (1 char) ’r’ (F_RDLCK), ’w’ (F_WRLCK), or ’u’ (F_UNLCK)
  * 
  * -- 3. start (int)
- * -- 4. stop (int)
+ * -- 4. length (int)
  * 
  * -- 5. whence (1 char) 's’ (SEEK_SET , default), ’c’ (SEEK_CUR), or ’e’ (SEEK_END)
  * 
@@ -54,11 +54,11 @@ char inp_whc(Inp* props);
 int inp_start(Inp* input);
 
 /**
- * Getter for the 'stop' 
- * @param input Inp*, Pointer to Inp struct from which to retrieve the end of lock location
- * @return 'stop' attribute
+ * Getter for the 'length' 
+ * @param input Inp*, Pointer to Inp struct from which to retrieve the length of lock "location"
+ * @return 'length' attribute
 */
-int inp_stop(Inp* input);
+int inp_length(Inp* input);
 
 /**
  * Prints attributes of given 'Inp' struct 'inp'.

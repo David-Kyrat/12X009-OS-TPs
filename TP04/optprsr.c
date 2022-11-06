@@ -37,52 +37,15 @@ int checkArgsNb(int argc) {
     return 0;
 }
 
-const char* parseArgv(int argc, char* argv[]) {
-    const char* parsedArg;
-    if (checkArgsNb(argc) != 0) {
-        fprintf(stderr, "%s: Not Enough arguments: Expecting at least %d.\n", argv[0], MIN_ARG_NB);
-        return NULL;
-    }
 
-    // relevant arg i.e. not program name. (Waiting only 1 arg)
-    char* arg = argv[1];
-
-    int argLen = strlen(arg);
-    if (argLen <= 0 || argLen >= PATH_MAX) {
-        errno = EINVAL;
-        return NULL;
-    }
-    // argv[i] is not destination i.e. last element and argv[i] does not exists
-    if (!exists(arg)) {
-        errno = ENOENT;
-        fprintf(stderr, "\"%s\" Invalid argument: %s", arg, strerror(ENOENT));
-        return NULL;
-    }
-    // returns absolute path if it was computed correctly.
-    parsedArg = realpath(arg, NULL);
-    if (parsedArg == NULL) {
-        int savedErr = errno;
-        fprintf(stderr, "Cannot resolve file %s: %s\n", arg, strerror(savedErr));
-        return NULL;
-    }
-    FILE_SIZE = getFileSize(parsedArg);
-    
-    if (FILE_SIZE < 0) {
-        fprintf(stderr, "Cannot get size of given file %s, ==> Max size will then be infered.\n", parsedArg);
-        FILE_SIZE = SSIZE_MAX;
-    }
-    return parsedArg;
-}
-
-
-int isLockInputValid(char* cmd, char* ltype, long start, long stop, char* whence) {
+int isLockInputValid(char* cmd, char* ltype, long start, long length, char* whence) {
     //*
     //* Checks if each char parameter is valid i.e. if each belongs to the corresponding array 'VALID_<param_name>' in optprsr.c
     //*
-    long abs_start = start < 0 ? -start : start; //checking if absolute value of start, stop are within FILE_SIZE. Abs val because start can be negative if, e.g., SEEK_END was provided
-    long abs_stop = stop < 0 ? -stop : stop;
-    if (start >= stop || abs_start >= FILE_SIZE || abs_stop > FILE_SIZE) {
-        fprintf(stderr, "Invalid start or stop value. (%ld, %ld) \n", start, stop);
+    long abs_start = start < 0 ? -start : start; //checking if absolute value of start, length are within FILE_SIZE. Abs val because start can be negative if, e.g., SEEK_END was provided
+    long abs_length = length < 0 ? -length : length;
+    if (abs_length > FILE_SIZE || abs_start >= FILE_SIZE) {
+        fprintf(stderr, "Invalid start or length value. (%ld, %ld) \n", start, length);
         errno = EINVAL;
         return 0;
     }
@@ -112,7 +75,8 @@ int isLockInputValid(char* cmd, char* ltype, long start, long stop, char* whence
     return 1;
 }
 
-int parseInput(const char* INP_FORMAT, char* cmd, char* ltype, long* start, long* stop, char* whence) {
+
+int parseInput(const char* INP_FORMAT, char* cmd, char* ltype, long* start, long* length, char* whence) {
     size_t buflen = LINE_MAX;
     char* buf = calloc(buflen, sizeof(char));
     buf = fgets(buf, buflen, stdin);
@@ -122,14 +86,15 @@ int parseInput(const char* INP_FORMAT, char* cmd, char* ltype, long* start, long
     }   
 
     //successfully parsed argument number
-    int an = sscanf(buf, "%s %s %ld %ld %s", cmd, ltype, start, stop, whence);
+    int an = sscanf(buf, "%s %s %ld %ld %s", cmd, ltype, start, length, whence);
     int isWhenceGiven = 0;
 
     switch (an) {
 
         // If sscanf says that there are 4 arguments (whence was NOT given)
         case 4:
-
+            *whence = 's'; // SEEK_SET is the default value for whence
+            
             /* if (*cmd == 'g') {*cmd = "F_GETLK";}
             else if (*cmd == 's') {*cmd = "F_SETLK";}
             else if (*cmd == 'w') {*cmd = "F_SETLKW";}
@@ -179,29 +144,8 @@ int parseInput(const char* INP_FORMAT, char* cmd, char* ltype, long* start, long
             return -1;
             break;
     }
-
-    //*
-    //* Checks if each char parameter is valid i.e. if each belongs to the corresponding array 'VALID_<param_name>' in optprsr.c
-    //*
-    
-
-    /*int match = 3;
-     for (int i = 0; i < sizeof VALID_CMD; i++) {
-        if (*cmd != VALID_CMD[i]) match--;
-    }
-    if (match > 0) {
-        match = 3;
-        for (int i = 0; i < sizeof VALID_LTYPE; i++) {
-            if (*ltype != VALID_LTYPE[i]) match--;
-        }
-    }
-    if (match > 0 && isWhenceGiven) {
-        match = 3;
-        for (int i = 0; i < sizeof VALID_WHENCE; i++) {
-            if (*whence != VALID_WHENCE[i]) match--;
-        }
-    } */
-    int isArgValid = isLockInputValid(cmd, ltype, *start, *stop, isWhenceGiven ? whence : NULL);
+   
+    int isArgValid = isLockInputValid(cmd, ltype, *start, *length, isWhenceGiven ? whence : NULL);
 
     if (isArgValid <= 0) {
         free(buf);
@@ -211,3 +155,45 @@ int parseInput(const char* INP_FORMAT, char* cmd, char* ltype, long* start, long
     free(buf);
     return EXIT_SUCCESS;
 }
+
+
+
+// ------- PARSING ARG DIRECTLY PASSED TO PROGRAM
+
+const char* parseArgv(int argc, char* argv[]) {
+    const char* parsedArg;
+    if (checkArgsNb(argc) != 0) {
+        fprintf(stderr, "%s: Not Enough arguments: Expecting at least %d.\n", argv[0], MIN_ARG_NB);
+        return NULL;
+    }
+
+    // relevant arg i.e. not program name. (Waiting only 1 arg)
+    char* arg = argv[1];
+
+    int argLen = strlen(arg);
+    if (argLen <= 0 || argLen >= PATH_MAX) {
+        errno = EINVAL;
+        return NULL;
+    }
+    // argv[i] is not destination i.e. last element and argv[i] does not exists
+    if (!exists(arg)) {
+        errno = ENOENT;
+        fprintf(stderr, "\"%s\" Invalid argument: %s", arg, strerror(ENOENT));
+        return NULL;
+    }
+    // returns absolute path if it was computed correctly.
+    parsedArg = realpath(arg, NULL);
+    if (parsedArg == NULL) {
+        int savedErr = errno;
+        fprintf(stderr, "Cannot resolve file %s: %s\n", arg, strerror(savedErr));
+        return NULL;
+    }
+    FILE_SIZE = getFileSize(parsedArg);
+    
+    if (FILE_SIZE < 0) {
+        fprintf(stderr, "Cannot get size of given file %s, ==> Max size will then be infered.\n", parsedArg);
+        FILE_SIZE = SSIZE_MAX;
+    }
+    return parsedArg;
+}
+
