@@ -82,20 +82,15 @@ int parseInput(const char* INP_FORMAT, char* cmd, char* ltype, long* start, long
 
         // If sscanf says that there are 4 arguments (whence was NOT given)
         case 4:
-            printf("INP_FORMAT: %s\n", INP_FORMAT);
 
-            printf("Cmd: %c\n", *cmd);
-            if (*cmd == 'g'); // F_GETLK
-            else if (*cmd == 's'); // F_SETLK
-            else if (*cmd == 'w'); // F_SETLKW
+            if (*cmd == 'g') {*cmd = "F_GETLK";}
+            else if (*cmd == 's') {*cmd = "F_SETLK";}
+            else if (*cmd == 'w') {*cmd = "F_SETLKW";}
 
-            printf("ltype: %c\n", *ltype);
-            if (*ltype == 'r'); // F_RDLCK
-            else if (*ltype == 'w'); // F_WRLCK
-            else if (*ltype == 'u'); // F_UNLCK
+            if (*ltype == 'r') {*ltype = "F_RDLCK";}
+            else if (*ltype == 'w') {*ltype = "F_WRLCK";}
+            else if (*ltype == 'u') {*ltype = "F_UNLCK";}
 
-            printf("Start: %d\n", *start);
-            printf("Stop: %d\n", *stop);
         
             break;
 
@@ -103,25 +98,17 @@ int parseInput(const char* INP_FORMAT, char* cmd, char* ltype, long* start, long
         case 5:
             isWhenceGiven = 1;
 
-            printf("INP_FORMAT: %s\n", INP_FORMAT);
+            if (*cmd == 'g') {*cmd = "F_GETLK";}
+            else if (*cmd == 's') {*cmd = "F_SETLK";}
+            else if (*cmd == 'w') {*cmd = "F_SETLKW";}
 
-            printf("Cmd: %c\n", *cmd);
-            if (*cmd == 'g'); // F_GETLK
-            else if (*cmd == 's'); // F_SETLK
-            else if (*cmd == 'w'); // F_SETLKW
+            if (*ltype == 'r') {*ltype = "F_RDLCK";}
+            else if (*ltype == 'w') {*ltype = "F_WRLCK";}
+            else if (*ltype == 'u') {*ltype = "F_UNLCK";}
 
-            printf("ltype: %c\n", *ltype);
-            if (*ltype == 'r'); // F_RDLCK
-            else if (*ltype == 'w'); // F_WRLCK
-            else if (*ltype == 'u'); // F_UNLCK
-
-            printf("Start: %d\n", *start);
-            printf("Stop: %d\n", *stop);
-
-            printf("Whence %c\n", *whence);
-            if (*whence == 's'); // SEEK_SET
-            else if (*whence == 'c'); // SEEK_CUR
-            else if (*whence == 'e'); // SEEK_END
+            if (*whence == 's') {*whence = "SEEK_SET";}
+            else if (*whence == 'c') {*whence = "SEEK_CUR";}
+            else if (*whence == 'e') {*whence = "SEEK_END";}
 
             break;
 

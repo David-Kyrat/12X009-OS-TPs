@@ -1,8 +1,5 @@
 #include "inp.h"
 
-// From TP4 (4.1. Utilisation)
-typedef struct flock flock;
-
 /**
  * Takes a file descriptor and an input struct, and returns the result of calling fcntl with the
  * file descriptor and the input struct's command, lock type, whence, start, and stop
