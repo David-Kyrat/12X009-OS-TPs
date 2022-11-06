@@ -83,13 +83,13 @@ int parseInput(const char* INP_FORMAT, char* cmd, char* ltype, long* start, long
         // If sscanf says that there are 4 arguments (whence was NOT given)
         case 4:
 
-            if (*cmd == 'g') {*cmd = "F_GETLK";}
+            /* if (*cmd == 'g') {*cmd = "F_GETLK";}
             else if (*cmd == 's') {*cmd = "F_SETLK";}
             else if (*cmd == 'w') {*cmd = "F_SETLKW";}
 
             if (*ltype == 'r') {*ltype = "F_RDLCK";}
             else if (*ltype == 'w') {*ltype = "F_WRLCK";}
-            else if (*ltype == 'u') {*ltype = "F_UNLCK";}
+            else if (*ltype == 'u') {*ltype = "F_UNLCK";} */
 
         
             break;
@@ -98,7 +98,7 @@ int parseInput(const char* INP_FORMAT, char* cmd, char* ltype, long* start, long
         case 5:
             isWhenceGiven = 1;
 
-            if (*cmd == 'g') {*cmd = "F_GETLK";}
+          /*   if (*cmd == 'g') {*cmd = "F_GETLK";}
             else if (*cmd == 's') {*cmd = "F_SETLK";}
             else if (*cmd == 'w') {*cmd = "F_SETLKW";}
 
@@ -108,7 +108,7 @@ int parseInput(const char* INP_FORMAT, char* cmd, char* ltype, long* start, long
 
             if (*whence == 's') {*whence = "SEEK_SET";}
             else if (*whence == 'c') {*whence = "SEEK_CUR";}
-            else if (*whence == 'e') {*whence = "SEEK_END";}
+            else if (*whence == 'e') {*whence = "SEEK_END";} */
 
             break;
 
@@ -121,7 +121,7 @@ int parseInput(const char* INP_FORMAT, char* cmd, char* ltype, long* start, long
                 return 2;
 
             } else if (*cmd == QUIT_CHAR) {
-                printf("%c was pressed, exiting...\n", QUIT_CHAR);
+                printf("\n%c was pressed, exiting...\n", QUIT_CHAR);
                 exit(EXIT_SUCCESS);
             }
             // else: just go into default branch because there is no break/return ...
@@ -133,7 +133,9 @@ int parseInput(const char* INP_FORMAT, char* cmd, char* ltype, long* start, long
             break;
     }
 
-    //* checks if each char paramter is valid i.e. if each belongs to the corresponding array 'VALID_<param_name>' in optprsr.c
+    //*
+    //* Checks if each char parameter is valid i.e. if each belongs to the corresponding array 'VALID_<param_name>' in optprsr.c
+    //*
     int match = 3;
     //* if match attain 0 then one of the param is not any of the declared valid values => hence our input is invalid.
     for (int i = 0; i < sizeof VALID_CMD; i++) {

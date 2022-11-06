@@ -18,30 +18,12 @@ const char DEF_MSG[] = "Enter ? for help or Q to exit.";
 const int strArgNb = 3;  //* nb of char argument stored in field 'props'
 
 // Prints the help message in case of '?' entered
-char* HELP_MSG;
-char* HELP_MSGS[6];
-int isHelpMessInit = 0;
 
-void initHelpMess() {
-
-    for(int i = 0; i < sizeof HELP_MSGS; i++) HELP_MSGS[i] = calloc(512, sizeof(char));
-
-    HELP_MSGS[0] = strdup("\n\t Format: cmd l_type start length [whence]");
-    HELP_MSGS[1] = strdup("\n\t 'cmd'       ---     'g' (F_GETLK), 's' (F_SETLK), or 'w' (F_SETLKW)");
-    HELP_MSGS[2] = strdup("\n\t 'l_type'    ---     'r' (F_RDLCK), 'w' (F_WRLCK), or 'u' (F_UNLCK)");
-    HELP_MSGS[3] = strdup("\n\t 'start'     ---     lock starting offset");
-    HELP_MSGS[4] = strdup("\n\t 'length'    ---     number of bytes to lock");
-    HELP_MSGS[5] = strdup("\n\t 'whence'    ---     's' (SEEK_SET, default), 'c' (SEEK_CUR), or 'e' (SEEK_END)\n");
-
-    HELP_MSG = calloc(sizeof HELP_MSGS * 512 + 1, sizeof(char));
-
-
-    for (int i = 0; i < 6; i++) {
-        strncat(HELP_MSG, HELP_MSGS[i], 512);
-    }
-
-}
-
+const char* HELP_MSG = "\n\t Format:  cmd\tl_type\tstart\tlength\t [whence]" \
+"\n\t 'cmd'       ---     'g' (F_GETLK), 's' (F_SETLK), or 'w' (F_SETLKW)" \
+"\n\t 'start'     ---     lock starting offset" \
+"\n\t 'length'    ---     number of bytes to lock" \
+"\n\t 'whence'    ---     's' (SEEK_SET, default), 'c' (SEEK_CUR), or 'e' (SEEK_END)\n";
 
 
 struct Inp {
@@ -63,15 +45,11 @@ void printPid(int in) {
     printf(msg, getpid());
 }
 
+
 int isWhenceGiven(char* props) {
     return props[2] && props[2] != '\0';
 }
 
-void inp_print(Inp* inp) {
-    printf("[ cm:%c, tp:%c, st:%ld, sp:%ld", inp->props[0], inp->props[1], inp->start, inp->stop);
-    if (isWhenceGiven(inp->props)) printf(", wh:%c", inp->props[2]);
-    printf(" ]\n");
-}
 
 Inp* inp_askUser() {
     Inp* inp = malloc(sizeof(Inp));
@@ -88,11 +66,10 @@ Inp* inp_askUser() {
     }
     if (exitCode == 2) {
         //user entered '?' 
-        if (! isHelpMessInit){ initHelpMess(); isHelpMessInit = 1;}
-        
         printf("%s\n", HELP_MSG);
 
-        //if usered entered only '?' the attributes wont be correctly initialized, hence why we're doing it here.
+        //if usered entered only '?' the attributes wont be correctly initialized, hence why we're doing it manually here.
+        inp->props[0] = '?';
         for (int i = 1; i < strArgNb; i++) inp->props[i] = '\0'; //terminating 'props' string at first char which should be '?'
         inp->start = -1; 
         inp->stop = -1;
@@ -100,6 +77,14 @@ Inp* inp_askUser() {
 
     return inp;
 }
+
+
+void inp_print(Inp* inp) {
+    printf("[ cm:%c, tp:%c, st:%ld, sp:%ld", inp->props[0], inp->props[1], inp->start, inp->stop);
+    if (isWhenceGiven(inp->props)) printf(", wh:%c", inp->props[2]);
+    printf(" ]\n");
+}
+
 
 // ------------ GETTERS --------------------
 
@@ -115,7 +100,3 @@ void inp_free(Inp* inp) {
     free(inp->props);
     free(inp);
 }
-
-
-// ---- Initializing long string like the help message to display on '?' is very cumbersome and can produce various 
-// ---- really dumb errors, so it is hard coded here in an not very elegant way.
