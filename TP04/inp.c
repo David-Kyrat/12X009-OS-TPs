@@ -33,6 +33,7 @@ struct Inp {
      */
     char* props;
     long start, length;
+    
 };
 
 /**

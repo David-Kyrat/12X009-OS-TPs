@@ -94,34 +94,11 @@ int parseInput(const char* INP_FORMAT, char* cmd, char* ltype, long* start, long
         // If sscanf says that there are 4 arguments (whence was NOT given)
         case 4:
             *whence = 's'; // SEEK_SET is the default value for whence
-            
-            /* if (*cmd == 'g') {*cmd = "F_GETLK";}
-            else if (*cmd == 's') {*cmd = "F_SETLK";}
-            else if (*cmd == 'w') {*cmd = "F_SETLKW";}
-
-            if (*ltype == 'r') {*ltype = "F_RDLCK";}
-            else if (*ltype == 'w') {*ltype = "F_WRLCK";}
-            else if (*ltype == 'u') {*ltype = "F_UNLCK";} */
-
-        
             break;
 
         // If sscanf says that there are 5 arguments (whence was given)
         case 5:
             isWhenceGiven = 1;
-
-          /*   if (*cmd == 'g') {*cmd = "F_GETLK";}
-            else if (*cmd == 's') {*cmd = "F_SETLK";}
-            else if (*cmd == 'w') {*cmd = "F_SETLKW";}
-
-            if (*ltype == 'r') {*ltype = "F_RDLCK";}
-            else if (*ltype == 'w') {*ltype = "F_WRLCK";}
-            else if (*ltype == 'u') {*ltype = "F_UNLCK";}
-
-            if (*whence == 's') {*whence = "SEEK_SET";}
-            else if (*whence == 'c') {*whence = "SEEK_CUR";}
-            else if (*whence == 'e') {*whence = "SEEK_END";} */
-
             break;
 
         case 1:

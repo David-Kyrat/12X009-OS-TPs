@@ -1,13 +1,15 @@
 #include "inp.h"
 
+
 /**
- * Takes a file descriptor and an input struct, and returns the result of calling fcntl with the
- * file descriptor and the input struct's command, lock type, whence, start, and length
+ * Simplify use of fcntl to handle locking related operations.  
+ * 
+ * Take a file descriptor and a user input then call 'fcntl' to perform what was asked by user (i.e. get/set lock etc...)
+ * on the file pointed to by the given file descriptor
  * 
  * @param fd file descriptor
- * @param input a pointer to a struct Inp
+ * @param input Inp struct, Contains the attribute of the flock struct and cmd to execute entered by user
  * 
- * @return The return value is the result of the fcntl() function.
+ * @return result of the corresponding fcntl() call.
  */
-
 int lock(int fd, Inp* input);

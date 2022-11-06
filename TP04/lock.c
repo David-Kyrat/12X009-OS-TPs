@@ -12,20 +12,19 @@
 // example from lecture 7: I/O
 
 int lock(int fd, Inp* input) {
-    // props[0] to props[2] of Inp contains each 'command' 'lock type' 'whence'
     struct flock fl;
 
     fl.l_type = toFlock_ltype(input);
-    fl.l_whence = toFlock_whence(inp_whc(input));
+    fl.l_whence = toFlock_whence(input);
     fl.l_start = inp_start(input);
     fl.l_len = inp_length(input);
     fl.l_pid = getpid();
+    
 
-    return fcntl(fd, inp_cmd(input), &fl);
+    return fcntl(fd, toFlock_cmd(input), &fl);
 }
 
 // --------- CONVERSION FROM INP TO FLOCK STRUCT --------
-
 
 /**
  * Converts the cmd character in the input to the corresponding cmd value for the flock
@@ -98,3 +97,16 @@ int toFlock_whence(Inp* inp) {
     }
 }
 
+/* struct flock inp_to_flock(Inp* inp, int* cmd) {
+    char inpCmd = inp_cmd(inp), inpLtype = inp_ltp(inp), inpWhence = inp_whc(inp);
+    long start = inp_start(inp), length = inp_length(inp);
+
+    *cmd = toFlock_cmd(inp);
+    struct flock fl;
+    fl.l_type = toFlock_ltype(input);
+    fl.l_whence = toFlock_whence(input);
+    fl.l_start = inp_start(input);
+    fl.l_len = inp_length(input);
+    fl.l_pid = getpid();
+
+}*/
