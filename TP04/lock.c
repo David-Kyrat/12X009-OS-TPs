@@ -21,7 +21,26 @@ int lock(int fd, Inp* input) {
     fl.l_pid = getpid();
     
 
-    return fcntl(fd, toFlock_cmd(input), &fl);
+    int result = fcntl(fd, toFlock_cmd(input), &fl);
+
+    if (fl.ltype == F_GETLK) {
+        if (result == -1) printf("No lock found\n");
+        else printf("Got lock\n");
+    }
+
+    if (fl.ltype == F_SETLK) {
+        if (result == -1) printf("Unable to set lock\n");
+        else printf("Successfully locked/unlocked by %d\n", fl.l_pid);
+    }
+    
+    if (fl.ltype == F_SETLKW) {
+        if (result == -1) printf("Waiting for a lock to be released\n");
+        else printf("Successfully locked/unlocked by %d\n", fl.l_pid);
+    }
+
+    return 0;
+
+
 }
 
 // --------- CONVERSION FROM INP TO FLOCK STRUCT --------
