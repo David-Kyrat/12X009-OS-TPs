@@ -10,6 +10,6 @@
  * @param fd file descriptor
  * @param input Inp struct, Contains the attribute of the flock struct and cmd to execute entered by user
  * 
- * @return result of the corresponding fcntl() call.
+ * @return 0 if success, -1 if error
  */
 int lock(int fd, Inp* input);

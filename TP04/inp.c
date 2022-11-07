@@ -36,10 +36,7 @@ struct Inp {
     
 };
 
-/**
- * Prints process id in specific manner
- * @param in, if ('in') then prints formatted as waiting output (i.e. PID=%d> ), else as printing ouput (i.e. [PID=%d] )
- */
+
 void printPid(int in) {
     char* msg = in ? "PID=%d> " : "[PID=%d] ";
     printf(msg, getpid());
@@ -87,8 +84,8 @@ void inp_print(Inp* inp) {
 char inp_cmd(Inp* input) { return input->props[0]; }
 char inp_ltp(Inp* input) { return input->props[1]; }
 char inp_whc(Inp* input) { return input->props[2]; }
-int inp_start(Inp* input) { return input->start; }
-int inp_length(Inp* input) { return input->length; }
+long inp_start(Inp* input) { return input->start; }
+long inp_length(Inp* input) { return input->length; }
 
 // ------------ END GETTERS --------------------
 

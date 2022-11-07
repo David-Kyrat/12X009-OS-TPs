@@ -36,14 +36,14 @@ char inp_cmd(Inp* input);
  * @param input Inp*, Pointer to Inp struct from which to retrieve the lock type
  * @return (copy ?) lock type
  */
-char inp_ltp(Inp* props);
+char inp_ltp(Inp* input);
 
 /**
  * Getter for the 'whence' (g, s or w)
  * @param input Inp*, Pointer to Inp struct from which to retrieve the whence param
  * @return whence (referential from wich the 'start' and 'end')
 */
-char inp_whc(Inp* props);
+char inp_whc(Inp* input);
 
 
 /**
@@ -51,14 +51,14 @@ char inp_whc(Inp* props);
  * @param input Inp*, Pointer to Inp struct from which to retrieve the start of lock location
  * @return 'start' attribute
 */
-int inp_start(Inp* input);
+long inp_start(Inp* input);
 
 /**
  * Getter for the 'length' 
  * @param input Inp*, Pointer to Inp struct from which to retrieve the length of lock "location"
  * @return 'length' attribute
 */
-int inp_length(Inp* input);
+long inp_length(Inp* input);
 
 /**
  * Prints attributes of given 'Inp' struct 'inp'.
@@ -73,3 +73,9 @@ void inp_print(Inp* inp);
  * @param inp The Inp struct to free.
  */
 void inp_free(Inp* inp);
+
+/**
+ * Prints process id in specific manner
+ * @param in if ('in') then prints formatted as waiting output (i.e. PID=%d> ), else as printing ouput (i.e. [PID=%d] )
+ */
+void printPid(int in);

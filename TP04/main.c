@@ -1,14 +1,17 @@
 #include <errno.h>
+#include <fcntl.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #include "files.h"
 #include "inp.h"
+#include "lock.h"
 #include "optprsr.h"
 #include "util.h"
-#include "lock.h"
 
 
 //TODO: recomment correctly optparser.h
@@ -21,18 +24,19 @@ int main(int argc, char* argv[]) {
         if (savedErr != -1) fprintf(stderr, "%s\n", strerror(savedErr));
         return EXIT_FAILURE;
     }
-
     printf("\nOperating on file: \"%s\"\n", file);
+    int fd = open(file, O_RDWR);
+    if (fd < 0) return hdlOpenErr(file, 1); // hanlde error and exits if we cannot open file
+
     Inp* inp = NULL;
-
-    do {
+    int err = EXIT_SUCCESS;
+    for(;;) {
         inp = inp_askUser();
+        if (inp != NULL) {
+            err = lock(fd, inp);
+        }
         printf("--------\n\n");
-    } while (inp == NULL || 1);
-
-    inp_print(inp);
-
-    // lock(file, inp);
-
-    return EXIT_SUCCESS;
+    }
+        
+    return err != 0;
 }
