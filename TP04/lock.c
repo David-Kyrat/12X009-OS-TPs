@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 // Managing file locks
+#include <string.h>
 #include <fcntl.h>
 #include <sys/file.h>
 #include <sys/stat.h>
@@ -36,7 +37,7 @@ int lock(int fd, Inp* input) {
         printPid(0);
         printf("Waiting for lock to be released...\n");
     }
-    
+
     int res = fcntl(fd, fl_cmd, &fl);
     printPid(0);
     switch (fl_cmd) {
@@ -46,7 +47,8 @@ int lock(int fd, Inp* input) {
                 fprintf(stderr, "%s: Could not get lock at %ld:%ld (whence = %c)\n", strerror(savedErr), inp_start(input), inp_length(input), inp_whc(input));
                 return hdl_lk_conflict(savedErr, fl, input);
             }
-            else printf("%c lock present\n", inp_ltp(input));
+            else 
+                printf("%c lock present (held by %d)\n", inp_ltp(input), fl.l_pid   );
             break;
 
         case F_SETLK:
@@ -78,20 +80,6 @@ int lock(int fd, Inp* input) {
         default:
             return -1;
     }
-/*     if (fl.l_type == F_GETLK) {
-        if (res == -1) printf("No lock found\n");
-        else printf("Got lock\n");
-    }
-
-    if (fl.l_type == F_SETLK) {
-        if (res == -1) printf("Unable to set lock\n");
-        else printf("Successfully locked/unlocked by %d\n", fl.l_pid);
-    }
-    
-    if (fl.l_type == F_SETLKW) {
-        if (res == -1) printf("Waiting for a lock to be released\n");
-        else printf("Successfully locked/unlocked by %d\n", fl.l_pid);
-    } */
 
     return 0;
 
@@ -100,14 +88,7 @@ int lock(int fd, Inp* input) {
 
 // --------- CONVERSION FROM INP TO FLOCK STRUCT --------
 
-/**
- * Converts the cmd character in the input to the corresponding cmd value for the flock
- * function
- * 
- * @param inp The input struct
- * 
- * @return Corresponding cmd value for the flock function
- */
+
 int toFlock_cmd(Inp* inp) {
     switch (inp_cmd(inp)) {
         case 'g':
@@ -127,14 +108,6 @@ int toFlock_cmd(Inp* inp) {
 }
 
 
-/**
- * Converts the l_type character in the input to the corresponding l_type value for the flock
- * function
- * 
- * @param inp The input struct
- * 
- * @return Corresponding l_type value for the flock function
- */
 int toFlock_ltype(Inp* inp) {
     switch (inp_ltp(inp)) {
         case 'r':
@@ -149,14 +122,7 @@ int toFlock_ltype(Inp* inp) {
     }
 }
 
-/**
- * Converts the whence character in the input to the corresponding whence value for the flock
- * function
- * 
- * @param inp The input struct
- * 
- * @return Corresponding whence value for the flock function
- */
+
 int toFlock_whence(Inp* inp) {
     switch (inp_whc(inp)) {
         case 's':
@@ -170,17 +136,3 @@ int toFlock_whence(Inp* inp) {
             return -1;
     }
 }
-
-/* struct flock inp_to_flock(Inp* inp, int* cmd) {
-    char inpCmd = inp_cmd(inp), inpLtype = inp_ltp(inp), inpWhence = inp_whc(inp);
-    long start = inp_start(inp), length = inp_length(inp);
-
-    *cmd = toFlock_cmd(inp);
-    struct flock fl;
-    fl.l_type = toFlock_ltype(input);
-    fl.l_whence = toFlock_whence(input);
-    fl.l_start = inp_start(input);
-    fl.l_len = inp_length(input);
-    fl.l_pid = getpid();
-
-}*/

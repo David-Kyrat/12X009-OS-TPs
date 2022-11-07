@@ -79,3 +79,36 @@ void inp_free(Inp* inp);
  * @param in if ('in') then prints formatted as waiting output (i.e. PID=%d> ), else as printing ouput (i.e. [PID=%d] )
  */
 void printPid(int in);
+
+
+/**
+ * Converts the cmd character in the input to the corresponding cmd value for the flock
+ * function
+ * 
+ * @param inp The input struct
+ * 
+ * @return Corresponding cmd value for the flock function
+ */
+int toFlock_cmd(Inp* inp);
+
+
+/**
+ * Converts the l_type character in the input to the corresponding l_type value for the flock
+ * function
+ * 
+ * @param inp The input struct
+ * 
+ * @return Corresponding l_type value for the flock function
+ */
+int toFlock_ltype(Inp* inp);
+
+
+/**
+ * Converts the whence character in the input to the corresponding whence value for the flock
+ * function
+ * 
+ * @param inp The input struct
+ * 
+ * @return Corresponding whence value for the flock function
+ */
+int toFlock_whence(Inp* inp);

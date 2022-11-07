@@ -49,6 +49,7 @@ Inp* inp_askUser() {
     inp->props = calloc(strArgNb + 1, sizeof(char));
 
     printf("%s\n", DEF_MSG);
+    printPid(1);
     errno = 0;
     int exitCode = parseInput(INP_FORMAT, &inp->props[0], &inp->props[1], &inp->start, &inp->length, &inp->props[2]);
     if (exitCode < 0) {
