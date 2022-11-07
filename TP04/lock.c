@@ -39,11 +39,12 @@ int lock(int fd, Inp* input) {
     }
 
     int res = fcntl(fd, fl_cmd, &fl);
-    printPid(0);
+    if (res >= 0) printPid(0);
     switch (fl_cmd) {
         case F_GETLK:
             if (res < 0){
                 int savedErr = errno;
+                fprintf(stderr, "[PID=%d] ", getpid());
                 fprintf(stderr, "%s: Could not get lock at %ld:%ld (whence = %c)\n", strerror(savedErr), inp_start(input), inp_length(input), inp_whc(input));
                 return hdl_lk_conflict(savedErr, fl, input);
             }
@@ -54,6 +55,7 @@ int lock(int fd, Inp* input) {
         case F_SETLK:
             if (res < 0) {
                 int savedErr = errno;
+                fprintf(stderr, "[PID=%d] ", getpid());
                 if (inp_ltp(input) == 'u')
                     fprintf(stderr, "%s: Could not unlock at %ld:%ld (whence = %c)\n", strerror(savedErr), inp_start(input), inp_length(input), inp_whc(input));
                 else
@@ -66,6 +68,7 @@ int lock(int fd, Inp* input) {
 
         case F_SETLKW:
             if (res < 0) {
+                fprintf(stderr, "[PID=%d] ", getpid());
                 int savedErr = errno;
                 if (inp_ltp(input) == 'u')
                     fprintf(stderr, "%s: Could not wait & unlock at %ld:%ld (whence = %c)\n", strerror(savedErr), inp_start(input), inp_length(input), inp_whc(input));
