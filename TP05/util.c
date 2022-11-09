@@ -2,16 +2,17 @@
  * @file util.c
  * @brief Utility functions mostly used for error handling
  */
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <errno.h>
 #include <string.h>
-#include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <time.h>
+#include <unistd.h>
 
 #include "util.h"
+
 
 void* tryalc(void* allocReturn) {
     if (allocReturn) return allocReturn;
@@ -19,7 +20,6 @@ void* tryalc(void* allocReturn) {
     fprintf(stderr, "%s, Cannot allocate Memory\n", strerror(errno));
     exit(ENOMEM);
 }
-
 
 int hdlOpenErr(const char* filename, int needsExit) {
     int savedErr = errno;
@@ -41,7 +41,15 @@ int hdlReadErr(const char* filename, int needsExit, int needsClose, int fd) {
     if (needsClose) {
         if (close(fd)) hdlCloseErr(filename, needsExit);
     }
-    
+
+    if (needsExit) exit(savedErr);
+    return -1;
+}
+
+
+int hdlReadInErr(int needsExit) {
+    int savedErr = errno;
+    fprintf(stderr, "Cannot read from standard input or input was empty: %s.\n", strerror(savedErr));
     if (needsExit) exit(savedErr);
     return -1;
 }
@@ -74,20 +82,25 @@ int hdlCatErr(const char* current) {
     return -1;
 }
 
-
 struct stat lstat_s(const char* path) {
     struct stat infos;
-    if (lstat(path, &infos) < 0) fprintf(stderr, "Cannot stat %s: %s\n", path, strerror(errno));
+    if (lstat(path, &infos) < 0) {
+        int savedErr = errno;
+        fprintf(stderr, "Cannot stat %s: %s\n", path, strerror(savedErr));
+        infos.st_size = -1;
+    }
     return infos;
 }
-
 
 struct stat stat_s(const char* path) {
     struct stat infos;
-    if (stat(path, &infos) < 0) fprintf(stderr, "Cannot stat %s: %s\n", path, strerror(errno));
+    if (stat(path, &infos) < 0) {
+        int savedErr = errno;
+        fprintf(stderr, "Cannot stat %s: %s\n", path, strerror(savedErr));
+        infos.st_size = -1;
+    }
     return infos;
 }
-
 
 int dateCmpr(struct timespec ts2, struct timespec ts1) {
     const time_t t1 = ts1.tv_sec, t2 = ts2.tv_sec;
@@ -96,21 +109,20 @@ int dateCmpr(struct timespec ts2, struct timespec ts1) {
     //? If elapsed < 0 then ts2 < ts1. Else (elapsed > 0) will return 1 Iif ts2 > ts0, and 0, if elapsed == 0. (because the only case left is elapsed == 0)
 }
 
-
-
 char* strsub(char* src, int stop_idx) {
     int sublen = stop_idx;
     char* sub = NULL;
     if (sublen < 0) errno = EINVAL;
     //will copy at most 'sublen' bytes and append a \0 if necesary at the end.
-    else sub = strndup(src, sublen); 
+    else
+        sub = strndup(src, sublen);
     if (sub == NULL) {
         int savedErr = errno;
         fprintf(stderr, "Cannot extract substring from \"%s\": %s\n", src, strerror(savedErr));
         //If we ran out of memory we cannot do anything. The only thing to do in this situation is to just exit.
-        if (savedErr == ENOMEM) exit(ENOMEM); 
+        if (savedErr == ENOMEM) exit(ENOMEM);
         return NULL;
     }
-    
+
     return sub;
 }
