@@ -40,14 +40,21 @@ Example:
 ---
 
 ### Functions:
+
+```c 
     int socket(int domain, int type, int protocol);                                     -> creates a socket
     int Connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);            -> initiates a connection
+```
+
 ---
 
+```c 
     struct sockaddr_in address;
+```
+
 ### Example of TCP client:
 
-
+```c
     memset( &address, 0, sizeof(address) );
     inet_pton( AF_INET, "192.168.1.1", &(address.sin_addr) );
     address.sin_family = AF_INET;
@@ -58,12 +65,9 @@ Example:
     ...
     read(sock, ...)
     write(sock, ...)
-
-
+```
 
 ---
-
-
 
 ## Server
 
