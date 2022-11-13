@@ -12,6 +12,9 @@
 #include <sys/socket.h>
 
 
+#define INTERVAL_MIN = 0 // to be replaced
+#define INTERVAL_MAX = 64 // to be replaced
+
 
 
 int main(int argc, char* argv[]) {
@@ -65,8 +68,20 @@ int main(int argc, char* argv[]) {
         unsigned int clientLength = sizeof(clientAddress);
         int clientSock = accept(serverSock, (struct sockaddr *) &clientAddress, &clientLength);
 
-        /* Lectures/Ecritures sur clientSock (read/write) */
-        // Read/Write here
+        // Display when a new client is connected
+        printf("Client %d connecté avec l'ip %d. \n", clientSock, clientAddress);
+
+        // Read / Write here
+        int numberToGuess = 0; // replace with whatever is read in /dev/urandom
+
+        // Display when a new random number is chosen for the client
+        printf("La valeur %d est choisie pour le client %d. \n", numberToGuess, clientSock);
+
+        // Communicate the interval to the client
+        write(clientSock, &INTERVAL_MIN, 1);
+        write(clientSock, &INTERVAL_MAX, 1);
+
+
 
         close(clientSock);
     }
