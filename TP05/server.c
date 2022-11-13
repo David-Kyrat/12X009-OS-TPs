@@ -14,7 +14,6 @@
 #define INTERVAL_MAX (64) // to be replaced
 
 
-
 int main(int argc, char* argv[]) {
 
     // The port is the first argument given when run
