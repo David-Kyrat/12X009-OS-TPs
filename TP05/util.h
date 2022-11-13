@@ -15,14 +15,18 @@
 #define printRErr(mess, args...)\
     printErr(mess, args); return -1;
 
+//* Set errno to given value and return -1;
+#define setRErrno(errnoVal) \
+    errno = errnoVal; return -1;
+
 /** 
  * Macro that stores errno into the variable 'savedErr' then checks whether the given error 'condition' is true, 
  * then prints the error message and given args to stderr and returns -1 (error) or 0 (sucess) accordingly.
- */
-#define check_hdlError(condition, args...)  \
+ * 
+ #define check_hdlError(condition, args...)  \
     int savedErr = errno;                   \
     if (condition) printRErr(stderr, args); \
-    else return 0;
+    else return 0; */
 
 /**
  * Checks if alloc (malloc, calloc ...) returned Null, if it did prints error message error message to stderr and exit with error ENOMEM

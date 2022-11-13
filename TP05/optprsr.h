@@ -5,7 +5,22 @@
 //* Unsigned char i.e. (should be) exactly 1 Byte 
 typedef unsigned char byte;
 
-int checkArgsNb(int argc);
+
+/**
+ * @brief Check if there is at least 'MIN_ARG_NB_SERV' and at max 'MAX_ARG_NB_SERV' argument.
+ * @param argc same as argc in main
+ * @return 0 if success otherwise code 22 (Invalid argument)
+ */
+int checkArgsNbServ(int argc);
+
+
+/**
+ * @brief Check if there is at least 'MIN_ARG_NB_CLIENT' and at max 'MAX_ARG_NB_CLIENT' argument.
+ * @param argc same as argc in main
+ * @return 0 if success otherwise code 22 (Invalid argument)
+ */
+int checkArgsNbClient(int argc);
+
 
 /**
  * Parses & extract path of file given at main function and return a copy of it.
@@ -15,7 +30,6 @@ int checkArgsNb(int argc);
  * 
  * @return Copy of parsed arguments.
  */
-const char* parseArgv(int argc, char* argv[]);
 
 
 /**

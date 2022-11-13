@@ -7,46 +7,63 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include "functions.h"
 #include "files.h"
 #include "optprsr.h"
 #include "util.h"
-#include "functions.h"
 
 
 //static const char HELP_CHAR = '?', QUIT_CHAR = 'Q';
 //const char* OPT_STRING = "fa";
-const int MIN_ARG_NB = 1, MAX_ARG_NB = 1;
+const int MIN_ARG_NB_SERV = 1, MAX_ARG_NB_SERV = 1;
+const int MIN_ARG_NB_CLIENT = 2, MAX_ARG_NB_CLIENT = 2;
 const char* USAGE_MSG_SERV = "Usage: %s <portNumber> (2Bytes integer in [1024, 65535]) \n";
 const char* USAGE_MSG_CLIENT = "Usage: %s <ip-address>(in decimal)  <portNumber> (2Bytes integer in [1024, 65535]) \n";
 
 const int PORT_SIZE = 2;
 
-
 //* Size of the file given when calling program
 size_t FILE_SIZE; 
 
-void test() {
-    printf("lul\n");
-}
-
 /**
- * @brief Check if there is at least 1 argument.
+ * @brief Check if there is at least 'minArgNb' and at max 'maxArgNb' argument.
  * @param argc same as argc in main
  * @return 0 if success otherwise code 22 (Invalid argument)
  */
-int checkArgsNb(int argc) {
-
-    printf("is Port valid : %d\n", isPortValid(-5));
+int checkArgsNb(int argc, const int minArgNb, const int maxArgNb) {
     int relevantNb = argc - 1;
-    if (relevantNb < MIN_ARG_NB || relevantNb > MAX_ARG_NB) {
+    if (relevantNb < minArgNb || relevantNb > maxArgNb) {
         errno = EINVAL;
         return EINVAL;
     }
     return 0;
 }
 
+int checkArgsNbServ(int argc) {
+    return checkArgsNb(argc, MIN_ARG_NB_SERV, MAX_ARG_NB_SERV);
+}
+int checkArgsNbClient(int argc) {
+    return checkArgsNb(argc, MIN_ARG_NB_CLIENT, MAX_ARG_NB_CLIENT);
+}
 
-int parseInput(const char* INP_FORMAT, char* cmd, char* ltype, long* start, long* length, char* whence) {
+
+int parseArgv(int argc, char* argv[], int isServ) {
+    int checkArgsErr = isServ ? checkArgsNbServ(argc) : checkArgsNbClient(argc);
+    if (checkArgsErr < 0) setRErrno(EINVAL);
+
+    int port_idx = isServ ? 1 : 2; // position of port value (as a string) in argv[]
+    char* port_str = strndup(argv[port_idx], strlen(argv[port_idx]));
+    int port = atoi(port_str);
+    if (!isPortValid(port)) return -1;
+
+    // parsing ip address if client called (i.e. isServ == 0)
+    if (!isServ) {
+        
+    }
+
+}
+
+/*int parseInput(const char* INP_FORMAT, char* cmd, char* ltype, long* start, long* length, char* whence) {
     size_t buflen = LINE_MAX;
     char* buf = calloc(buflen, sizeof(char));
     buf = fgets(buf, buflen, stdin);
@@ -59,7 +76,7 @@ int parseInput(const char* INP_FORMAT, char* cmd, char* ltype, long* start, long
     int an = sscanf(buf, "%s %s %ld %ld %s", cmd, ltype, start, length, whence);
     int isWhenceGiven = 0;
 
-   /*  switch (an) {
+     switch (an) {
 
         // If sscanf says that there are 4 arguments (whence was NOT given)
         case 4:
@@ -91,7 +108,7 @@ int parseInput(const char* INP_FORMAT, char* cmd, char* ltype, long* start, long
             return -1;
             break;
     }
-    */
+    
 
    //TODO: IMPLEMENT
     int isArgValid = 0; //isLockInputValid(cmd, ltype, *start, *length, isWhenceGiven ? whence : NULL);
@@ -103,13 +120,13 @@ int parseInput(const char* INP_FORMAT, char* cmd, char* ltype, long* start, long
 
     free(buf);
     return EXIT_SUCCESS;
-}
+}*/
 
 
 
 // ------- PARSING ARG DIRECTLY PASSED TO PROGRAM
 
-const char* parseArgv(int argc, char* argv[]) {
+/* const char* parseArgv(int argc, char* argv[]) {
     const char* parsedArg;
     if (checkArgsNb(argc) != 0) {
         fprintf(stderr, "%s: Not Enough arguments: Expecting at least %d.\n", argv[0], MIN_ARG_NB);
@@ -145,4 +162,4 @@ const char* parseArgv(int argc, char* argv[]) {
     }
     return parsedArg;
 }
-
+ */

@@ -44,7 +44,11 @@ int main(int argc, char* argv[]) {
 
     if (serverSock == -1) {
         int errnum = errno;
-        fprintf(stderr, "%s: Could not create server socket.\n", strerror(errnum));
+        //fprintf(stderr, "%s: Could not create server socket.\n", strerror(errnum)); 
+        //* Not everytime, and even tho it is asked to check if port is already in use
+        //* there doesnt seem to be a way to do that since two processes can connect to 
+        //* the same port if the address is different. Hence, we only need the check for the address
+
         return -1;
     }
 

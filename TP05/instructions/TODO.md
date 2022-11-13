@@ -48,14 +48,12 @@ Example:
 
 ---
 
-```c 
-    struct sockaddr_in address;
-```
-
 ### Example of TCP client:
 
 ```c
+    struct sockaddr_in address;
     memset( &address, 0, sizeof(address) );
+
     inet_pton( AF_INET, "192.168.1.1", &(address.sin_addr) );
     address.sin_family = AF_INET;
     address.sin_port = htons(8080);
@@ -149,6 +147,7 @@ The server should display:
 
 ---
 
+---
 
 ## Useful functions
 
