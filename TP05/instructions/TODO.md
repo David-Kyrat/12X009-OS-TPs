@@ -1,8 +1,8 @@
 
 # TODO
 
-
 ## Objective
+
 - Implement a server that receives a client connection from any interface and shows its socket and IP address. This can be tested with *telnet ip_serveur port_serveur*
 - Implement a client that connects to a server, then closes its socket and stops.
 - Exchange information between the client and server (Random number generation, sending, receving etc.)
@@ -17,7 +17,7 @@
 
 ### What to do:
 
-Client takes 2 parameters: the IP address to server aid the port to connect to
+Client takes 2 parameters: the IP address to server, and the port to connect to.
 
 Example:
 
