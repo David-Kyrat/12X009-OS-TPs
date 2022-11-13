@@ -47,10 +47,17 @@ int main(int argc, char* argv[]) {
     }
 
     // Attaches socket to address
-    bind(serverSock, (struct sockaddr *) &address, sizeof(address));
+    int checkPort = bind(serverSock, (struct sockaddr *) &address, sizeof(address));
+
+    // Check that the port isn't already being used
+    if (checkPort == -1) {
+        int errnum = errno;
+        fprintf(stderr, "Port is already being used. Try another one.\n", stderror(errnum));
+        return -1;
+    }
 
     // Socket is marked as passive
-    listen(sock, 5);
+    listen(sock, 1);
 
     // While the program is running, listen for new clients
     while(1) {
@@ -63,4 +70,6 @@ int main(int argc, char* argv[]) {
 
         close(clientSock);
     }
+
+    close(serverSock);
 }
