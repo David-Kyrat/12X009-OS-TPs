@@ -13,10 +13,16 @@ CFLAGS = -lm -Wall -Wuninitialized -Wfloat-equal -Wshadow -Wbad-function-cast -W
 # Debug build settings
 #
 DBGFLAGS = -g -DDEBUG
-EXEC = main.out
+EXEC = serveur client
 OBJS = out/main.o out/files.o out/optprsr.o out/util.o
 
 all: $(EXEC)
+
+# serveur: serveur.c fonctions.c
+# 	gcc –o serveur serveur.c fonctions.c
+
+# client: client.c fonctions.c
+# 	gcc –o client client.c fonctions.c
 
 $(EXEC): $(OBJS)
 	$(CC) $(OBJS) -o $(EXEC)
