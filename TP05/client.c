@@ -1,6 +1,10 @@
 // Standard libraries
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/socket.h>
+       #include <arpa/inet.h>
+
+
 
 // Error 
 #include <errno.h>
