@@ -2,14 +2,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/socket.h>
-       #include <arpa/inet.h>
+#include <arpa/inet.h>
 
 
 
 // Error 
 #include <errno.h>
-
-
 
 int main(int argc, char* argv[]) {
     struct sockaddr_in address;
@@ -20,7 +18,7 @@ int main(int argc, char* argv[]) {
 
     int sock = socket(AF_INET, SOCK_STREAM, 0);
     connect(sock, (struct sockaddr *) &address, sizeof(address));
-    ...
-    read(sock, ...)
-    write(sock, ...)
+    //...
+    /* read(sock, ...)
+    write(sock, ...) */
 }
