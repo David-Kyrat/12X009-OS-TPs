@@ -12,6 +12,7 @@
             "defines": [],
             "compilerPath": "/usr/bin/gcc",
             "compilerArgs": [
+                "-std=c11",
                 "-D_BSD_SOURCE"
             ],
             "cStandard": "c11",

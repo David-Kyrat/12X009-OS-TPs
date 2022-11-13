@@ -1,10 +1,10 @@
 // Standard libraries
 #include <stdio.h>
 #include <stdlib.h>
-
-#include <string.h> //memset
+//memset
+#include <string.h>
+//basic string manip
 #include <strings.h>
-
 // Error 
 #include <errno.h>
 // Types
@@ -13,31 +13,25 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
+
+#include "functions.h"
+#include "optprsr.h"
+#include "util.h"
+
 #define INTERVAL_MIN (0) // to be replaced
 #define INTERVAL_MAX (64) // to be replaced
+
+const char* USAGE_MSG_SERV = "Usage: %s <portNumber> (2Bytes integer in [1024, 65535]) \n";
 
 int main(int argc, char* argv[]) {
 
     // The port is the first argument given when run
-    int port = argv[1];
-
-    // Check that the port number is between 1024 and 65535
-    if (port < 1024 || port > 65535) {
-        int errnum = errno;
-        fprintf(stderr, "Port number is not between 1024 and 65535.\n", strerror(errnum));
-        return -1;
-    }
-
-    // Modified code from lecture 8: FIFO
-
-    // Create the address
-    struct sockaddr_in address;
-    memset(&address, 0, sizeof(address)); //initialize it at 0
-    address.sin_family = AF_INET; //set address domain to internet
-    address.sin_addr.s_addr = htonl(INADDR_ANY);
-
-    // Use the port given
-    address.sin_port = htons(port);
+    
+    int port;
+    // Parse arguments and check that the port number is between 1024 and 65535
+    if (parseArgvServ(argc, argv, &port) < 0) 
+        printRErr("%s: Incorrect Number of Argument.\n %s", USAGE_MSG_SERV);
+    
 
     // Create a server socket
     int serverSock = socket(AF_INET, SOCK_STREAM, 0);

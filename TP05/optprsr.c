@@ -17,8 +17,8 @@
 //const char* OPT_STRING = "fa";
 const int MIN_ARG_NB_SERV = 1, MAX_ARG_NB_SERV = 1;
 const int MIN_ARG_NB_CLIENT = 2, MAX_ARG_NB_CLIENT = 2;
-const char* USAGE_MSG_SERV = "Usage: %s <portNumber> (2Bytes integer in [1024, 65535]) \n";
-const char* USAGE_MSG_CLIENT = "Usage: %s <ip-address>(in decimal)  <portNumber> (2Bytes integer in [1024, 65535]) \n";
+/* const char* USAGE_MSG_SERV = "Usage: %s <portNumber> (2Bytes integer in [1024, 65535]) \n";
+const char* USAGE_MSG_CLIENT = "Usage: %s <ip-address>(in decimal)  <portNumber> (2Bytes integer in [1024, 65535]) \n"; */
 
 const int PORT_SIZE = 2;
 
@@ -47,119 +47,43 @@ int checkArgsNbClient(int argc) {
 }
 
 
-int parseArgv(int argc, char* argv[], int isServ) {
+/**
+ * Parses the command line arguments and stores the port number and the ip address (if client
+ * called) into the given *_dest arguments.
+ * 
+ * @param argc the number of arguments passed to the program
+ * @param argv the array of arguments passed to the program
+ * @param isServ 1 if called for server, 0 if it's for client
+ * @param port_dest the port number to be used for the connection
+ * @param ip_addr_dest Pointer to the IP address of the server (if client) or NULL (if server)
+ *                     NB: does a malloc. ip_addr_dest must not have any memory allocated before. Also remember to free.
+ * 
+ * @return error code. -1 if an error happened (errno set appropriately), 0 for success.
+ */
+int parseArgv(int argc, char* argv[], int isServ, int* port_dest, char** ip_addr_dest) {
     int checkArgsErr = isServ ? checkArgsNbServ(argc) : checkArgsNbClient(argc);
-    if (checkArgsErr < 0) setRErrno(EINVAL);
+    if (checkArgsErr < 0) return -1;
 
     int port_idx = isServ ? 1 : 2; // position of port value (as a string) in argv[]
     char* port_str = strndup(argv[port_idx], strlen(argv[port_idx]));
     int port = atoi(port_str);
     if (!isPortValid(port)) return -1;
+    *port_dest = port;
 
     // parsing ip address if client called (i.e. isServ == 0)
     if (!isServ) {
-        
+        *ip_addr_dest = strndup(argv[2], strlen(argv[2]));
+        if (*ip_addr_dest == NULL) {
+            printErr("%s, %s: Cannot copy IP address.\n", *ip_addr_dest);
+            exit(EXIT_FAILURE); //No memory Left => Force-exiting program.
+        }
     }
-
-}
-
-/*int parseInput(const char* INP_FORMAT, char* cmd, char* ltype, long* start, long* length, char* whence) {
-    size_t buflen = LINE_MAX;
-    char* buf = calloc(buflen, sizeof(char));
-    buf = fgets(buf, buflen, stdin);
-    if (buf == NULL) {
-        free(buf);
-        return hdlReadInErr(0);
-    }   
-
-    //successfully parsed argument number
-    int an = sscanf(buf, "%s %s %ld %ld %s", cmd, ltype, start, length, whence);
-    int isWhenceGiven = 0;
-
-     switch (an) {
-
-        // If sscanf says that there are 4 arguments (whence was NOT given)
-        case 4:
-            *whence = 's'; // SEEK_SET is the default value for whence
-            break;
-
-        // If sscanf says that there are 5 arguments (whence was given)
-        case 5:
-            isWhenceGiven = 1;
-            break;
-
-        case 1:
-            //* If user did not enter '?' or 'Q (quit_char)' then having only 1 parameter is not valid.
-            //* The program will then not enter the if clause, i.e. => not break => continue to default branch => finally return -1 with errno set to EINVAL.
-            if (*cmd == HELP_CHAR) {
-                //if user seeked for help (entered ?) => returns 2 to indicate that. else does what was described above.
-                free(buf);
-                return 2;
-
-            } else if (*cmd == QUIT_CHAR) {
-                printf("\n%c was pressed, exiting...\n", QUIT_CHAR);
-                exit(EXIT_SUCCESS);
-            }
-            // else: just go into default branch because there is no break/return ...
-        default:
-            errno = EINVAL;
-            fprintf(stderr, "%s: Expecting between 4 and 5 inputs, received:%d\n", strerror(EINVAL), an);
-            free(buf);
-            return -1;
-            break;
-    }
-    
-
-   //TODO: IMPLEMENT
-    int isArgValid = 0; //isLockInputValid(cmd, ltype, *start, *length, isWhenceGiven ? whence : NULL);
-
-    if (isArgValid <= 0) {
-        free(buf);
-        return -1;
-    }
-
-    free(buf);
     return EXIT_SUCCESS;
-}*/
-
-
-
-// ------- PARSING ARG DIRECTLY PASSED TO PROGRAM
-
-/* const char* parseArgv(int argc, char* argv[]) {
-    const char* parsedArg;
-    if (checkArgsNb(argc) != 0) {
-        fprintf(stderr, "%s: Not Enough arguments: Expecting at least %d.\n", argv[0], MIN_ARG_NB);
-        return NULL;
-    }
-
-    // relevant arg i.e. not program name. (Waiting only 1 arg)
-    char* arg = argv[1];
-
-    int argLen = strlen(arg);
-    if (argLen <= 0 || argLen >= PATH_MAX) {
-        errno = EINVAL;
-        return NULL;
-    }
-    // argv[i] is not destination i.e. last element and argv[i] does not exists
-    if (!exists(arg)) {
-        errno = ENOENT;
-        fprintf(stderr, "\"%s\" Invalid argument: %s", arg, strerror(ENOENT));
-        return NULL;
-    }
-    // returns absolute path if it was computed correctly.
-    parsedArg = realpath(arg, NULL);
-    if (parsedArg == NULL) {
-        int savedErr = errno;
-        fprintf(stderr, "Cannot resolve file %s: %s\n", arg, strerror(savedErr));
-        return NULL;
-    }
-    FILE_SIZE = getFileSize(parsedArg);
-    
-    if (FILE_SIZE < 0) {
-        fprintf(stderr, "Cannot get size of given file %s, ==> Max size will then be infered.\n", parsedArg);
-        FILE_SIZE = SSIZE_MAX;
-    }
-    return parsedArg;
 }
- */
+
+int parseArgvServ(int argc, char* argv[], int* port_dest) {
+    return parseArgv(argc, argv, 1, port_dest, NULL);
+}
+int parseArgvClient(int argc, char* argv[], int* port_dest, char** ip_addr_dest) {
+    return parseArgv(argc, argv, 0, port_dest, ip_addr_dest);
+}

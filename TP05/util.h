@@ -7,17 +7,17 @@
 
 /** Macro that Prints given message to stderr. Message should be printf formatted and the first arg is always strerror(savedErr) where savedErr is the saved value of errno.
 * Usage: 'printErr("%s, %d: port number not valid\n", port)' first %s will be 'strerror(savedErr)' */
-#define printErr(mess, args...) \
+#define printErr(mess, args...) { \
     int savedErr = errno; \
-    fprintf(stderr, mess, strerror(savedErr), args);
+    fprintf(stderr, mess, strerror(savedErr), args);}
 
 //* Macro that Prints given (printf formatted) message to stderr and returns -1. See 'printErr' for more info
-#define printRErr(mess, args...)\
-    printErr(mess, args); return -1;
+#define printRErr(mess, args...) { \
+    printErr(mess, args); return -1;}
 
 //* Set errno to given value and return -1;
-#define setRErrno(errnoVal) \
-    errno = errnoVal; return -1;
+#define setRErrno(errnoVal) { \
+    errno = errnoVal; return -1;}
 
 /** 
  * Macro that stores errno into the variable 'savedErr' then checks whether the given error 'condition' is true, 
