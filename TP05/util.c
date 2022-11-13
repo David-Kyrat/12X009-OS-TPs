@@ -21,6 +21,13 @@ void* tryalc(void* allocReturn) {
     exit(ENOMEM);
 }
 
+
+int hdlBasicErr() {
+    int savedErr = errno;
+    fprintf(stderr, "Unexpected error: %s\n", strerror(savedErr));
+    return -1;
+}
+
 int hdlOpenErr(const char* filename, int needsExit) {
     int savedErr = errno;
     fprintf(stderr, "Could not %s file %s : %s\n", savedErr == EEXIST ? "create" : "open", filename, strerror(savedErr));

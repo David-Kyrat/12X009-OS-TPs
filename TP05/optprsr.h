@@ -1,3 +1,12 @@
+#define MIN_PORT 1024 // Lowest Port value
+#define MAX_PORT 65535 //Highest Port value
+
+
+//* Unsigned char i.e. (should be) exactly 1 Byte 
+typedef unsigned char byte;
+
+int checkArgsNb(int argc);
+
 /**
  * Parses & extract path of file given at main function and return a copy of it.
  * (does a malloc remember to free.)

@@ -10,17 +10,24 @@
 #include "files.h"
 #include "optprsr.h"
 #include "util.h"
+#include "functions.h"
 
-static const char VALID_CMD[3] = {'g', 's', 'w'}, VALID_LTYPE[3] = {'r', 'w', 'u'}, VALID_WHENCE[3] = {'s', 'c', 'e'};
-static const char HELP_CHAR = '?', QUIT_CHAR = 'Q';
 
+//static const char HELP_CHAR = '?', QUIT_CHAR = 'Q';
 //const char* OPT_STRING = "fa";
 const int MIN_ARG_NB = 1, MAX_ARG_NB = 1;
-const char* USAGE_MSG = "Usage: %s folder1 folder2/ destination \n";
+const char* USAGE_MSG_SERV = "Usage: %s <portNumber> (2Bytes integer in [1024, 65535]) \n";
+const char* USAGE_MSG_CLIENT = "Usage: %s <ip-address>(in decimal)  <portNumber> (2Bytes integer in [1024, 65535]) \n";
+
+const int PORT_SIZE = 2;
+
 
 //* Size of the file given when calling program
 size_t FILE_SIZE; 
 
+void test() {
+    printf("lul\n");
+}
 
 /**
  * @brief Check if there is at least 1 argument.
@@ -28,50 +35,14 @@ size_t FILE_SIZE;
  * @return 0 if success otherwise code 22 (Invalid argument)
  */
 int checkArgsNb(int argc) {
+
+    printf("is Port valid : %d\n", isPortValid(-5));
     int relevantNb = argc - 1;
     if (relevantNb < MIN_ARG_NB || relevantNb > MAX_ARG_NB) {
         errno = EINVAL;
         return EINVAL;
     }
     return 0;
-}
-
-
-int isLockInputValid(char* cmd, char* ltype, long start, long length, char* whence) {
-    //*
-    //* Checks if each char parameter is valid i.e. if each belongs to the corresponding array 'VALID_<param_name>' in optprsr.c
-    //*
-    long abs_start = start < 0 ? -start : start; //checking if absolute value of start, length are within FILE_SIZE. Abs val because start can be negative if, e.g., SEEK_END was provided
-    long abs_length = length < 0 ? -length : length;
-    if (abs_length > FILE_SIZE || abs_start >= FILE_SIZE) {
-        fprintf(stderr, "Invalid start or length value. (%ld, %ld) \n", start, length);
-        errno = EINVAL;
-        return 0;
-    }
-
-    int match = 3;
-    //* if match attain 0 then one of the param is not any of the declared valid values => hence our input is invalid.
-    for (int i = 0; i < sizeof VALID_CMD; i++) 
-        if (*cmd != VALID_CMD[i]) match--;
-    
-    if (match > 0) {
-        match = 3;
-        for (int i = 0; i < sizeof VALID_LTYPE; i++)
-            if (*ltype != VALID_LTYPE[i]) match--;
-        
-    }
-    if (match > 0 && whence != NULL) {
-        match = 3;
-        for (int i = 0; i < sizeof VALID_WHENCE; i++)
-            if (*whence != VALID_WHENCE[i]) match--;
-    }
-
-    if (match <= 0) {
-        errno = EINVAL;
-        return -1;
-    }
-
-    return 1;
 }
 
 
@@ -88,7 +59,7 @@ int parseInput(const char* INP_FORMAT, char* cmd, char* ltype, long* start, long
     int an = sscanf(buf, "%s %s %ld %ld %s", cmd, ltype, start, length, whence);
     int isWhenceGiven = 0;
 
-    switch (an) {
+   /*  switch (an) {
 
         // If sscanf says that there are 4 arguments (whence was NOT given)
         case 4:
@@ -120,8 +91,10 @@ int parseInput(const char* INP_FORMAT, char* cmd, char* ltype, long* start, long
             return -1;
             break;
     }
-   
-    int isArgValid = isLockInputValid(cmd, ltype, *start, *length, isWhenceGiven ? whence : NULL);
+    */
+
+   //TODO: IMPLEMENT
+    int isArgValid = 0; //isLockInputValid(cmd, ltype, *start, *length, isWhenceGiven ? whence : NULL);
 
     if (isArgValid <= 0) {
         free(buf);

@@ -30,10 +30,14 @@ all: $(EXEC)
 
 
 $(SERV_EXEC): $(SERV_OBJS)
-	$(CC) $(SERV_OBJS) –o $(SERV_EXEC)
+	$(CC) $(SERV_OBJS) -o $(SERV_EXEC)
 
 $(CLIENT_EXEC): $(CLIENT_OBJS)
 	$(CC) $(CLIENT_OBJS) -o $(CLIENT_EXEC)
+
+
+test: test.c $(SHARED_OBJS)
+	$(CC) test.c $(SHARED_OBJS) $(CFLAGS) $(DBGFLAGS) -o test.out
 
 
 out/client.o: client.c functions.h optprsr.h files.h util.h

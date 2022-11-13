@@ -6,17 +6,16 @@
                 "${workspaceFolder}/**",
                 "/usr/include/**",
                 "/usr/include/x86_64-linux-gnu/**",
-                "/usr/lib/gcc/x86_64-linux-gnu/9/include/**"
+                "/usr/lib/gcc/x86_64-linux-gnu/12/include/**"
+                
             ],
             "defines": [],
-            "configurationProvider": "ms-vscode.makefile-tools",
             "compilerPath": "/usr/bin/gcc",
             "compilerArgs": [
-                "-std=c17",
                 "-D_BSD_SOURCE"
             ],
-            "cStandard": "c17",
-            "mergeConfigurations": true
+            "cStandard": "c11",
+            "intelliSenseMode": "clang-x64"
         }
     ],
     "version": 4
