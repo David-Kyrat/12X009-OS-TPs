@@ -2,7 +2,7 @@
 # TODO
 
 
-## **Objective**
+## Objective
 - Implement a server that receives a client connection from any interface and shows its socket and IP address. This can be tested with *telnet ip_serveur port_serveur*
 - Implement a client that connects to a server, then closes its socket and stops.
 - Exchange information between the client and server (Random number generation, sending, receving etc.)
@@ -10,15 +10,14 @@
 - Check that the client sockets are closed with *ss -tn*
 
 ---
----
 
-## **Client**
-
+## Client
 
 ---
 
-### **What to do:**
-Client takes 2 parameters: the IP address to server and the port to connect to
+### What to do:
+
+Client takes 2 parameters: the IP address to server aid the port to connect to
 
 Example:
 
@@ -31,7 +30,8 @@ Example:
 
 ---
 
-### **How to do it:**
+### How to do it:
+
 1. Create socket
 2. Connect a socket to server
 3. Read/Write from socket
@@ -39,16 +39,15 @@ Example:
 
 ---
 
-### **Functions:**
+### Functions:
     int socket(int domain, int type, int protocol);                                     -> creates a socket
-    int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);            -> initiates a connection
-
+    int Connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);            -> initiates a connection
 ---
 
-### **Example of TCP client:**
-
-
     struct sockaddr_in address;
+### Example of TCP client:
+
+
     memset( &address, 0, sizeof(address) );
     inet_pton( AF_INET, "192.168.1.1", &(address.sin_addr) );
     address.sin_family = AF_INET;
@@ -63,15 +62,15 @@ Example:
 
 
 ---
+
+
+
+## Server
+
 ---
 
+### What to do:
 
-
-## **Server**
-
----
-
-### **What to do:**
 Server takes 1 parameter: The port number it will be waiting at
 
 Example:
@@ -94,7 +93,7 @@ The server should display:
 -  "Client *socket* propose *proposition*" when a client proposition is received.
 ---
 
-### **How to do it:**
+### How to do it:
 
 1. Create server socket
 2. Attach server socket to an address
@@ -114,8 +113,10 @@ The server should display:
     int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);                -> accepts a connection
 
 ---
+
 ### Example of TCP server:
 
+```c
     struct sockaddr_in address;
     memset(&address, 0, sizeof(address));
     address.sin_family = AF_INET;
@@ -137,8 +138,8 @@ The server should display:
 
         close( clientSock );
     }
+```
 
----
 ---
 
 
@@ -159,6 +160,6 @@ The server should display:
         char sun_path[UNIX_PATH_MAX];  /* Chemin sur le systeme de fichiers */
     };
 
----
+
 ---
 
