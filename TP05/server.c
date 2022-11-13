@@ -4,16 +4,14 @@
 
 // Error 
 #include <errno.h>
-
 // Types
 #include <sys/types.h>
-
-// Sockets
+// Sockets, inet addresses
 #include <sys/socket.h>
+#include <arpa/inet.h>
 
-
-#define INTERVAL_MIN = 0 // to be replaced
-#define INTERVAL_MAX = 64 // to be replaced
+#define INTERVAL_MIN (0) // to be replaced
+#define INTERVAL_MAX (64) // to be replaced
 
 
 
