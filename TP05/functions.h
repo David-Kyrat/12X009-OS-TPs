@@ -47,3 +47,14 @@ sockaddr_in new_sockaddr(int port, const char* addr_repr);
  * @return A file descriptor for the new socket, or -1 for errors.
  */
 int new_socket();
+
+/**
+ * Utility function for basic handling of error related to Socket connection.
+ * Prints an error message to stderr.
+ * 
+ * @param port The port number that the client is trying to connect to.
+ * @param ip_addr The IP address of the server.
+ * 
+ * @return -1.
+ */
+int hdlClientConnectErr(int port, const char* ip_addr);

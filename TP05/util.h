@@ -17,6 +17,7 @@
 
 //* Set errno to given value and return -1;
 #define setRErrno(errnoVal) { \
+
     errno = errnoVal; return -1;}
 
 /** 

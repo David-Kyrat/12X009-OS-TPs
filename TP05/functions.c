@@ -73,3 +73,13 @@ int new_socket() {
     if (sock < 0) printRErr("%s, Cannot open given socket\n", "")
     return sock;
 }
+
+/**
+ * This function handles the error that occurs when a client cannot connect to a server.
+ * 
+ * @param port The port number that the client is trying to connect to.
+ * @param ip_addr The IP address of the server.
+ */
+int hdlClientConnectErr(int port, const char* ip_addr) {
+    printRErr("%s, Cannot connect to server at address %s and port %d\n.", ip_addr, port);
+}
