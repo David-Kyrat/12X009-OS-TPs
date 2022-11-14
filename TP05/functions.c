@@ -10,6 +10,8 @@
 #include "optprsr.h"
 #include "util.h"
 
+//Max Length in character of an IP address "xxx.xxx.xxx.xxx\0" => 13chars.
+const socklen_t MAX_IPADDR_LEN = 13;
 
 int isPortValid(int port) {
     if (port < MIN_PORT || port > MAX_PORT) {
@@ -40,6 +42,14 @@ struct in_addr* new_in_addr(const char* addr_repr) {
 }
 
 
+const char *inet_tostr(struct in_addr* in_addr) {
+    socklen_t size = MAX_IPADDR_LEN;
+    char* dst = tryalc(calloc(size, sizeof(char)));
+    inet_ntop(AF, in_addr, dst, size);
+    return dst;
+}
+
+
 sockaddr_in new_sockaddr(int port, const char* addr_repr) {
     // Create the address
     sockaddr_in address;
@@ -58,6 +68,8 @@ sockaddr_in new_sockaddr(int port, const char* addr_repr) {
     return address;
 }
 
-int socket_predef() {
-    return socket(AF, SOCK_TYPE, PROTOCOL);
+int new_socket() {
+    int sock = socket(AF, SOCK_TYPE, PROTOCOL);
+    if (sock < 0) printRErr("%s, Cannot open given socket\n", "")
+    return sock;
 }

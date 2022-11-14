@@ -19,7 +19,14 @@ typedef struct sockaddr_in sockaddr_in;
  */
 int isPortValid(int port);
 
-
+/**
+ * Converts the binary IP address contained in the 'in_addr' struct to a string
+ * 
+ * @param in_addr The 'in_addr' struct containing the address to convert.
+ * 
+ * @return Human readable representation of the IP address.
+ */
+const char *inet_tostr(struct in_addr* in_addr);
 
 /**
  * Creates a socket address for a client or a server
@@ -27,6 +34,16 @@ int isPortValid(int port);
  * @param port the port number to bind the socket to
  * @param addr_repr (Can Be Null) string representation of the IP address (or 'NULL' to default to 'INADDR_ANY', if creating socket address for the server side)
  * 
- * @return Initialized sockaddr_in struct just left to call the 'socket()' method on it to initiate connection (client) / finish binding-listen-accept (server).
+ * @return Initialized sockaddr_in struct just left to call the 'socket()' method on it to initiate connection (client) / finish binding-listen-accept (server). (exits in case of error)
  */
 sockaddr_in new_sockaddr(int port, const char* addr_repr);
+
+
+/**
+ * Shorthand for 'socket(AF, SOCK_STREAM, 0)'.
+ * Creates a new socket based on 'AF', 'SOCK_TYPE' and 'PROTOCOL' and check for error.
+ * If there are => prints message on stderr.
+ * 
+ * @return A file descriptor for the new socket, or -1 for errors.
+ */
+int new_socket();
