@@ -43,7 +43,7 @@ Example:
 
 ```c 
     int socket(int domain, int type, int protocol);                                     -> creates a socket
-    int Connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);            -> initiates a connection
+    int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);            -> initiates a connection
 ```
 
 ---

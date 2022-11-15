@@ -23,9 +23,10 @@
 
 const int INTERVAL_MIN = 0; // to be replaced
 const int INTERVAL_MAX = 64; // to be replaced
+const int GUESSES = 5;
 
 const char* USAGE_MSG_SERV = "Usage: %s <portNumber> (2Bytes integer in [1024, 65535]) \n";
-const int MAX_PEND_CNCTN = 1; //* Maximum length to which the queue of pending connections for sockfd may  grow.
+const int MAX_PEND_CNCTN = 1; //* Maximum length to which the queue of pending connections for sockfd may grow.
 
 int main(int argc, char* argv[]) {
 
@@ -53,6 +54,7 @@ int main(int argc, char* argv[]) {
         int client_socket = accept(server_socket, (struct sockaddr *) &clientAddress, &clientLength);
 
         const char* pretty_clientAddress = inet_tostr(&clientAddress.sin_addr);
+        
         // Display when a new client is connected
         printf("Client %d connected with IP: %s.\n", client_socket, pretty_clientAddress);
 
@@ -60,12 +62,36 @@ int main(int argc, char* argv[]) {
         int numberToGuess = 0; // replace with whatever is read in /dev/urandom
 
         // Display when a new random number is chosen for the client
-        printf("Selected value for client %d: %d.\n", numberToGuess, client_socket);
+        printf("Selected value for client %d: %d.\n", client_socket, numberToGuess);
 
         // Communicate the interval to the client
-        write(client_socket, &INTERVAL_MIN, 1);
-        write(client_socket, &INTERVAL_MAX, 1);
+        write(client_socket, &INTERVAL_MIN, 4);
+        write(client_socket, &INTERVAL_MAX, 4);
         //TODO: Check if works with only 1Byte. Apprently there are errors when sending 1Byte or less
+
+        int proposition;
+        int guess = 0;
+
+        while (proposition != numberToGuess && guess <= GUESSES) {
+            read(client_socket, &proposition, 4);
+            printf("Client %d proposes: %d\n", client_socket, proposition);
+
+            if (proposition == numberToGuess) {
+                write(client_socket, 0, 100);
+            }
+
+            else if (proposition < numberToGuess) {
+                write(client_socket, 1, 100);
+                guess++;
+            }
+
+            else if (proposition > numberToGuess) {
+                write(client_socket, 2, 100);
+                guess++;
+            }
+            
+        }
+
 
 
         free(pretty_clientAddress);
