@@ -70,7 +70,7 @@ sockaddr_in new_sockaddr(int port, const char* addr_repr) {
 
 int new_socket() {
     int sock = socket(AF, SOCK_TYPE, PROTOCOL);
-    if (sock < 0) printRErr("%s, Cannot open given socket\n", "")
+    if (sock < 0) printRErr("%s, Cannot open given socket\n", "");
     return sock;
 }
 

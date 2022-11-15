@@ -53,6 +53,16 @@ int main(int argc, char* argv[]) {
         sockaddr_in clientAddress; uint clientLength = sizeof(clientAddress);
         int client_socket = accept(server_socket, (struct sockaddr *) &clientAddress, &clientLength);
 
+        // Code taken from slides
+
+        // Make a temporary fork
+        pid_t t_pid = fork();
+        if (t_pid == 0) {
+            pid_t pid = fork();
+
+        // If we're on the parent processus, handle the client
+        if (pid == 0) {
+
         const char* pretty_clientAddress = inet_tostr(&clientAddress.sin_addr);
         
         // Display when a new client is connected
@@ -94,8 +104,19 @@ int main(int argc, char* argv[]) {
 
 
 
-        free(pretty_clientAddress);
-        close(client_socket);
+            free(pretty_clientAddress);
+            close(client_socket);
+            }
+        }
+
+        // If it isn't, exit
+        else {
+            exit(EXIT_FAILURE);
+        }
+
+        waitpid(t_pid);
+
+        
     }
 
     close(server_socket);
