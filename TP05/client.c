@@ -25,9 +25,8 @@ const char* USAGE_MSG_CLIENT = "Usage: %s <ip-address> (in decimal)  <portNumber
 
 int main(int argc, char* argv[]) {
     
-    int port;
-    const char* ip_addr;
-    if (parseArgvClient(argc, argv, &port, &ip_addr) < 0) printRErr("%s\n  %s", USAGE_MSG_CLIENT);
+    int port = argv[2];
+    const char* ip_addr = argv[1];
 
     sockaddr_in address = new_sockaddr(port, ip_addr);
 

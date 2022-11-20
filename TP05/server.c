@@ -30,9 +30,12 @@ const int MAX_PEND_CNCTN = 1; //* Maximum length to which the queue of pending c
 
 int main(int argc, char* argv[]) {
 
-    int port;
+    int port = argv[1];
     // Parse arguments and check that the port number is between 1024 and 65535
-    if (parseArgvServ(argc, argv, &port) < 0) printRErr("%s\n  %s", USAGE_MSG_SERV);
+    if (port < 1024 || port > 65535) {
+        printf(USAGE_MSG_SERV);
+        return -1;
+    }
 
     sockaddr_in address = new_sockaddr(port, NULL);
 

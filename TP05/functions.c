@@ -4,13 +4,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <arpa/inet.h>
-#include <sys/socket.h>
 
 #include "optprsr.h"
 #include "util.h"
 
-//Max Length in character of an IP address "xxx.xxx.xxx.xxx\0" => 13chars.
+// Max Length in character of an IP address "xxx.xxx.xxx.xxx\0" => 13chars.
 const socklen_t MAX_IPADDR_LEN = 13;
 
 int isPortValid(int port) {
@@ -24,7 +22,7 @@ int isPortValid(int port) {
 
 
 /**
- * Return the conversion of an  IP address' string representation to binary.
+ * Return the conversion of an IP address' string representation to binary.
  * @param addr_repr (Can Be Null) string representation of the IP address (or 'NULL' to default to 'INADDR_ANY', Usefull when create socket address for a server)
  * 
  * @return Initialized struct in_addr on success or nothing (exits with exit code EXIT_FAILURE) if an error happened.
