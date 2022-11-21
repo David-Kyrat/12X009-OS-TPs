@@ -1,4 +1,4 @@
-#include "functions.h"
+
 
 #include <errno.h>
 #include <stdio.h>
@@ -7,6 +7,8 @@
 
 #include "optprsr.h"
 #include "util.h"
+
+#include "functions.h"
 
 // Max Length in character of an IP address "xxx.xxx.xxx.xxx\0" => 13chars.
 const socklen_t MAX_IPADDR_LEN = 13;

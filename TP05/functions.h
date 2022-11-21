@@ -1,3 +1,6 @@
+#ifndef __FUNCTIONS__
+#define __FUNCTIONS__
+
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
@@ -58,3 +61,6 @@ int new_socket();
  * @return -1.
  */
 int hdlClientConnectErr(int port, const char* ip_addr);
+
+
+#endif /* __FUNCTIONS__ */

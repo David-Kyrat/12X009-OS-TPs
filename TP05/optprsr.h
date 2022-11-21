@@ -1,3 +1,5 @@
+#ifndef __OPTPRSR__
+#define __OPTPRSR__
 #define MIN_PORT 1024 // Lowest Port value
 #define MAX_PORT 65535 //Highest Port value
 
@@ -65,3 +67,6 @@ int parseArgvClient(int argc, char* argv[], int* port_dest, char** ip_addr_dest)
  * @return 0 if success, -1 if error (errno is set accordingly). Or 2 if user entered an '?' to get help.
  */
 int parseInput(const char* INP_FORMAT, char* cmd, char* ltype, long* start, long* length, char* whence);
+
+
+#endif /* __OPTPRSR__ */
