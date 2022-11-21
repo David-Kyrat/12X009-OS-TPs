@@ -24,6 +24,8 @@
 const char* USAGE_MSG_CLIENT = "Usage: %s <ip-address> (in decimal)  <portNumber> (2Bytes integer in [1024, 65535]) \n";
 
 int main(int argc, char* argv[]) {
+
+    int a = parseArgvClient(argc, argv, argv[2], argv[1]);
     
     /* int port = argv[2];ip
     const char* ip_addr = argv[1]; */
