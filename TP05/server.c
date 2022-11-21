@@ -23,26 +23,21 @@
 #include "util.h"
 
 
-const int INTERVAL_MIN = 0;   // to be replaced
-const int INTERVAL_MAX = 64;  // to be replaced
+const int INTERVAL_MIN = 0;
+const int INTERVAL_MAX = 64;  
 const int GUESSES = 5;
 
 const char* USAGE_MSG_SERV = "Usage: %s <portNumber> (2Bytes integer in [1024, 65535]) \n";
-const int MAX_PEND_CNCTN = 1;  //* Maximum length to which the queue of pending connections for sockfd may grow.
+const int MAX_PEND_CNCTN = 5;  //* Maximum length to which the queue of pending connections for sockfd may grow.
 
 int main(int argc, char* argv[]) {
+
+    // Check the port
     int port = atoi(argv[1]);
     if (!isPortValid(port)) {
         printf("Invalid port\n");
         return -1;
     }
-    
-    // if (parseArgvServ(argc, argv, &port) < 0) {
-    //     printErr("%s: Cannot parse argument passed to %s\n.", argv[0]);
-    //     return EXIT_FAILURE;
-    // }
-
-
 
 
     sockaddr_in address = new_sockaddr(port, NULL);
@@ -74,10 +69,16 @@ int main(int argc, char* argv[]) {
         // Make a temporary fork
         pid_t t_pid = fork();
         printf("PID: %d\n", t_pid);
+
         if (t_pid < 0) {
             printErr("%s: %s - Cannot Fork.\n", argv[0]);
             exit(EXIT_FAILURE);
         }
+
+        if (t_pid > 0) {
+            waitpid(t_pid, NULL, 0);
+        }
+
         if (t_pid == 0) {
             pid_t pid = fork();
 
@@ -89,7 +90,11 @@ int main(int argc, char* argv[]) {
                 printf("Client %d connected with IP: %s.\n", client_socket, pretty_clientAddress);
 
                 // Read / Write here
-                int numberToGuess = 10;  // replace with whatever is read in /dev/urandom
+                srand(time(NULL));
+                int numberToGuess = (rand() % 65);
+                
+                // dev/urandom doesnt work well on WSL, so a simple random number is used, but the code of dev/urandom is provided below
+                //
                 // FILE *f;
                 // f = fopen("/dev/urandom", "r");
                 // fread(&numberToGuess, sizeof(int), 1, f);  
@@ -107,6 +112,7 @@ int main(int argc, char* argv[]) {
                 int result;
                 int guess = 1;
 
+                // Check for the results given back by the client
                 while (proposition != numberToGuess && guess <= GUESSES) {
                     read(client_socket, &proposition, 4);
                     printf("Client %d proposes: %d\n", client_socket, proposition);
@@ -114,6 +120,7 @@ int main(int argc, char* argv[]) {
                     if (proposition == numberToGuess) {
                         result = 0;
                         write(client_socket, &result, 4);
+                        break;
                     }
 
                     else if (proposition < numberToGuess) {
@@ -139,8 +146,6 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        int childExitStatus;
-        waitpid(t_pid, &childExitStatus, WUNTRACED); //TODO: see if this option is 
     }
 
     close(server_socket);

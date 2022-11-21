@@ -80,11 +80,11 @@ int main(int argc, char* argv[]) {
             printf("Number is lower\n");
         }
 
-        else {
+       if(received == 4) {
             printf("Too many guesses, you lose!\n");
             received = 0;
             close(client_socket);
-
+            break;
         }
     }
 
