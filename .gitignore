@@ -3,7 +3,6 @@
 
 #.clang-format
 #**/.clang-format
-TP03/out
 
 .fake
 *.zip

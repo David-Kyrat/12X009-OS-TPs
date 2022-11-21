@@ -17,6 +17,8 @@
 //close
 #include <unistd.h>
 
+#include <sys/wait.h>
+
 #include "functions.h"
 #include "optprsr.h"
 #include "util.h"
@@ -30,11 +32,16 @@ const int MAX_PEND_CNCTN = 1; //* Maximum length to which the queue of pending c
 
 int main(int argc, char* argv[]) {
 
-    int port = atoi(argv[1]);
+    /* int port = atoi(argv[1]);
     // Parse arguments and check that the port number is between 1024 and 65535
     if (port < 1024 || port > 65535) {
         printf(USAGE_MSG_SERV);
         return -1;
+    } */
+    int port;
+    if (parseArgvServ(argc, argv, &port) < 0) {
+        printErr("%s: Cannot parse Server arugment\n.", "");
+        return EXIT_FAILURE;
     }
 
     sockaddr_in address = new_sockaddr(port, NULL);
