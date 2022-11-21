@@ -14,7 +14,7 @@
 const socklen_t MAX_IPADDR_LEN = 13;
 
 int isPortValid(int port) {
-    if (port < MIN_PORT || port > MAX_PORT) {
+    if (port < 1024 || port > 65535) {
         errno = EINVAL;
         printErr("%s, %d: Invalid port. Expected number in [1024, 65535]\n", port);
         return 0;
@@ -35,7 +35,7 @@ struct in_addr* new_in_addr(const char* addr_repr) {
     if (addr_repr == NULL) inaddr->s_addr = htonl(INADDR_ANY);
 
     else if (inet_pton(AF, addr_repr, inaddr) <= 0) {
-        printErr("%s, %s: Cannot convert address to binary form.\n", addr_repr);
+        printErr("%s, %d: Cannot convert address to binary form.\n", addr_repr);
         exit(EXIT_FAILURE);
     }
     return inaddr;

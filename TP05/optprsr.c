@@ -78,7 +78,12 @@ int parseArgv(int argc, char* argv[], int isServ, int* port_dest, char** ip_addr
             exit(EXIT_FAILURE); //No memory Left => Force-exiting program.
         }
     }
-    return EXIT_SUCCESS;
+    
+    printf("IP address: %s\n", *ip_addr_dest);
+    printf("Port: %d\n", *port_dest);
+
+
+    return 0;
 }
 
 int parseArgvServ(int argc, char* argv[], int* port_dest) {
