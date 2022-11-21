@@ -15,6 +15,7 @@ DBGFLAGS = -g -DDEBUG
 
 SERV_EXEC = server.out
 CLIENT_EXEC = client.out
+
 EXEC = $(SERV_EXEC) $(CLIENT_EXEC)
 
 SHARED_OBJS = out/functions.o out/files.o out/optprsr.o out/util.o
@@ -43,11 +44,11 @@ test: test.c $(SHARED_OBJS)
 out/client.o: client.c functions.h optprsr.h files.h util.h
 	$(CC) -c client.c $(CFLAGS) $(DBGFLAGS) -o out/client.o
 
-out/server.o: server.c functions.h optprsr.h files.h util.h
+out/server.o: server.c functions.h optprsr.h util.h
 	$(CC) -c server.c $(CFLAGS) $(DBGFLAGS) -o out/server.o
 
 
-out/functions.o: functions.c functions.h files.h util.h
+out/functions.o: functions.c functions.h util.h
 	$(CC) -c functions.c $(CFLAGS) $(DBGFLAGS) -o out/functions.o
 
 
