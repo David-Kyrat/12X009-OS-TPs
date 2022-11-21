@@ -72,7 +72,7 @@ int parseArgv(int argc, char* argv[], int isServ, int* port_dest, char** ip_addr
 
     // parsing ip address if client called (i.e. isServ == 0)
     if (!isServ) {
-        *ip_addr_dest = strndup(argv[2], strlen(argv[2]));
+        *ip_addr_dest = strndup(argv[1], strlen(argv[1]));
         if (*ip_addr_dest == NULL) {
             printErr("%s, %s: Cannot copy IP address.\n", *ip_addr_dest);
             exit(EXIT_FAILURE); //No memory Left => Force-exiting program.

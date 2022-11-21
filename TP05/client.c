@@ -25,8 +25,10 @@ const char* USAGE_MSG_CLIENT = "Usage: %s <ip-address> (in decimal)  <portNumber
 
 int main(int argc, char* argv[]) {
     
-    int port = argv[2];
-    const char* ip_addr = argv[1];
+    /* int port = argv[2];ip
+    const char* ip_addr = argv[1]; */
+    int port; const char* ip_addr;
+    parseArgvClient(argc, argv, &port, &ip_addr);
 
     sockaddr_in address = new_sockaddr(port, ip_addr);
 
@@ -35,7 +37,8 @@ int main(int argc, char* argv[]) {
     if (client_socket < 0) return -1;
 
     // Attempt at establishing connection
-    if (connect(client_socket, (struct sockaddr *) &address, sizeof(address)) < 0) return hdlClientConnectErr(port, ip_addr);
+    if (connect(client_socket, (struct sockaddr *) &address, sizeof(address)) < 0) 
+        return hdlClientConnectErr(port, ip_addr);
 
 
     int received;

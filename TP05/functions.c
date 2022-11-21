@@ -81,5 +81,5 @@ int new_socket() {
  * @param ip_addr The IP address of the server.
  */
 int hdlClientConnectErr(int port, const char* ip_addr) {
-    printRErr("%s, Cannot connect to server at address %s and port %d\n.", ip_addr, port);
+    printRErr("%s, Cannot connect to server at address %s and port %d.\n", ip_addr, port);
 }
