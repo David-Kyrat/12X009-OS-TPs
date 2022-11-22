@@ -29,14 +29,12 @@ const int GUESSES = 5;
 
 const char* USAGE_MSG_SERV = "Usage: %s <portNumber> (2Bytes integer in [1024, 65535]) \n";
 const int MAX_PEND_CNCTN = 5;  //* Maximum length to which the queue of pending connections for sockfd may grow.
-const int MAX_CLIENT_SIMULT = 2; // Set to 2 for testing purposes, replace by a real value
-
 
 int main(int argc, char* argv[]) {
 
     // Check the port
     int port = atoi(argv[1]);
-    if (!isPortValid(port)) { //TODO: see why parseServerArgs not work anymore
+    if (!isPortValid(port)) {
         printf("Invalid port\n");
         return -1;
     }
@@ -63,6 +61,7 @@ int main(int argc, char* argv[]) {
         sockaddr_in clientAddress;
         uint clientLength = sizeof(clientAddress);
         printf("Waiting for clients at port %d.\n", port);
+
         int client_socket = accept(server_socket, (struct sockaddr*)&clientAddress, &clientLength);
 
         // Code taken from slides
@@ -71,12 +70,16 @@ int main(int argc, char* argv[]) {
         pid_t t_pid = fork();
         printf("PID: %d\n", t_pid);
 
+        if (t_pid < 0) {
+            printErr("%s: %s - Cannot Fork.\n", argv[0]);
+            exit(EXIT_FAILURE);
+        }
+
         if (t_pid > 0) {
-            // if in parent
             waitpid(t_pid, NULL, 0);
         }
 
-        else if (t_pid == 0) {
+        if (t_pid == 0) {
             pid_t pid = fork();
 
             // If we're on the child processus, handle the client
@@ -141,11 +144,6 @@ int main(int argc, char* argv[]) {
                 free(pretty_clientAddress);
                 close(client_socket);
             }
-
-        } else {
-            // fork returned something < 0  => error
-             printErr("%s: %s - Cannot Fork.\n", argv[0]);
-            //exit(EXIT_FAILURE);
         }
 
     }
