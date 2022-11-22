@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
 
     // Check the port
     int port = atoi(argv[1]);
-    if (!isPortValid(port)) {
+    if (!isPortValid(port)) { //TODO: see why parseServerArgs not work anymore
         printf("Invalid port\n");
         return -1;
     }
