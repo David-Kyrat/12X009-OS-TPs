@@ -71,15 +71,12 @@ int main(int argc, char* argv[]) {
         pid_t t_pid = fork();
         printf("PID: %d\n", t_pid);
 
-        if (t_pid < 0) {
-           
-        }
-
-        else if (t_pid > 0) {
+        if (t_pid > 0) {
+            // if in parent
             waitpid(t_pid, NULL, 0);
         }
 
-        if (t_pid == 0) {
+        else if (t_pid == 0) {
             pid_t pid = fork();
 
             // If we're on the child processus, handle the client
@@ -144,6 +141,7 @@ int main(int argc, char* argv[]) {
                 free(pretty_clientAddress);
                 close(client_socket);
             }
+
         } else {
             // fork returned something < 0  => error
              printErr("%s: %s - Cannot Fork.\n", argv[0]);
