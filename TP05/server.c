@@ -82,7 +82,7 @@ int main(int argc, char* argv[]) {
         if (t_pid == 0) {
             pid_t pid = fork();
 
-            // If we're on the parent processus, handle the client
+            // If we're on the child processus, handle the client
             if (pid == 0) {
                 const char* pretty_clientAddress = inet_tostr(&clientAddress.sin_addr);
 
