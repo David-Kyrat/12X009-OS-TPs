@@ -19,9 +19,9 @@ EXEC = main.out
 #
 # All headers. i.e. dependency of the out/main.o target
 #
-HDRS = input.h util.h
+HDRS = shell.h input.h util.h
 
-OBJS = out/main.o out/input.o out/util.o
+OBJS = out/main.o out/shell.o out/input.o out/util.o
 #out/main.o out/files.o out/optprsr.o out/util.o
 
 
@@ -38,7 +38,11 @@ test: test.c $(SHARED_OBJS)
 
 out/main.o: main.c $(HDRS)
 	$(CC) -c main.c $(CFLAGS) $(DBGFLAGS) -o out/main.o
-	
+
+
+out/shell.o: shell.c shell.h util.h
+	$(CC) -c shell.c $(CFLAGS) $(DBGFLAGS) -o out/shell.o
+
 
 out/input.o: input.c input.h util.h
 	$(CC) -c input.c $(CFLAGS) $(DBGFLAGS) -o out/input.o
