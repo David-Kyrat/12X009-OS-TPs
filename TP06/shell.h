@@ -22,8 +22,10 @@ const char* pwd();
 /**
  * Print the current working directory to console output
  */
-void printpath();
+void prettyPrintPath();
 
+/** init shell, todo: remove this after when proper struct was implemented */
+void sh_init();
 
 //
 // NB: returned string as allocated with malloc. Don't forget to free.

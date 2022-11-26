@@ -8,14 +8,15 @@
 #include "shell.h"
 
 
-
 int main(int argc, char* argv[]) {
 
     int err = EXIT_SUCCESS;
 
+    //init shell, todo: remove this after when proper struct was implemented
+    sh_init();
 
     for (;;) {
-        printpath();
+        prettyPrintPath();
         const char* inp = readInput();
         
 
