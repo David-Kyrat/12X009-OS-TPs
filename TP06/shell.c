@@ -32,5 +32,5 @@ int cd(const char* path) {
 
 
 const char* pwd() {
-    return getwd(crt_path);
+    return getcwd(crt_path, PATH_MAX);
 }
