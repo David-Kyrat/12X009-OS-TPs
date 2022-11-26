@@ -5,13 +5,15 @@
 #include <string.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <ctype.h> // isBlank
 
 #include "input.h"
 #include "util.h"
 
-const char EOL = '\n';
+const char EOL = '\n', ARG_SEP = ' ';  //Tab and space are the only argument separator
 
 /**
+ * 
  * Reads user input from stdin and returns it as a string
  * 
  * @return User input or null if nothing could be read
@@ -38,12 +40,28 @@ const char* readInput() {
     return buff;
 }
 
-const char* parseInput(const char* inp) {
-    //TODO:
-    if (strncmp(inp, "exit", 5) == 0) {
-        exit(inp[6]);
+/**
+ * Checks if each char in 'str' is a space or a tab
+ * @param str string to check
+ * @return 1 if true 0 otherwise
+ */
+int isWhiteSpace(const char* str) {
+    size_t len = strlen(str);
+    for (size_t i = 0; i < len; i++) {
+        if (!isblank(str[i])) return 0;
     }
-    return inp;
+    return 1;
+}
+
+const char** parseInput(const char* inp, int* argc) {
+    //TODO:
+    /* if (strncmp(inp, "exit", 5) == 0) {
+        exit(inp[6]);
+    } */
+    char** argv = strsplit(inp, ARG_SEP, argc);
+
+
+    return argv;
 }
 
 /**
@@ -54,5 +72,6 @@ const char* parseInput(const char* inp) {
 const char* readParseIn() {
     const char* tmp = readInput();
     if (tmp == NULL) return NULL;
-    return parseInput(tmp);
+    int argc = 0;
+    return parseInput(tmp, &argc);
 }

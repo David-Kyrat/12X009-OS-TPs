@@ -172,17 +172,20 @@ char** strsplit(char* string, const char* separator, size_t* size) {
     char** out = calloc(max_len + 1, sizeof(char*)); //array containing the split parts of string
     char* text = strndup(string, strlen(string)); //copy that strtok can modify at will
 
-    strtok(text, separator);
-    while ((token = strtok(NULL, separator)) != NULL) {
+    token = strtok(text, separator);
+    do {
         size_t token_len = strlen(token);
         out[crt_len] = tryalc(malloc(token_len+1));
         strncpy(out[crt_len++], token, token_len+1);
-        /* In strok each returned "split string" aren't the extracted subparts of 'text' at all.
+    
+    } while ((token = strtok(NULL, separator)) != NULL);
+
+    /* In strok each returned "split string" aren't the extracted subparts of 'text' at all.
            Instead they are just multiple pointers on the very _same_ string where the separators in it 
            have been replaced by the "terminating null byte" '\0'. Which means that the data these pointers points to completely overlap.
            I.e. From each substring, we can access and modify every other as we want very easily. (i.e. we can modify data we are not supposed to have access to)
-           Hence why we are copying each portion into an array to avoid this behavior*/
-    }
+           Hence why we are copying at max 'token_len'+1 bytes of each portion into 'out' to avoid this behavior
+           and impose a real separation of each part.*/
     *size = crt_len;
     free(text);
     return out;

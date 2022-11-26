@@ -8,15 +8,15 @@
 void arrPrint(char** arr, int size) {
     printf("[");
     for (int i = 0; i < size-1; i++)
-        printf("%s,", arr[i]);
-    printf("%s]\n", arr[size-1]);
+        printf("\'%s\',", arr[i]);
+    printf("\'%s\']\n", arr[size-1]);
 }
 
 int main(int argc, char* argv[]) {
-    char* s = "lul1, lul2, lul3, a,b,c,d";
+    char* s = "lul1 lul2    lul3  a b  c d";
     int len = 0;
 
-    char** spl = strsplit(s, ",", &len);
+    char** spl = strsplit(s, " ", &len);
     arrPrint(spl, len);
 /* 
     char* s1 = calloc(25, 1);
