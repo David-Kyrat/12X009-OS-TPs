@@ -2,14 +2,14 @@
 
 ## Objectives
 
-- Créer des processus avec la fonction fork;
-- Gérer ces processus, notamment éviter les zombies;
-- Gérer les signaux envoyés au shell.  
+- Create processes with the `fork()` function.
+- Handle those processes, especially avoid zombies.
+- Handle the signals sent to the shell.  
 
 
 ## Features  
 
-#### User can:  
+#### User can
 
 - Interact with system
 - Execute commands
@@ -17,7 +17,7 @@
 
 ### Shell must
 
-- Create multiple processes (with `fork`)
+- Create multiple processes (`fork`)
 - Handle those processes (avoid zombies)
 - Be able to use builtin commands (`cd <dirname>` and `exit <exit-code>`)
 - Be able to execute jobs, i.e. system's programs (e.g. `ls`, `pwd`, `ps`...)
@@ -29,11 +29,10 @@
 
 ### Comment lire l'entrée utilisateur ?
 
-- Transformer la chaine de caractère en un tableau de chaine comme
-`argv`, `argc` (c.f. fonction `main`)  
+- Split the input string to an array than can be used like `argv`, `argc` (c.f. `main`)  
 
-- Dans notre cas on considérera que l'espace et la tabulation sont les deux seuls caractères qui séparent les arguments.  
-  - Consultez la fonction `strtok` dans le manuel. La commande `realloc` peut être utile aussi.
+- In our case we will consider that the space and the tab are the only 2 arguments separators.
+  - Consult the `strtok` function in the manuel. The `realloc` function can also be useful.
 
 
 ```C
