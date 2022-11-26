@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
 
     for (;;) {
         prettyPrintPath();
-        const char* inp = readInput();
+        const char* inp = readParseIn();
         
 
         if (inp != NULL) printf("%s\n", inp);

@@ -32,8 +32,8 @@ $(EXEC): $(OBJS)
 	$(CC) $(OBJS) -o $(EXEC)
 
 
-test: test.c $(SHARED_OBJS)
-	$(CC) test.c $(SHARED_OBJS) $(CFLAGS) $(DBGFLAGS) -o test.out
+test: test.c $(OBJS)
+	$(CC) test.c out/shell.o out/input.o out/util.o $(CFLAGS) $(DBGFLAGS) -o test.out
 
 
 out/main.o: main.c $(HDRS)

@@ -1,9 +1,12 @@
-
 /**
  * @file util.h
  * @brief Utility functions mostly used for error handling
  * 
  */
+
+#ifndef __UTIL__
+#define __UTIL__
+
 
 /** Macro that Prints given message to stderr. Message should be printf formatted and the first arg is always strerror(savedErr) where savedErr is the saved value of errno.
 * Usage: 'printErr("%s, %d: port number not valid\n", port)' first %s will be 'strerror(savedErr)' */
@@ -176,3 +179,30 @@ int strToInt(const char* str, int base, int* result);
  * @return src[0 : stop_idx] i.e. substring of length 'stop_idx'
  */
 char* strsub(char* src, int stop_idx);
+
+
+/**
+ * Return whether 'str' starts with given prefix.
+ * @param str String to check 
+ * @param prefix prefix to match against
+ * @return 1 if it does 0 otherwise.
+ */
+int strstartwith(const char* str, const char* prefix);
+
+
+/**
+ * Splits the given string with respect to the given separator.
+ * For example split("I,love,Dennis,Ritchie", ",", &len) will return
+ * ["I", "love", "Dennis", "Ritchie"] and set len to 4.
+ *
+ * @param string string to spit
+ * @param separator separator based uppon which the string is split.
+ * @param size ptr to variable in which to store the size of the returned array.
+ *
+ * @return Array of results of length "size"
+ */
+char** strsplit(char* string, const char* separator, size_t* size);
+
+
+
+#endif // __UTIL__
