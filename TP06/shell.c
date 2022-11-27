@@ -128,6 +128,26 @@ int getAndResolveCmd() {
 } */
 
 
+// 0:default,  1:red, 2:Green,  3:Blue, 4:Purple, 5:yellow,  6:cyan
+const char* colors[] = {"\033[0m", "\033[0;31m", "\033[0;32m", "\033[0;34m", "\033[0;35m", "\033[0;33m", "\033[0;36m"};
+
+/**
+ * 0:default,  1:red, 2:Green,  3:Blue, 4:Purple, 5:yellow,  6:cyan
+ */
+void setOutColor(int color) {
+    printf("%s", colors[color]);
+}
+void resetCol() {
+	setOutColor(0);
+}
 void prettyPrintPath() {
-    printf("( %s )\n|_ $ ", crt_path);
+    setOutColor(1);
+    printf("( ");
+    setOutColor(6);
+    printf("%s", crt_path);
+    setOutColor(1);
+    printf(" )\n|_ ");
+    setOutColor(5);
+    printf("$ ");
+    resetCol();
 }
