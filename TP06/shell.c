@@ -6,8 +6,13 @@
 #include <limits.h>
 
 #include "shell.h"
+#include "input.h"
 #include "util.h"
 
+/* const char CMDS[] = {
+    hash("cd"),
+    hash("exit")
+}; */
 
 // TODO: Create a struct with a local copy of pwd (the current path) that will be udpated on cd
 // (TO avoid calling getwd function that fills a buffer over and over again for each time user enters something)
@@ -38,6 +43,26 @@ int update_path() {
 
 const char* pwd() {
     return crt_path;
+}
+
+
+int getAndResolveCmd() {
+    int argc; 
+    const char** argv = readParseIn(&argc);
+    if (argc == 0 || argv == NULL)
+        printRErr("%s: Could not parse user input - %d argument entered\n", argc);
+    
+    const char* cmd_name = argv[0];
+    const char* cmd_hash = hash(cmd_name);
+
+
+
+    if (argc == 1) {
+        const char* arg = argv[0];
+        // Hashs are supposed to be easy&fast to compute
+
+    }
+
 }
 
 

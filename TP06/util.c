@@ -10,6 +10,7 @@
 #include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
+#include <openssl/sha.h>
 
 #include "util.h"
 
@@ -191,4 +192,9 @@ char** strsplit(char* string, const char* separator, size_t* size) {
     return out;
 }
 
-size_t slen(char* str) {return strlen(str);}
+
+const char* hash(const char* str) {
+    const char* buffer = malloc(SHA_DIGEST_LENGTH);
+    SHA1(str, strlen(str), buffer);
+    return buffer;
+}

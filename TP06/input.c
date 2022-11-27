@@ -12,12 +12,7 @@
 
 const char EOL = '\n', ARG_SEP = ' ';  //Tab and space are the only argument separator
 
-/**
- * 
- * Reads user input from stdin and returns it as a string
- * 
- * @return User input or null if nothing could be read
- */
+
 const char* readInput() {
     int crt_size = MAX_INPUT;
     char* buff = tryalc(malloc(crt_size + 1));
@@ -53,25 +48,26 @@ int isWhiteSpace(const char* str) {
     return 1;
 }
 
+/**
+ * Split given input (with respect to 'ARG_SEP') into an argv array 
+ * and stores the argc into the given 'argc' variable.
+ * 
+ * @param inp raw user input
+ * @param argc ptr to variable in whcih to store the number of argument
+ * @return char* buffer i.e. 'inp' split with respect to 'ARG_SEP'
+ */
 const char** parseInput(const char* inp, int* argc) {
-    //TODO:
-    /* if (strncmp(inp, "exit", 5) == 0) {
-        exit(inp[6]);
-    } */
+    *argc = 0;
     char** argv = strsplit(inp, ARG_SEP, argc);
 
+    //TODO: maybe make it to more stuff later if needed
 
     return argv;
 }
 
-/**
- * Reads user input from stdin and then parses it (if it was correctly read)
- * 
- * @return Parsed input as a string 
- */
-const char* readParseIn() {
+
+const char** readParseIn(int* argc) {
     const char* tmp = readInput();
     if (tmp == NULL) return NULL;
-    int argc = 0;
-    return parseInput(tmp, &argc);
+    return parseInput(tmp, argc);
 }
