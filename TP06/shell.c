@@ -4,6 +4,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <limits.h>
+#include <ctype.h>
 
 #include "shell.h"
 #include "util.h"
@@ -77,7 +78,8 @@ const char* pwd() {
  * Exit shell with given exitcode
  * @param arg exitcode as string
  */
-void exit_shell(char* arg) {
+void exit_shell(const char* arg) {
+    if (!arg) exit(0);
     int exit_code;
     int err = strToInt(arg, 10, &exit_code);
     // if conversion failed, only change exit_code if there was no error before (i.e. exit_code == "EXIT_SUCCESS")
@@ -90,11 +92,9 @@ void exit_shell(char* arg) {
 int getAndResolveCmd() {
     int argc; 
     const char** argv = readParseIn(&argc);
-    if (argc == 0 || argv == NULL)
+    if (argc <= 0 || argv == NULL)
         printRErr("%s: Could not parse user input - %d argument entered\n", argc);
-    
     const char* cmd_name = argv[0];
-    //const char* cmd_hash = hash(cmd_name);
     switch (strswitch(cmd_name, CMDS, CMD_NB)) {
         case 0: 
             // CMDS[0] is "cd". => cd to 2nd argument in argv ignoring the rest.
@@ -103,7 +103,9 @@ int getAndResolveCmd() {
             break;
         case 1:
             // CMDS[1] is "exit"
-            exit_shell(argv[1]);
+            // if no exit code 2nd arg is blank => exit with default code
+            exit_shell((argc <= 1 || *argv[1] == '\n') ? NULL : argv[1]);
+
             //? break here is useless since we exit, but do we have to add it for good practices ?
 
         default:
