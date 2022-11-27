@@ -41,15 +41,14 @@ int cd(const char* path) {
     char* resolvedPath;
     if (isAbsolute) resolvedPath = path;
     else {
-        resolvedPath = absPath(concat_path(crt_path, path));
-        
+        const char* tmp = concat_path(crt_path, path);
+        resolvedPath = absPath(tmp);
+        free(tmp);
+        if (resolvedPath == NULL) return -1;
     } 
-
-    resolvedPath = isAbsolute ? absPath(concat_path(crt_path, path)) : path;
-    if (resolvedPath == NULL) return -1;
     //const char* asb_path = absPath(path);
 
-    if (chdir(path) < 0) printRErr("cd : %s - %s\n", path);
+    if (chdir(resolvedPath) < 0) printRErr("cd : %s - %s\n", path);
     // if successfully changed path:
     if (update_path() < 0) return -1;
 
@@ -100,6 +99,7 @@ int getAndResolveCmd() {
         case 0: 
             // CMDS[0] is "cd". => cd to 2nd argument in argv ignoring the rest.
             if (cd(argv[1]) < 0)  return -1;
+            printf("\n");
             break;
         case 1:
             // CMDS[1] is "exit"

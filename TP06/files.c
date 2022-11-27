@@ -39,7 +39,7 @@ const char* concat_path(const char* parent, const char* child) {
     char* newPath = tryalc(malloc(len_tot + 1));
 
     // computes the name of the subdirectory and checks if it is not too long
-    int written = snprintf(buf, len_tot+1, "%s/%s", parent, child);
+    int written = snprintf(newPath, len_tot+1, "%s/%s", parent, child);
     if (written > PATH_MAX) {
         written = -1;
         errno = ENAMETOOLONG;
@@ -81,7 +81,7 @@ const char* getFileName(const char* path) {
 
 const char* absPath(const char* path) {
     if (path == NULL) return NULL;
-    
+
     const char* out = realpath(path, NULL);
     if (out == NULL) {
         int savedErr = errno;
