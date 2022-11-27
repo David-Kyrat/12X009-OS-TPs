@@ -1,11 +1,7 @@
 
-/**
- * Changes the current working directory to the one specified by the path argument
- * 
- * @param path The path to the directory to change to.
- * 
- * @return Exit code. 0 for success, -1 for error.
- */
+//TODO remove cd from shell.h
+//! exported here only for testing purposes.
+
 int cd(const char* path);
 
 
@@ -15,6 +11,15 @@ int cd(const char* path);
  * @return The current working directory.
  */
 const char* pwd();
+
+
+/**
+ * Call 'readParseIn()' to get the parsed user input => 
+ * then resolve the requested command / program to launch & execute them accordingly.
+ * 
+ * @return Exit code. 0 on success, -1 otherwise.
+ */
+int getAndResolveCmd();
 
 
 /**

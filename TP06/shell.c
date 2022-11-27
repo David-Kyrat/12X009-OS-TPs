@@ -25,6 +25,11 @@ const char crt_path[PATH_MAX];
 void sh_init() { update_path(); }
 
 
+/**
+ * Changes the current working directory to the one specified by the path argument
+ * @param path The path to the directory to change to.
+ * @return Exit code. 0 for success, -1 for error.
+ */
 int cd(const char* path) {
     if (chdir(path) < 0) printRErr("cd : %s - %s\n", path);
     // if successfully changed path:
@@ -64,12 +69,7 @@ void exit_shell(char* arg) {
     exit(exit_code);
 }
 
-/**
- * Call 'readParseIn()' to get the parsed user input => 
- * then resolve the requested command / program to launch & execute them accordingly.
- * 
- * @return Exit code. 0 on success, -1 otherwise.
- */
+
 int getAndResolveCmd() {
     int argc; 
     const char** argv = readParseIn(&argc);
@@ -80,12 +80,13 @@ int getAndResolveCmd() {
     //const char* cmd_hash = hash(cmd_name);
     switch (strswitch(cmd_name, CMDS, CMD_NB)) {
         case 0: 
-            // CMDS[0] == "cd". => cd to 2nd argument in argv ignoring the rest.
+            // CMDS[0] is "cd". => cd to 2nd argument in argv ignoring the rest.
             if (cd(argv[1]) < 0)  return -1;
             break;
         case 1:
-            // CMDS[1] == "exit"
+            // CMDS[1] is "exit"
             exit_shell(argv[1]);
+            //? break here is useless since we exit, but do we have to add it for good practices ?
 
         default:
             // execve to execute program requested by user

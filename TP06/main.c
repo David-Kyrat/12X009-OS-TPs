@@ -17,14 +17,11 @@ int main(int argc, char* argv[]) {
 
     for (;;) {
         prettyPrintPath();
-        /* const char* inp = readParseIn();
-        
 
-        if (inp != NULL) printf("%s\n", inp);
-        else {
+        if ( getAndResolveCmd() < 0 ) {
             err = EXIT_FAILURE;
-            fprintf(stderr, "Please try again.\n\n");
-        } */
+            fprintf(stderr, "Command could not be resolved. Please try again.\n\n");
+        }
     }
 
     return err;
