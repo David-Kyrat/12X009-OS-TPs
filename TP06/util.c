@@ -224,18 +224,16 @@ const char* stripl(char* str) {
 }
 
 
-/**
- * Remove all whitespace to the right of the given string. 
- * A whitespace is a char s such that isspace(s) returns 1. (lib ctype.h)
- * @param str string to right-strip
- * @return right-stripped string
- */
-/*const char* stripr(char* str) {
+const char* stripr(char* str) {
     char* ptr = str + strlen(str) -1;
-    while(isspace(*ptr)) {
-        *(ptr--) = '\0';
-    
+    while(ptr && isspace(*ptr)) {
+        *ptr = '\0';
+        ptr--;
     }
     return str;
-}*/
+}
+
+const char* strip(char* str) {
+    return stripr(stripl(str));
+}
 

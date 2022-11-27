@@ -22,7 +22,7 @@ const char* CMDS[] = {CMD_CD, CMD_EXIT};
 int update_path();
 
 // copy of pwd environment variable as a field, to not having to refetch it everytime
-const char crt_path[PATH_MAX]; 
+char crt_path[PATH_MAX]; 
 
 void sh_init() { update_path(); }
 
@@ -33,14 +33,9 @@ void sh_init() { update_path(); }
  * @return Exit code. 0 for success, -1 for error.
  */
 int cd(const char* path) {
-
-    //TODO if first letter of path is a "/" ==> path is absolute 
-    //TODO if not path is relative . "/foo/bar" => absolute. "foo/bar" should expand to concat_path(pwd, "foo/bar")
-
     int isAbsolute = *path == '/';
-    
     char* resolvedPath;
-    if (isAbsolute) resolvedPath = path;
+    if (isAbsolute) resolvedPath = path; 
     else {
         const char* tmp = concat_path(crt_path, path);
         resolvedPath = absPath(tmp);
@@ -49,10 +44,12 @@ int cd(const char* path) {
     } 
     //const char* asb_path = absPath(path);
 
-    if (chdir(resolvedPath) < 0) printRErr("cd : %s - %s\n", path);
-    // if successfully changed path:
-    if (update_path() < 0) return -1;
+    if (chdir(resolvedPath) < 0) {
+        printRErr("cd : %s - %s\n", path);
+    }
+    else if (update_path() < 0) return -1;
 
+    // if successfully changed path:
     return EXIT_SUCCESS;
 }
 
@@ -79,11 +76,13 @@ const char* pwd() {
  * @param arg exitcode as string
  */
 void exit_shell(const char* arg) {
-    if (!arg) exit(0);
     int exit_code;
-    int err = strToInt(arg, 10, &exit_code);
-    // if conversion failed, only change exit_code if there was no error before (i.e. exit_code == "EXIT_SUCCESS")
-    if (err < 0 && exit_code == EXIT_SUCCESS) exit_code = EXIT_FAILURE;
+    if (!arg) exit_code = 0;
+    else {
+        int err = strToInt(arg, 10, &exit_code);
+        // if conversion failed, only change exit_code if there was no error before (i.e. exit_code == "EXIT_SUCCESS")
+        if (err < 0 && exit_code == EXIT_SUCCESS) exit_code = EXIT_FAILURE;
+    }
     printf("Exit with exit code %d\n\n", exit_code);
     exit(exit_code);
 }

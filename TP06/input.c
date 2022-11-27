@@ -32,7 +32,7 @@ const char* readInput() {
         return NULL;
     }
     buff[readNb] = '\0';  //Null terminate string in case anything happened
-    return stripl(buff);
+    return strip(buff);
 }
 
 /**
