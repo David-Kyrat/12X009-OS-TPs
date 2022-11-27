@@ -203,9 +203,5 @@ int strstartwith(const char* str, const char* prefix);
  */
 char** strsplit(char* string, const char* separator, size_t* size);
 
-/**
- * @return SHA1 digest of given string (20 char long)
- */
-const char* hash(const char* str);
 
 #endif // __UTIL__

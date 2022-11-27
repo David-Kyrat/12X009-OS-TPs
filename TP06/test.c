@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <openssl/sha.h>
 
 #include "util.h"
 
@@ -15,6 +14,8 @@ void arrPrint(char** arr, int size) {
     printf("\'%s\']\n", arr[size-1]);
 }
 
+
+//int str
 
 int main(int argc, char* argv[]) {
    
