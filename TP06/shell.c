@@ -6,14 +6,15 @@
 #include <limits.h>
 
 #include "shell.h"
-#include "input.h"
 #include "util.h"
+#include "input.h"
+#include "files.h"
 
 #define CMD_CD ("cd")
 #define CMD_EXIT ("exit")
 
 const int CMD_NB = 2;
-const char* CMDS[CMD_NB] = {CMD_CD, CMD_EXIT}; 
+const char* CMDS[] = {CMD_CD, CMD_EXIT}; 
 
 // TODO: Create a struct with a local copy of pwd (the current path) that will be udpated on cd
 // (TO avoid calling getwd function that fills a buffer over and over again for each time user enters something)
@@ -27,10 +28,27 @@ void sh_init() { update_path(); }
 
 /**
  * Changes the current working directory to the one specified by the path argument
- * @param path The path to the directory to change to.
+ * @param path The path (relative or absolute) to the directory to change to.
  * @return Exit code. 0 for success, -1 for error.
  */
 int cd(const char* path) {
+
+    //TODO if first letter of path is a "/" ==> path is absolute 
+    //TODO if not path is relative . "/foo/bar" => absolute. "foo/bar" should expand to concat_path(pwd, "foo/bar")
+
+    int isAbsolute = *path == '/';
+    
+    char* resolvedPath;
+    if (isAbsolute) resolvedPath = path;
+    else {
+        resolvedPath = absPath(concat_path(crt_path, path));
+        
+    } 
+
+    resolvedPath = isAbsolute ? absPath(concat_path(crt_path, path)) : path;
+    if (resolvedPath == NULL) return -1;
+    //const char* asb_path = absPath(path);
+
     if (chdir(path) < 0) printRErr("cd : %s - %s\n", path);
     // if successfully changed path:
     if (update_path() < 0) return -1;
@@ -62,10 +80,10 @@ const char* pwd() {
  */
 void exit_shell(char* arg) {
     int exit_code;
-    int err = strToInt(arg, 10, exit_code);
+    int err = strToInt(arg, 10, &exit_code);
     // if conversion failed, only change exit_code if there was no error before (i.e. exit_code == "EXIT_SUCCESS")
     if (err < 0 && exit_code == EXIT_SUCCESS) exit_code = EXIT_FAILURE;
-    printf("Exit with exit code %d\n", exit_code);
+    printf("Exit with exit code %d\n\n", exit_code);
     exit(exit_code);
 }
 
@@ -91,7 +109,9 @@ int getAndResolveCmd() {
         default:
             // execve to execute program requested by user
             //TODO: implement execve call
-
+            // for now just print command
+            for (int i = 0; i < argc; i++) printf("%s ", argv[i]);
+            printf("\n");
             break;
     }
 

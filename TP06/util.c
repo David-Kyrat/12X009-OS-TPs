@@ -197,9 +197,16 @@ int streq(const char* s1, const char* s2) {
 }
 
 
-int strswitch(const char* pattern, char* cases[], int caseNb) {
+int strswitch(const char* pattern, const char* cases[], int caseNb) {
     for (int i = 0; i < caseNb; i++) {
         if (streq(pattern, cases[i])) return i;
     }
     return -1;
+}
+
+void arrPrint(char** arr, int size) {
+    printf("[");
+    for (int i = 0; i < size-1; i++)
+        printf("\'%s\'#", arr[i]);
+    printf("\'%s\']\n", arr[size-1]);
 }

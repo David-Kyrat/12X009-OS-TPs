@@ -7,21 +7,19 @@
 
 #define switch_str(pattern, cases, caseNb) switch(strswitch(pattern, cases, caseNb))
 
-void arrPrint(char** arr, int size) {
-    printf("[");
-    for (int i = 0; i < size-1; i++)
-        printf("\'%s\',", arr[i]);
-    printf("\'%s\']\n", arr[size-1]);
-}
-
 
 
 int main(int argc, char* argv[]) {
     const char* patt = "cd";
-    char* cases[] = {"xdfe", "abcde","cd"};
+/*     char* cases[] = {"xdfe", "abcde","cd"};
     int match = strswitch(patt, cases, 11);
-    printf("match: %d\n", match);
+    printf("match: %d\n", match); */
+    const char* test = "a,b,c,d,e";
+    int size;
+    /* const char SEP = ',';
+    const char** split = strsplit(test, &SEP, &size); */
 
+    arrPrint(split, size);
     return 0;
 }
 

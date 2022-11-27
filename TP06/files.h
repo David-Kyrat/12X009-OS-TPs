@@ -40,16 +40,16 @@ int isFile(const char* path, int lstat);
  */
 int isDir(const char* path);
 
+
 /**
- * Takes a parent path and a current path and concatenates them into a buffer. 
+ * Takes a parent path and a child path and returns their concatenation
  * 
- * @param buf The buffer to write the path to.
- * @param parent The parent directory
- * @param current the current directory
+ * @param parent The parent path
+ * @param child the child path
  * 
- * @return 0 if success or -1 if path got too long (sets errno = ENAMETOOLONG).
+ * @return New concatenated path or null if an error happened.
  */
-int concat_path(char buf[], const char* parent, const char* current);
+const char* concat_path(const char* parent, const char* child);
 
 
 /**
@@ -68,7 +68,7 @@ const char* getFileName(const char* path);
 ssize_t getFileSize(const char* path);
 
 /**
- * Takes a path and returns the absolute path
+ * Takes a path and returns the absolute path. (also hanldes error when necessary)
  * @param path The path to the file or directory.
  * @return The absolute path of the file.
  */

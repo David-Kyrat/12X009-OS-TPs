@@ -58,7 +58,7 @@ int isWhiteSpace(const char* str) {
  */
 const char** parseInput(const char* inp, int* argc) {
     *argc = 0;
-    char** argv = strsplit(inp, ARG_SEP, argc);
+    char** argv = strsplit(inp, &ARG_SEP, argc);
 
     //TODO: maybe make it to more stuff later if needed
 

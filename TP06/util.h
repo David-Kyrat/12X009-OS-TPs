@@ -227,6 +227,15 @@ int streq(const char* s1, const char* s2);
  * 
  * @return The index of the first matching case. 
  */
-int strswitch(const char* pattern, char* cases[], int caseNb);
+int strswitch(const char* pattern, const char* cases[], int caseNb);
+
+
+/**
+ * Print array of string
+ * 
+ * @param arr array to print
+ * @param size size of array
+ */
+void arrPrint(char** arr, int size);
 
 #endif // __UTIL__
