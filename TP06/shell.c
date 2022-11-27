@@ -9,17 +9,18 @@
 #include "input.h"
 #include "util.h"
 
-/* const char CMDS[] = {
-    hash("cd"),
-    hash("exit")
-}; */
+#define CMD_CD ("cd")
+#define CMD_EXIT ("exit")
+
+const int CMD_NB = 2;
+const char* CMDS[CMD_NB] = {CMD_CD, CMD_EXIT}; 
 
 // TODO: Create a struct with a local copy of pwd (the current path) that will be udpated on cd
 // (TO avoid calling getwd function that fills a buffer over and over again for each time user enters something)
 int update_path();
 
-
-const char crt_path[PATH_MAX];
+// copy of pwd environment variable as a field, to not having to refetch it everytime
+const char crt_path[PATH_MAX]; 
 
 void sh_init() { update_path(); }
 
@@ -33,6 +34,10 @@ int cd(const char* path) {
 }
 
 
+/**
+ * Update the 'crt_path' field to actual current working directory (the one returned by 'getcwd()')
+ * @return Exit cod. 0 if success -1 otherwise.
+ */
 int update_path() {
      if (getcwd(crt_path, PATH_MAX) == NULL)
         printRErr("%s - cannot update pwd (%s)\n", crt_path);
@@ -46,6 +51,25 @@ const char* pwd() {
 }
 
 
+/**
+ * Exit shell with given exitcode
+ * @param arg exitcode as string
+ */
+void exit_shell(char* arg) {
+    int exit_code;
+    int err = strToInt(arg, 10, exit_code);
+    // if conversion failed, only change exit_code if there was no error before (i.e. exit_code == "EXIT_SUCCESS")
+    if (err < 0 && exit_code == EXIT_SUCCESS) exit_code = EXIT_FAILURE;
+    printf("Exit with exit code %d\n", exit_code);
+    exit(exit_code);
+}
+
+/**
+ * Call 'readParseIn()' to get the parsed user input => 
+ * then resolve the requested command / program to launch & execute them accordingly.
+ * 
+ * @return Exit code. 0 on success, -1 otherwise.
+ */
 int getAndResolveCmd() {
     int argc; 
     const char** argv = readParseIn(&argc);
@@ -53,26 +77,34 @@ int getAndResolveCmd() {
         printRErr("%s: Could not parse user input - %d argument entered\n", argc);
     
     const char* cmd_name = argv[0];
-    const char* cmd_hash = hash(cmd_name);
+    //const char* cmd_hash = hash(cmd_name);
+    switch (strswitch(cmd_name, CMDS, CMD_NB)) {
+        case 0: 
+            // CMDS[0] == "cd". => cd to 2nd argument in argv ignoring the rest.
+            if (cd(argv[1]) < 0)  return -1;
+            break;
+        case 1:
+            // CMDS[1] == "exit"
+            exit_shell(argv[1]);
 
+        default:
+            // execve to execute program requested by user
+            //TODO: implement execve call
 
-
-    if (argc == 1) {
-        const char* arg = argv[0];
-        // Hashs are supposed to be easy&fast to compute
-
+            break;
     }
 
+    return EXIT_SUCCESS;
 }
 
 
 
 // ================ Printing functions ====================
 
-void printPid(int in) {
+/* void printPid(int in) {
     char* msg = in ? "PID=%d> " : "[PID=%d] ";
         printf(msg, getpid());
-}
+} */
 
 
 void prettyPrintPath() {

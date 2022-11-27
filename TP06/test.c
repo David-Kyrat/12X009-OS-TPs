@@ -5,7 +5,7 @@
 
 #include "util.h"
 
-typedef long long llong;
+#define switch_str(pattern, cases, caseNb) switch(strswitch(pattern, cases, caseNb))
 
 void arrPrint(char** arr, int size) {
     printf("[");
@@ -15,10 +15,12 @@ void arrPrint(char** arr, int size) {
 }
 
 
-//int str
 
 int main(int argc, char* argv[]) {
-   
+    const char* patt = "cd";
+    char* cases[] = {"xdfe", "abcde","cd"};
+    int match = strswitch(patt, cases, 11);
+    printf("match: %d\n", match);
 
     return 0;
 }

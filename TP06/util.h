@@ -203,5 +203,30 @@ int strstartwith(const char* str, const char* prefix);
  */
 char** strsplit(char* string, const char* separator, size_t* size);
 
+/**
+ * Equality test for string
+ * @param s1 string1
+ * @param s2 string2
+ * @return Whether string1 and string2 represent the same string (1 if they does, 0 otherwise)
+ */
+int streq(const char* s1, const char* s2);
+
+
+
+/**
+ * Purpose of this function is to allow switch over an array of string.
+ * Returns the index of the first string in the array that matches the pattern, or -1 if no match is
+ * found.  
+ * 
+ * Can be called like so: 
+ * switch( strswitch(pattern, cases, caseNb) ) { case 0: ....}
+ * 
+ * @param pattern the string to match
+ * @param cases an array of cases to match against 'pattern'
+ * @param caseNb the number of cases
+ * 
+ * @return The index of the first matching case. 
+ */
+int strswitch(const char* pattern, char* cases[], int caseNb);
 
 #endif // __UTIL__

@@ -191,3 +191,15 @@ char** strsplit(char* string, const char* separator, size_t* size) {
     return out;
 }
 
+
+int streq(const char* s1, const char* s2) {
+    return strcmp(s1, s2) == 0;
+}
+
+
+int strswitch(const char* pattern, char* cases[], int caseNb) {
+    for (int i = 0; i < caseNb; i++) {
+        if (streq(pattern, cases[i])) return i;
+    }
+    return -1;
+}

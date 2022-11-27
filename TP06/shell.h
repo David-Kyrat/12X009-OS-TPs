@@ -10,11 +10,9 @@ int cd(const char* path);
 
 
 /**
- * Wrapper for the 'getcwd()' system call.
+ * Returns the current working directory
  * 
- * @param buff - buffer in which to store current path
- * 
- * @return Current working directory. (output is the same as typing 'pwd' in any shell). Or NULL on error.
+ * @return The current working directory.
  */
 const char* pwd();
 
