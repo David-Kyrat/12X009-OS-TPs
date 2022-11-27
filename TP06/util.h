@@ -238,4 +238,13 @@ int strswitch(const char* pattern, const char* cases[], int caseNb);
  */
 void arrPrint(char** arr, int size);
 
+
+/**
+ * Remove all whitespace to the left of the given string. 
+ * A whitespace is a char s such that isspace(s) returns 1. (lib ctype.h)
+ * @param  str string to left-strip
+ * @return left-stripped string
+ */
+const char* stripl(char* str);
+
 #endif // __UTIL__

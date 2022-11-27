@@ -10,6 +10,7 @@
 #include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
+#include <ctype.h>
 
 #include "util.h"
 
@@ -210,3 +211,31 @@ void arrPrint(char** arr, int size) {
         printf("\'%s\'#", arr[i]);
     printf("\'%s\']\n", arr[size-1]);
 }
+
+/**
+ * Remove all whitespace to the left of the given string. 
+ * A whitespace is a char s such that isspace(s) returns 1. (lib ctype.h)
+ * @param str string to left-strip
+ * @return left-stripped string
+ */
+const char* stripl(char* str) {
+    while(isspace(*str) && *str != '\0') str++;
+    return str;
+}
+
+
+/**
+ * Remove all whitespace to the right of the given string. 
+ * A whitespace is a char s such that isspace(s) returns 1. (lib ctype.h)
+ * @param str string to right-strip
+ * @return right-stripped string
+ */
+/*const char* stripr(char* str) {
+    char* ptr = str + strlen(str) -1;
+    while(isspace(*ptr)) {
+        *(ptr--) = '\0';
+    
+    }
+    return str;
+}*/
+
