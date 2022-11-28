@@ -36,6 +36,7 @@ void sh_init() { update_path(); }
  * @return Exit code. 0 for success, -1 for error.
  */
 int cd(const char* path) {
+
     int isAbsolute = *path == '/';
     char* resolvedPath;
     if (isAbsolute) resolvedPath = path; 
@@ -46,6 +47,13 @@ int cd(const char* path) {
         if (resolvedPath == NULL) return -1;
     } 
     //const char* asb_path = absPath(path);
+
+    if (strcmp(path, "..") == 0) {
+        chdir("..");
+        if (update_path() < 0) return -1;
+        return EXIT_SUCCESS;
+    }
+
 
     if (chdir(resolvedPath) < 0) {
         printRErr("cd : %s - %s\n", path);
@@ -110,6 +118,7 @@ int getAndResolveCmd() {
             exit_shell((argc <= 1 || *argv[1] == '\n') ? NULL : argv[1]);
 
             //? break here is useless since we exit, but do we have to add it for good practices ?
+            // answer: no.
 
         default: ;
             // execve to execute program requested by user
@@ -117,6 +126,7 @@ int getAndResolveCmd() {
 
             if (t_pid < 0) {
                 printErr("%s: %s - Cannot Fork.\n", argv[0]);
+                printf("Foreground job exited\n");
                 exit(EXIT_FAILURE);
             }
 
@@ -131,11 +141,12 @@ int getAndResolveCmd() {
                 if (pid == 0) { 
                     // execute the given command
                     execvpe(cmd_name, argv, NULL);
-                    
+                    printf("Foreground job exited\n");
                     exit(EXIT_FAILURE);
                 }
 
-                waitpid(t_pid, pid, 0);
+                waitpid(t_pid, NULL, 0);
+                printf("Foreground job exited with code 0\n");
                 exit(EXIT_SUCCESS);
 
             }
