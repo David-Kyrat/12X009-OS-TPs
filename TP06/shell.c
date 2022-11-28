@@ -11,6 +11,9 @@
 #include "input.h"
 #include "files.h"
 
+// Types
+#include <sys/types.h>
+
 #define CMD_CD ("cd")
 #define CMD_EXIT ("exit")
 
@@ -107,16 +110,34 @@ int getAndResolveCmd() {
 
             //? break here is useless since we exit, but do we have to add it for good practices ?
 
-        default:
+        default: ;
             // execve to execute program requested by user
-            //TODO: implement execve call
-            // for now just print command
-            for (int i = 0; i < argc; i++) printf("%s ", argv[i]);
-            printf("\n");
-            break;
+            pid_t t_pid = fork();
+
+            if (t_pid < 0) {
+                printErr("%s: %s - Cannot Fork.\n", argv[0]);
+                exit(EXIT_FAILURE);
+            }
+
+            if (t_pid > 0) {
+                waitpid(t_pid, NULL, 0);
+            }
+
+            if (t_pid == 0) {
+                pid_t pid = fork();
+
+                // If we're on the parent processus, execute the code
+                if (pid == 0) { 
+                    // execute the given command
+                    execvpe(cmd_name, argv, NULL);
+                    exit(EXIT_FAILURE);
+                }
+
+            }
+
+                return EXIT_SUCCESS;
     }
 
-    return EXIT_SUCCESS;
 }
 
 
