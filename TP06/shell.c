@@ -98,6 +98,7 @@ int getAndResolveCmd() {
         printRErr("%s: Could not parse user input - %d argument entered\n", argc);
     const char* cmd_name = argv[0];
     switch (strswitch(cmd_name, CMDS, CMD_NB)) {
+        
         case 0: 
             // CMDS[0] is "cd". => cd to 2nd argument in argv ignoring the rest.
             if (cd(argv[1]) < 0)  return -1;
@@ -130,8 +131,12 @@ int getAndResolveCmd() {
                 if (pid == 0) { 
                     // execute the given command
                     execvpe(cmd_name, argv, NULL);
+                    
                     exit(EXIT_FAILURE);
                 }
+
+                waitpid(t_pid, pid, 0);
+                exit(EXIT_SUCCESS);
 
             }
 
