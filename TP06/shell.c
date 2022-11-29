@@ -14,8 +14,12 @@
 // Types
 #include <sys/types.h>
 
+#define printExitCode(exitcode) \
+    printf("%s  -Foreground job exited with exit code %d\033[0m\n\n", "\033[2m", exitcode);
+
 #define CMD_CD ("cd")
 #define CMD_EXIT ("exit")
+
 
 const int CMD_NB = 2;
 const char* CMDS[] = {CMD_CD, CMD_EXIT}; 
@@ -118,7 +122,7 @@ int exec(const char* filename, char *const argv[]) {
     errno = 0; int exitcode = 0;
     if (execvpe(filename, argv, getEnvp()) < 0) {
         exitcode = errno;
-        fprintf(stderr, "%s: \"%s\" \n", strerror(exitcode), filename);
+        fprintf(stderr, "%s: \"%s\" \n", exitcode == ENOENT ? "command not found" : strerror(exitcode), filename);
     }
     
     return -1;
@@ -128,12 +132,13 @@ int exec(const char* filename, char *const argv[]) {
 int executeJob(const char* cmd_name, char *const argv[]) {
     if (cmd_name == NULL || strlen(cmd_name) <= 0) return -1;
             pid_t t_pid = fork();
-            int child_exitcode = -1;
+            int child_exitcode = EXIT_FAILURE;
 
             if (t_pid < 0) {
                 printErr("%s: %s - Cannot Fork.\n", argv[0]);
-                printf("Foreground job exited\n\n");
+                //printf("Foreground job exited\n\n");
                 //exit(EXIT_FAILURE);
+                printExitCode(child_exitcode);
                 return -1;
             }
 
@@ -146,7 +151,8 @@ int executeJob(const char* cmd_name, char *const argv[]) {
                         exit(EXIT_FAILURE);
                 // if it is not programm that was called shouldve exited
             }
-            printf("Foreground job exited with exit code %d\n", child_exitcode);
+            printExitCode(child_exitcode);
+            //printf("%s  -Foreground job exited with exit code %d%s\n\n", colors[7], child_exitcode,  colors[0]);
             return EXIT_SUCCESS;
 }
 
@@ -193,9 +199,8 @@ int getAndResolveCmd() {
 } */
 
 
-//! 0:default,  1:red, 2:Green,  3:Blue, 4:Purple, 5:yellow,  6:cyan
-const char* colors[] = {"\033[0m", "\033[0;31m", "\033[0;32m", "\033[0;34m", "\033[0;35m", "\033[0;33m", "\033[0;36m"};
-
+//! 0:default,  1:red, 2:Green,  3:Blue, 4:Purple, 5:yellow,  6:cyan,  7:grey
+const char* colors[] = {"\033[0m", "\033[0;31m", "\033[0;32m", "\033[0;34m", "\033[0;35m", "\033[0;33m", "\033[0;36m", "\033[2m"};
 /**
  * 0:default,  1:red, 2:Green,  3:Blue, 4:Purple, 5:yellow,  6:cyan
  */
