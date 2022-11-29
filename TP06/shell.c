@@ -27,6 +27,8 @@ int update_path();
 // copy of pwd environment variable as a field, to not having to refetch it everytime
 char crt_path[PATH_MAX]; 
 
+extern char** environ;
+
 void sh_init() { update_path(); }
 
 
@@ -48,11 +50,11 @@ int cd(const char* path) {
     } 
     //const char* asb_path = absPath(path);
 
-    if (strcmp(path, "..") == 0) {
+    /*if (strcmp(path, "..") == 0) {
         chdir("..");
         if (update_path() < 0) return -1;
         return EXIT_SUCCESS;
-    }
+    }*/
 
 
     if (chdir(resolvedPath) < 0) {
@@ -98,8 +100,67 @@ void exit_shell(const char* arg) {
     exit(exit_code);
 }
 
+/** Utility function if we ever need to do something to environ (e.g. pretreat it...) before returing it*/
+char** getEnvp() {
+    return environ;
+}
+
+void listEnv() {
+    for (char **current = environ; *current; current++) puts(*current);
+}
+
+/**
+ * Call execvpe, handle errors and print "Foreground job exited with exit code <errorcode extracted when handling error>" 
+ */
+int exec(const char* filename, char *const argv[]) {
+    errno = 0; int exitcode = 0;
+    if (execvpe(filename, argv, getEnvp()) < 0) {
+        exitcode = errno;
+        fprintf(stderr, "%s: cmd %s \n", strerror(exitcode), filename);
+    }
+    printf("Foreground job exited with exit code %d\n", exitcode);
+    return exitcode;
+}
+
+int executeJob(const char* cmd_name, char *const argv[]) {
+
+            pid_t t_pid = fork();
+
+            if (t_pid < 0) {
+                printErr("%s: %s - Cannot Fork.\n", argv[0]);
+                printf("Foreground job exited\n\n");
+                //exit(EXIT_FAILURE);
+                return -1;
+            }
+
+            if (t_pid > 0) {
+                waitpid(t_pid, NULL, 0);
+            }
+
+            if (t_pid == 0) {
+                pid_t pid = fork();
+
+                // If we're on the parent processus, execute the code
+                if (pid == 0) { 
+                    // execute the given command
+                    //listEnv();
+                   // if (execvpe(filename, argv, getEnvp()) < 0) printErr("%s : %s", filename);
+                   // printf("Foreground job exited\n");
+                    if (exec(cmd_name, argv) < 0) exit(EXIT_FAILURE);
+                }
+
+                waitpid(t_pid, NULL, 0);
+                printf("Foreground job exited with code 0\n");
+                exit(EXIT_SUCCESS);
+
+            }
+
+            return EXIT_SUCCESS;
+}
+
 
 int getAndResolveCmd() {
+    //TODO: Check for & => and make background job
     int argc; 
     const char** argv = readParseIn(&argc);
     if (argc <= 0 || argv == NULL)
@@ -122,38 +183,12 @@ int getAndResolveCmd() {
 
         default: ;
             // execve to execute program requested by user
-            pid_t t_pid = fork();
+                 //const char* const* args = argv; 
+                 if (executeJob(cmd_name, argv) < 0) return -1; 
 
-            if (t_pid < 0) {
-                printErr("%s: %s - Cannot Fork.\n", argv[0]);
-                printf("Foreground job exited\n");
-                exit(EXIT_FAILURE);
-            }
-
-            if (t_pid > 0) {
-                waitpid(t_pid, NULL, 0);
-            }
-
-            if (t_pid == 0) {
-                pid_t pid = fork();
-
-                // If we're on the parent processus, execute the code
-                if (pid == 0) { 
-                    // execute the given command
-                    execvpe(cmd_name, argv, NULL);
-                    printf("Foreground job exited\n");
-                    exit(EXIT_FAILURE);
-                }
-
-                waitpid(t_pid, NULL, 0);
-                printf("Foreground job exited with code 0\n");
-                exit(EXIT_SUCCESS);
-
-            }
-
-                return EXIT_SUCCESS;
     }
 
+    return EXIT_SUCCESS;
 }
 
 
