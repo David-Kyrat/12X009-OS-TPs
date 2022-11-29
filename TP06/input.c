@@ -6,6 +6,9 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <ctype.h> // isBlank
+#include <readline/readline.h>
+#include <readline/history.h>
+
 
 #include "input.h"
 #include "util.h"
@@ -13,7 +16,7 @@
 const char EOL = '\n', ARG_SEP = ' ';  //Tab and space are the only argument separator
 
 
-const char* readInput() {
+const char* _readInput() {
     int crt_size = MAX_INPUT;
     char* buff = tryalc(malloc(crt_size + 1));
     memset(buff, 0, crt_size);
@@ -33,6 +36,10 @@ const char* readInput() {
     }
     buff[readNb] = '\0';  //Null terminate string in case anything happened
     return strip(buff);
+}
+
+const char* readInput() {
+    return strip(readline(NULL));
 }
 
 /**
