@@ -22,7 +22,6 @@ EXEC = main.out
 HDRS = shell.h files.h input.h util.h
 
 OBJS = out/main.o out/shell.o out/files.o out/input.o out/util.o
-#out/main.o out/files.o out/optprsr.o out/util.o
 
 
 all: $(EXEC)
@@ -50,10 +49,6 @@ out/input.o: input.c input.h util.h
 
 out/files.o: files.c files.h util.h
 	$(CC) -c files.c $(CFLAGS) $(DBGFLAGS) -o out/files.o
-
-
-out/optprsr.o: optprsr.c optprsr.h util.h
-	$(CC) -c optprsr.c $(CFLAGS) $(DBGFLAGS) -o out/optprsr.o
 
 
 out/util.o: util.c util.h
