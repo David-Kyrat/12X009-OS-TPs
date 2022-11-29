@@ -29,7 +29,7 @@ all: $(EXEC)
 
 
 $(EXEC): $(OBJS)
-	$(CC) $(OBJS) -o $(EXEC)
+	$(CC) $(OBJS) -o $(EXEC) -lreadline
 
 
 test: test.c $(OBJS)

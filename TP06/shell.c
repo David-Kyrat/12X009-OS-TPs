@@ -38,16 +38,19 @@ void sh_init() { update_path(); }
  * @return Exit code. 0 for success, -1 for error.
  */
 int cd(const char* path) {
-
-    int isAbsolute = *path == '/';
     char* resolvedPath;
-    if (isAbsolute) resolvedPath = path; 
+    if (!path)  resolvedPath = getenv("HOME");
     else {
-        const char* tmp = concat_path(crt_path, path);
-        resolvedPath = absPath(tmp);
-        free(tmp);
-        if (resolvedPath == NULL) return -1;
-    } 
+        int isAbsolute = (*path == '/');
+        if (isAbsolute) resolvedPath = path; 
+        else {
+            const char* tmp = concat_path(crt_path, path);
+            resolvedPath = absPath(tmp);
+            free(tmp);
+            if (resolvedPath == NULL) return -1;
+        } 
+    }
+
     //const char* asb_path = absPath(path);
 
     /*if (strcmp(path, "..") == 0) {
@@ -74,7 +77,6 @@ int cd(const char* path) {
 int update_path() {
      if (getcwd(crt_path, PATH_MAX) == NULL)
         printRErr("%s - cannot update pwd (%s)\n", crt_path);
-     
      return EXIT_SUCCESS;
 }
 
@@ -123,7 +125,7 @@ int exec(const char* filename, char *const argv[]) {
 }
 
 int executeJob(const char* cmd_name, char *const argv[]) {
-
+    if (cmd_name == NULL || strlen(cmd_name) <= 0) return -1;
             pid_t t_pid = fork();
 
             if (t_pid < 0) {
@@ -164,13 +166,13 @@ int getAndResolveCmd() {
     int argc; 
     const char** argv = readParseIn(&argc);
     if (argc <= 0 || argv == NULL)
-        printRErr("%s: Could not parse user input - %d argument entered\n", argc);
+        printRErr("%s: Could not parse user input - %d argument entered\n", argc); //returns -1
     const char* cmd_name = argv[0];
     switch (strswitch(cmd_name, CMDS, CMD_NB)) {
         
         case 0: 
             // CMDS[0] is "cd". => cd to 2nd argument in argv ignoring the rest.
-            if (cd(argv[1]) < 0)  return -1;
+            if (cd(argc <= 1 ? NULL : argv[1]) < 0)  return -1;
             printf("\n");
             break;
         case 1:

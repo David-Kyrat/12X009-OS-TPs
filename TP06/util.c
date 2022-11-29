@@ -171,7 +171,7 @@ char** strsplit(char* string, const char* separator, size_t* size) {
     size_t max_len = strlen(string), crt_len = 0; char* token;
 
     char** out = calloc(max_len + 1, sizeof(char*)); //array containing the split parts of string
-    char* text = strndup(string, strlen(string)); //copy that strtok can modify at will
+    char* text = (char*) tryalc(strndup(string, strlen(string))); //copy that strtok can modify at will
 
     token = strtok(text, separator);
     do {

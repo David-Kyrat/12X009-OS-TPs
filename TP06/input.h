@@ -3,7 +3,7 @@ void printPid(int in);
 
 /**
  * 
- * Reads user input from stdin and returns it as a string
+ * Reads user input from stdin and returns it as a string (stripped i.e. without left and right whitespace). 
  * 
  * @return User input or null if nothing could be read
  */

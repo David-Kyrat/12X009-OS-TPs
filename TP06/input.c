@@ -6,15 +6,19 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <ctype.h> // isBlank
+#include <readline/readline.h>
+#include <readline/history.h>
 
 #include "input.h"
 #include "util.h"
 
 const char EOL = '\n', ARG_SEP = ' ';  //Tab and space are the only argument separator
 
-
-//! This is the basic code
+//!
+//! Below is the basic code of readInput() (function that returns what the user entered) which I preferred to replace by the GNU library "readline.h" by simplicity. The library just adds more feature (like going back and forward) when User has to enter text. Everything else is still made by us, it is just that specific small  part that was replaced for conveniance.
 //! 
+//! The basic function below of course works, feel free to uncomment this one and comment to the other (and remove the <readline/*> includes) to test it
+//!
 
 /*const char* readInput() {
     int crt_size = MAX_INPUT;
@@ -67,7 +71,7 @@ int isWhiteSpace(const char* str) {
 const char** parseInput(const char* inp, int* argc) {
     *argc = 0;
     char** argv = strsplit(inp, &ARG_SEP, argc);
-
+    
     //TODO: maybe make it to more stuff later if needed
 
     return argv;
