@@ -118,15 +118,17 @@ int exec(const char* filename, char *const argv[]) {
     errno = 0; int exitcode = 0;
     if (execvpe(filename, argv, getEnvp()) < 0) {
         exitcode = errno;
-        fprintf(stderr, "%s: cmd %s \n", strerror(exitcode), filename);
+        fprintf(stderr, "%s: \"%s\" \n", strerror(exitcode), filename);
     }
-    printf("Foreground job exited with exit code %d\n", exitcode);
-    return exitcode;
+    
+    return -1;
+    // if exec command returns then there have been an error somewhere
 }
 
 int executeJob(const char* cmd_name, char *const argv[]) {
     if (cmd_name == NULL || strlen(cmd_name) <= 0) return -1;
             pid_t t_pid = fork();
+            int child_exitcode = -1;
 
             if (t_pid < 0) {
                 printErr("%s: %s - Cannot Fork.\n", argv[0]);
@@ -135,28 +137,16 @@ int executeJob(const char* cmd_name, char *const argv[]) {
                 return -1;
             }
 
-            if (t_pid > 0) {
-                waitpid(t_pid, NULL, 0);
-            }
+            //* In parent 
+            if (t_pid > 0) wait(&child_exitcode);
 
             if (t_pid == 0) {
-                pid_t pid = fork();
-
-                // If we're on the parent processus, execute the code
-                if (pid == 0) { 
-                    // execute the given command
-                    //listEnv();
-                   // if (execvpe(filename, argv, getEnvp()) < 0) printErr("%s : %s", filename);
-                   // printf("Foreground job exited\n");
-                    if (exec(cmd_name, argv) < 0) exit(EXIT_FAILURE);
-                }
-
-                waitpid(t_pid, NULL, 0);
-                printf("Foreground job exited with code 0\n");
-                exit(EXIT_SUCCESS);
-
+                //* In child
+                if (exec(cmd_name, argv) < 0) 
+                        exit(EXIT_FAILURE);
+                // if it is not programm that was called shouldve exited
             }
-
+            printf("Foreground job exited with exit code %d\n", child_exitcode);
             return EXIT_SUCCESS;
 }
 
