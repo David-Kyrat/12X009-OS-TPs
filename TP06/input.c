@@ -13,7 +13,10 @@
 const char EOL = '\n', ARG_SEP = ' ';  //Tab and space are the only argument separator
 
 
-const char* readInput() {
+//! This is the basic code
+//! 
+
+/*const char* readInput() {
     int crt_size = MAX_INPUT;
     char* buff = tryalc(malloc(crt_size + 1));
     memset(buff, 0, crt_size);
@@ -32,6 +35,11 @@ const char* readInput() {
         return NULL;
     }
     buff[readNb] = '\0';  //Null terminate string in case anything happened
+    return strip(buff);
+}*/
+
+const char* readInput() {
+    const char* buff = readline("");
     return strip(buff);
 }
 
