@@ -29,7 +29,7 @@ const char* CMDS[] = {CMD_CD, CMD_EXIT};
 int update_path();
 
 // copy of pwd environment variable as a field, to not having to refetch it everytime
-char crt_path[PATH_MAX]; 
+char crt_path[PATH_MAX];
 
 extern char** environ;
 
@@ -211,13 +211,9 @@ void resetCol() {
 	setOutColor(0);
 }
 void prettyPrintPath() {
-    setOutColor(1);
-    printf("( ");
-    setOutColor(6);
+    printf("%s( %s", colors[1], colors[6]);
     printf("%s", crt_path);
-    setOutColor(1);
-    printf(" )\n|_ ");
-    setOutColor(5);
-    printf("$ ");
+    printf("%s )\n|_ ", colors[1]);
+    printf("%s$ ", colors[5]);
     resetCol();
 }
