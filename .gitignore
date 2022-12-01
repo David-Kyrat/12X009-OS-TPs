@@ -1,5 +1,6 @@
 .vscode/
 **/.vscode/
+.directory
 
 #.clang-format
 #**/.clang-format
