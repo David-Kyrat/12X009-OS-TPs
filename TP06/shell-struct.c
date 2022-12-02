@@ -10,11 +10,11 @@
 #include <limits.h>
 #include <ctype.h>
 
-#include "shell.h"
+#include "shell-struct.h"
 #include "util.h"
 #include "input.h"
 #include "files.h"
-#include <sys/types.h>
+#include <sys/types.h> //pid_t
 
 #define printExitCode(exitcode) \
     printf("%s  -Foreground job exited with exit code %d\033[0m\n\n", "\033[2m", exitcode);
@@ -31,12 +31,22 @@ const char* CMDS[] = {CMD_CD, CMD_EXIT};
 int update_path();
 
 // copy of pwd environment variable as a field, to not having to refetch it everytime
-char crt_path[PATH_MAX];
+//char crt_path[PATH_MAX];
 
 extern char** environ;
 
 void sh_init() { update_path(); }
 
+
+Shell* new_Shell() {
+    Shell* sh = tryalc(malloc(sizeof(Shell)));
+    sh->crt_path = tryalc(malloc(PATH_MAX));
+    //TODO: init crt_path
+    sh->background_job = -1;
+    sh->foreground_job = -1;
+
+    return sh;
+}
 
 /**
  * Changes the current working directory to the one specified by the path argument

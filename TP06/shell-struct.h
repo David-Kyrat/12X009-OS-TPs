@@ -2,15 +2,33 @@
 #define __SHELL__
 
 #include <limits.h>
+#include <sys/types.h>
 
+
+/**
+ * Represents a Shell with a crt_path (pwd) a foreground job and 
+ * a background_job. Crt_path default value is where the executable was called
+ * and foregroud_job & background_job default value are -1.
+ * 
+ */
 typedef struct Shell Shell;
 
 struct Shell {
-    char crt_path[PATH_MAX];
+    /** Contains the cwd (of Size PATH_MAX) */
+    char* crt_path;
     pid_t foreground_job;
     pid_t background_job;
 
 };
+
+/**
+ * Shell primary constructor. Return a pointer to a new instance
+ * of Shell with crt_path initialized at where the executable was called
+ * and no foregroud_job nor background_job (-1 value)
+ * 
+ * @return pointer to a new instance of Shel
+ */
+Shell* new_Shell();
 
 /**
  * Returns the current working directory
