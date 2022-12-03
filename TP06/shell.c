@@ -261,10 +261,10 @@ int executeJob(Shell* sh, const char* cmd_name, char* const argv[], int isForegr
 
 int sh_getAndResolveCmd(Shell* sh) {
     //TODO: Check for & => and make background job
-    int argc;
+    int argc = 0;
     const char** argv = readParseIn(&argc);
     if (argc <= 0 || argv == NULL)
-        printRErr("%s: Could not parse user input - %d argument entered\n", argc); //returns -1
+        printRErr("%s: Could not parse user input - read %d argument.\n", argc); //returns -1
     const char* cmd_name = argv[0];
     switch (strswitch(cmd_name, CMDS, CMD_NB)) {
 

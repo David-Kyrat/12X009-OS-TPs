@@ -11,6 +11,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <ctype.h>
+#include <sys/wait.h>
 
 #include "util.h"
 
