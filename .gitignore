@@ -5,6 +5,7 @@
 #.clang-format
 #**/.clang-format
 TP03/out
+**/.idea
 
 .fake
 *.zip
