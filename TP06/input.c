@@ -48,6 +48,7 @@ const char EOL = '\n', ARG_SEP = ' ';  //Tab and space are the only argument sep
 
 const char* readInput() {
     const char* buff = readline("");
+    if (buff == NULL || strlen(buff) <= 0) return  NULL;
     return strip(buff);
 }
 
