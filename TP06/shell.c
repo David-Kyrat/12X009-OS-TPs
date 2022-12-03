@@ -10,6 +10,7 @@
 #include <limits.h>
 #include <ctype.h>
 
+#include <fcntl.h>
 #include "shell.h"
 #include "util.h"
 #include "input.h"
@@ -159,20 +160,6 @@ int cd(Shell* sh, const char* path) {
     return EXIT_SUCCESS;
 }
 
-/*
- * Update the 'crt_path' field to actual current working directory (the one returned by 'getcwd()').
- * !! getcwd() functions makes a copy of current path => don't abuse use
- * @return Exit cod. 0 if success -1 otherwise.
- */
-/*
-int update_path(Shell* sh) {
-    if (getcwd(sh->crt_path, PATH_MAX) == NULL) printRErr("%s - cannot update pwd (%s)\n", sh->crt_path);
-    return EXIT_SUCCESS;
-}
-*/
-
-//TODO: set pid of crt jbs when launched and reset them when they were waited on and terminated
-
 
 /**
  * Exit shell with given exitcode by calling 'clean_exit()' once 'arg' was parsed into an int
@@ -196,6 +183,23 @@ char** getEnvp() {
     return environ;
 }
 
+
+//void because exit on error
+void redirectIO() {
+    const char* redirection = "/dev/null";
+    //close stdin, stdout stderr
+    for (int i = 0; i < 3; i++)
+        if (close(i) < 0) hdlCloseErr("stdin", 1);
+
+    // reopens 3times /dev/null, so that the 3 first file descriptors points to it.
+    // (3rd first fd's are always std in/out/err)
+    for (int i = 0; i < 3; i++) {
+        if (open(redirection, (i == 0 ? O_RDONLY : O_RDWR) | O_EXCL))
+            hdlOpenErr(redirection, 1);
+    }
+}
+
+
 /**
  * Call execvpe, handle errors and print "Foreground job exited with exit code <errorcode extracted when handling error>"
  */
@@ -217,7 +221,6 @@ int exec(Shell* sh, const char* filename, char* const argv[], int isForeground) 
 }
 
 
-
 //TODO: document this
 
 int executeJob(Shell* sh, const char* cmd_name, char* const argv[], int isForeground) {
@@ -236,6 +239,7 @@ int executeJob(Shell* sh, const char* cmd_name, char* const argv[], int isForegr
     //* In parent
     if (t_pid > 0) {
         sh->child_number += 1;
+
         if (isForeground) {
             set_FJ(sh, t_pid);
             //- Only wait for foreground jobs
@@ -244,7 +248,10 @@ int executeJob(Shell* sh, const char* cmd_name, char* const argv[], int isForegr
                 printExitCode(child_exitcode, isForeground);
                 return EXIT_SUCCESS;
             } else return -1;
+
         } else {
+
+            redirectIO();
             set_BJ(sh, t_pid);
             return EXIT_SUCCESS;
         }
@@ -289,8 +296,6 @@ int sh_getAndResolveCmd(Shell* sh) {
                 int lastArgLen = strlen(lastArg);
                 isForeground = lastArg[lastArgLen-1] != '&';
             }
-            //! TODO: redirect stdin and stdout to dev/null for bg job
-            printf("isForeground %d\n", isForeground);
             if (executeJob(sh, cmd_name, argv, isForeground) < 0) return -1;
         }
     }

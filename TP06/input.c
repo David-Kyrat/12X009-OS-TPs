@@ -1,5 +1,6 @@
 #include <errno.h>
 #include <limits.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -76,7 +77,7 @@ int isWhiteSpace(const char* str) {
  */
 const char** parseInput(const char* inp, int* argc) {
     *argc = 0;
-    char** argv = strsplit(inp, &ARG_SEP, argc);
+    char** argv = strsplit(inp, &ARG_SEP, (size_t*) argc);
     
     //TODO: maybe make it to more stuff later if needed
 
