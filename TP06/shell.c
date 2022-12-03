@@ -242,18 +242,19 @@ int executeJob(Shell* sh, const char* cmd_name, char* const argv[], int isForegr
             if (wait_s(&child_exitcode) == EXIT_SUCCESS) {
                 sh->child_number -= 1;
                 printExitCode(child_exitcode, isForeground);
+                return EXIT_SUCCESS;
             } else return -1;
         } else {
             set_BJ(sh, t_pid);
+            return EXIT_SUCCESS;
         }
-        return EXIT_SUCCESS;
-
     }
     if (t_pid == 0) {
         //* In child_number
         if (exec(sh, cmd_name, argv, isForeground) < 0)
             exit(EXIT_FAILURE);
     }
+    return -1;
     //- If we're in parent we've returned with the return above and if we're child we've exited
 }
 
@@ -288,6 +289,7 @@ int sh_getAndResolveCmd(Shell* sh) {
                 int lastArgLen = strlen(lastArg);
                 isForeground = lastArg[lastArgLen-1] != '&';
             }
+            //! TODO: redirect stdin and stdout to dev/null for bg job
             printf("isForeground %d\n", isForeground);
             if (executeJob(sh, cmd_name, argv, isForeground) < 0) return -1;
         }
