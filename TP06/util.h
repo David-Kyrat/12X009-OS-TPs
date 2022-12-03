@@ -184,7 +184,7 @@ char* strsub(char* src, int stop_idx);
  * Return whether 'str' starts with given prefix.
  * @param str String to check 
  * @param prefix prefix to match against
- * @return 1 if it does 0 otherwise.
+ * @return 1 if it does 0 otherwise or -1 for errors.
  */
 int strstartwith(const char* str, const char* prefix);
 

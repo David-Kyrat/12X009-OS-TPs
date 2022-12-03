@@ -130,6 +130,10 @@ int dateCmpr(struct timespec ts2, struct timespec ts1) {
 
 
 int strToInt(const char* str, int base, int* result) {
+    if (str == NULL) {
+        errno = EINVAL;
+        return -1;
+    }
     char* endptr = tryalc(malloc(strlen(str)+1));
     errno = 0;
     int res = (int) strtol(str, &endptr, base);
@@ -145,6 +149,7 @@ int strToInt(const char* str, int base, int* result) {
 }
 
 char* strsub(char* src, int stop_idx) {
+    if (src == NULL) {errno = EINVAL; return NULL; }
     int sublen = stop_idx;
     char* sub = NULL;
     if (sublen < 0) errno = EINVAL;
@@ -163,11 +168,23 @@ char* strsub(char* src, int stop_idx) {
 
 
 int strstartwith(const char* str, const char* prefix) {
+    if (str == NULL || prefix == NULL) { errno = EINVAL; return -1; }
     return strncmp(str, prefix, strlen(prefix)) == 0;
 }
 
 
 char** strsplit(char* string, const char* separator, size_t* size) {
+    if (string == NULL) {
+        *size = 0;
+        errno = EINVAL;
+        return NULL;
+    }
+    if (separator == NULL) {
+        char** wrapper = tryalc(malloc(sizeof(char*)));
+        *wrapper = string;
+        *size = 0;
+        return wrapper;
+    }
     size_t max_len = strlen(string), crt_len = 0; char* token;
 
     char** out = calloc(max_len + 1, sizeof(char*)); //array containing the split parts of string
@@ -194,11 +211,13 @@ char** strsplit(char* string, const char* separator, size_t* size) {
 
 
 int streq(const char* s1, const char* s2) {
+    if (s1 == NULL || s2 == NULL) return -2;
     return strcmp(s1, s2) == 0;
 }
 
 
 int strswitch(const char* pattern, const char* cases[], int caseNb) {
+    if (pattern == NULL || cases == NULL) return -1;
     for (int i = 0; i < caseNb; i++) {
         if (streq(pattern, cases[i])) return i;
     }
@@ -219,12 +238,14 @@ void arrPrint(char** arr, int size) {
  * @return left-stripped string
  */
 const char* stripl(char* str) {
+    if (str == NULL) return NULL;
     while(isspace(*str) && *str != '\0') str++;
     return str;
 }
 
 
 const char* stripr(char* str) {
+    if (str == NULL) return NULL;
     char* ptr = str + strlen(str) -1;
     while(ptr && isspace(*ptr)) {
         *ptr = '\0';
