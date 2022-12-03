@@ -10,7 +10,7 @@
 #include <limits.h>
 #include <ctype.h>
 
-#include "shell-struct.h"
+#include "shellstruct.h"
 #include "util.h"
 #include "input.h"
 #include "files.h"
@@ -18,30 +18,60 @@
 
 #define printExitCode(exitcode) \
     printf("%s  -Foreground job exited with exit code %d\033[0m\n\n", "\033[2m", exitcode);
-
 #define CMD_CD ("cd")
 #define CMD_EXIT ("exit")
 
-
 const int CMD_NB = 2;
-const char* CMDS[] = {CMD_CD, CMD_EXIT}; 
+const char* CMDS[] = {CMD_CD, CMD_EXIT};
 
-// TODO: Create a struct with a local copy of pwd (the current path) that will be udpated on cd
-// (TO avoid calling getwd function that fills a buffer over and over again for each time user enters something)
-int update_path();
+int update_path(Shell* sh);
+
+struct Shell {
+    /** Contains the cwd (of Size PATH_MAX) */
+    char** environment;
+    /** copy of current working directory as a field, to not having to refetch it everytime since
+     * 'getcwd()' copies the actual each time it is called */
+    char* crt_path;
+    pid_t foreground_job;
+    pid_t background_job;
+};
+
+
+const char* pwd(Shell* sh) { return sh->crt_path; }
+pid_t get_BJ(Shell* sh) { return sh->background_job; }
+pid_t get_FJ(Shell* sh) { return sh->foreground_job; }
+
+
+/**
+ * "Private" setter for background job
+ * @param sh Shell instance
+ * @param background_job  pid of background job
+ */
+void set_BJ(Shell* sh, pid_t background_job) { sh->background_job = background_job; }
+
+/**
+ * "Private" setter for foreground job
+ * @param sh Shell instance
+ * @param foreground_job  pid of foreground job
+ */
+void set_FJ(Shell* sh, pid_t foreground_job) { sh->foreground_job = foreground_job; }
+
 
 // copy of pwd environment variable as a field, to not having to refetch it everytime
 //char crt_path[PATH_MAX];
 
 extern char** environ;
 
-void sh_init() { update_path(); }
-
-
 Shell* new_Shell() {
     Shell* sh = tryalc(malloc(sizeof(Shell)));
+    sh->environment = environ;
     sh->crt_path = tryalc(malloc(PATH_MAX));
-    //TODO: init crt_path
+
+    if (getcwd(sh->crt_path, PATH_MAX) == NULL) {
+        printErr("%s - cannot initialize pwd (%s)\n", sh->crt_path);
+        return NULL;
+    }
+
     sh->background_job = -1;
     sh->foreground_job = -1;
 
@@ -50,56 +80,47 @@ Shell* new_Shell() {
 
 /**
  * Changes the current working directory to the one specified by the path argument
+ * @param sh Shell*, ptr to instance of Shell
  * @param path The path (relative or absolute) to the directory to change to.
  * @return Exit code. 0 for success, -1 for error.
  */
-int cd(const char* path) {
+int cd(Shell* sh, const char* path) {
     char* resolvedPath;
-    if (!path)  resolvedPath = getenv("HOME");
+    if (!path) resolvedPath = getenv("HOME");
     else {
         int isAbsolute = (*path == '/');
-        if (isAbsolute) resolvedPath = path; 
+        if (isAbsolute) resolvedPath = absPath(path);
         else {
-            const char* tmp = concat_path(crt_path, path);
+            const char* tmp = concat_path(pwd(sh), path);
             resolvedPath = absPath(tmp);
             free(tmp);
-            if (resolvedPath == NULL) return -1;
-        } 
+        }
+        if (resolvedPath == NULL) printRErr("cd: %s : %s", path);
     }
-
-    //const char* asb_path = absPath(path);
-
-    /*if (strcmp(path, "..") == 0) {
-        chdir("..");
-        if (update_path() < 0) return -1;
-        return EXIT_SUCCESS;
-    }*/
-
 
     if (chdir(resolvedPath) < 0) {
         printRErr("cd : %s - %s\n", path);
+    } else {
+        
     }
-    else if (update_path() < 0) return -1;
+
+    //else if (update_path(NULL) < 0) return -1;
 
     // if successfully changed path:
     return EXIT_SUCCESS;
 }
 
-
-/**
- * Update the 'crt_path' field to actual current working directory (the one returned by 'getcwd()')
+/*
+ * Update the 'crt_path' field to actual current working directory (the one returned by 'getcwd()').
+ * !! getcwd() functions makes a copy of current path => don't abuse use
  * @return Exit cod. 0 if success -1 otherwise.
  */
-int update_path() {
-     if (getcwd(crt_path, PATH_MAX) == NULL)
-        printRErr("%s - cannot update pwd (%s)\n", crt_path);
-     return EXIT_SUCCESS;
+/*
+int update_path(Shell* sh) {
+    if (getcwd(sh->crt_path, PATH_MAX) == NULL) printRErr("%s - cannot update pwd (%s)\n", sh->crt_path);
+    return EXIT_SUCCESS;
 }
-
-
-const char* pwd() {
-    return crt_path;
-}
+*/
 
 
 /**
@@ -124,63 +145,64 @@ char** getEnvp() {
 }
 
 void listEnv() {
-    for (char **current = environ; *current; current++) puts(*current);
+    for (char** current = environ; *current; current++) puts(*current);
 }
 
 /**
  * Call execvpe, handle errors and print "Foreground job exited with exit code <errorcode extracted when handling error>" 
  */
-int exec(const char* filename, char *const argv[]) {
-    errno = 0; int exitcode = 0;
+int exec(const char* filename, char* const argv[]) {
+    errno = 0;
+    int exitcode = 0;
     if (execvpe(filename, argv, getEnvp()) < 0) {
         exitcode = errno;
         fprintf(stderr, "%s: \"%s\" \n", exitcode == ENOENT ? "command not found" : strerror(exitcode), filename);
     }
-    
+
     return -1;
     // if exec command returns then there have been an error somewhere
 }
 
-int executeJob(const char* cmd_name, char *const argv[]) {
+int executeJob(const char* cmd_name, char* const argv[]) {
     if (cmd_name == NULL || strlen(cmd_name) <= 0) return -1;
-            pid_t t_pid = fork();
-            int child_exitcode = EXIT_FAILURE;
+    pid_t t_pid = fork();
+    int child_exitcode = EXIT_FAILURE;
 
-            if (t_pid < 0) {
-                printErr("%s: %s - Cannot Fork.\n", argv[0]);
-                //printf("Foreground job exited\n\n");
-                //exit(EXIT_FAILURE);
-                printExitCode(child_exitcode);
-                return -1;
-            }
+    if (t_pid < 0) {
+        printErr("%s: %s - Cannot Fork.\n", argv[0]);
+        //printf("Foreground job exited\n\n");
+        //exit(EXIT_FAILURE);
+        printExitCode(child_exitcode);
+        return -1;
+    }
 
-            //* In parent 
-            if (t_pid > 0) wait(&child_exitcode);
+    //* In parent
+    if (t_pid > 0) wait(&child_exitcode);
 
-            if (t_pid == 0) {
-                //* In child
-                if (exec(cmd_name, argv) < 0) 
-                        exit(EXIT_FAILURE);
-                // if it is not programm that was called shouldve exited
-            }
-            printExitCode(child_exitcode);
-            //printf("%s  -Foreground job exited with exit code %d%s\n\n", colors[7], child_exitcode,  colors[0]);
-            return EXIT_SUCCESS;
+    if (t_pid == 0) {
+        //* In child
+        if (exec(cmd_name, argv) < 0)
+            exit(EXIT_FAILURE);
+        // if it is not programm that was called shouldve exited
+    }
+    printExitCode(child_exitcode);
+    //printf("%s  -Foreground job exited with exit code %d%s\n\n", colors[7], child_exitcode,  colors[0]);
+    return EXIT_SUCCESS;
 }
 
 
 int getAndResolveCmd() {
     //TODO: Check for & => and make background job
-    int argc; 
+    int argc;
     const char** argv = readParseIn(&argc);
-    if (argc <= 0 || argv == NULL)
-        printRErr("%s: Could not parse user input - %d argument entered\n", argc); //returns -1
+    if (argc <= 0 || argv == NULL) printRErr("%s: Could not parse user input - %d argument entered\n",
+                                             argc); //returns -1
     const char* cmd_name = argv[0];
     switch (strswitch(cmd_name, CMDS, CMD_NB)) {
-        
-        case 0: 
+
+        case 0:
             // CMDS[0] is "cd". => cd to 2nd argument in argv ignoring the rest.
-            if (cd(argc <= 1 ? NULL : argv[1]) < 0)  return -1;
+            if (cd(argc <= 1 ? NULL : argv[1]) < 0) return -1;
             printf("\n");
             break;
         case 1:
@@ -191,10 +213,10 @@ int getAndResolveCmd() {
             //? break here is useless since we exit, but do we have to add it for good practices ?
             // answer: no.
 
-        default: ;
+        default:;
             // execve to execute program requested by user
-                 //const char* const* args = argv; 
-                 if (executeJob(cmd_name, argv) < 0) return -1; 
+            //const char* const* args = argv;
+            if (executeJob(cmd_name, argv) < 0) return -1;
 
     }
 
@@ -212,16 +234,20 @@ int getAndResolveCmd() {
 
 
 //! 0:default,  1:red, 2:Green,  3:Blue, 4:Purple, 5:yellow,  6:cyan,  7:grey
-const char* colors[] = {"\033[0m", "\033[0;31m", "\033[0;32m", "\033[0;34m", "\033[0;35m", "\033[0;33m", "\033[0;36m", "\033[2m"};
+const char* colors[] = {"\033[0m", "\033[0;31m", "\033[0;32m", "\033[0;34m", "\033[0;35m", "\033[0;33m", "\033[0;36m",
+                        "\033[2m"};
+
 /**
  * 0:default,  1:red, 2:Green,  3:Blue, 4:Purple, 5:yellow,  6:cyan
  */
 void setOutColor(int color) {
     printf("%s", colors[color]);
 }
+
 void resetCol() {
-	setOutColor(0);
+    setOutColor(0);
 }
+
 void prettyPrintPath() {
     printf("%s( %s", colors[1], colors[6]);
     printf("%s", crt_path);

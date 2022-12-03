@@ -19,9 +19,9 @@ EXEC = main.out
 #
 # All headers. i.e. dependency of the out/main.o target
 #
-HDRS = shell.h files.h input.h util.h
+HDRS = shellstruct.h shell.h files.h input.h util.h
 
-OBJS = out/main.o out/shell.o out/files.o out/input.o out/util.o
+OBJS = out/main.o out/shellstruct.o out/shell.o out/files.o out/input.o out/util.o
 
 
 all: $(EXEC)
@@ -39,6 +39,10 @@ out/main.o: main.c $(HDRS)
 	$(CC) -c main.c $(CFLAGS) $(DBGFLAGS) -o out/main.o
 
 
+out/shellstruct.o: shellstruct.c shellstruct.h
+	$(CC) -c shellstruct.c $(CFLAGS) $(DBGFLAGS) -o out/shellstruct.o
+
+
 out/shell.o: shell.c shell.h files.h input.h util.h
 	$(CC) -c shell.c $(CFLAGS) $(DBGFLAGS) -o out/shell.o
 
@@ -53,6 +57,7 @@ out/files.o: files.c files.h util.h
 
 out/util.o: util.c util.h
 	$(CC) -c util.c $(CFLAGS) $(DBGFLAGS) -o out/util.o
+
 
 
 #! Make directory that will contain all .o & .out (except for main.out wich will be at root of source dir i.e. where Makefile is)

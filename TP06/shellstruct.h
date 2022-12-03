@@ -1,5 +1,5 @@
-#ifndef __SHELL__
-#define __SHELL__
+#ifndef __SHELLS__
+#define __SHELLS__
 
 #include <limits.h>
 #include <sys/types.h>
@@ -8,23 +8,17 @@
 /**
  * Represents a Shell with a crt_path (pwd) a foreground job and 
  * a background_job. Crt_path default value is where the executable was called
- * and foregroud_job & background_job default value are -1.
+ * and foreground_job & background_job default value are -1.
  * 
  */
 typedef struct Shell Shell;
 
-struct Shell {
-    /** Contains the cwd (of Size PATH_MAX) */
-    char* crt_path;
-    pid_t foreground_job;
-    pid_t background_job;
 
-};
 
 /**
  * Shell primary constructor. Return a pointer to a new instance
  * of Shell with crt_path initialized at where the executable was called
- * and no foregroud_job nor background_job (-1 value)
+ * and no foreground_job nor background_job (-1 value)
  * 
  * @return pointer to a new instance of Shel
  */
@@ -35,7 +29,7 @@ Shell* new_Shell();
  * 
  * @return The current working directory.
  */
-const char* pwd();
+const char* pwd(Shell* sh);
 
 
 /**
@@ -47,17 +41,28 @@ const char* pwd();
 int getAndResolveCmd();
 
 
+// =================== GETTERS & Other =====================
+
+/**
+ * @param sh pointer to Shell instance
+ * @return background_job field for 'sh'
+ */
+pid_t get_BJ(Shell* sh);
+
+/**
+ * @param sh pointer to Shell instance
+ * @return foreground_job field for 'sh'
+ */
+pid_t get_FJ(Shell* sh);
+
 /**
  * Print the current working directory to console output
  */
 void prettyPrintPath();
-
-/** init shell, todo: remove this after when proper struct was implemented */
-void sh_init();
 
 //
 // NB: returned string as allocated with malloc. Don't forget to free.
 
 
 
-#endif /* __SHELL__ */
+#endif /* __SHELLS__ */

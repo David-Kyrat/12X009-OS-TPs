@@ -15,10 +15,14 @@
 const char EOL = '\n', ARG_SEP = ' ';  //Tab and space are the only argument separator
 
 //!
-//! Below is the basic code of readInput() (function that returns what the user entered) which I preferred to replace by the GNU library "readline.h" by simplicity. The library just adds more feature (like going back and forward) when User has to enter text. Everything else is still made by us, it is just that specific small  part that was replaced for conveniance.
+//! Below is the basic code of readInput() (function that returns what the user entered) which I preferred to replace by the GNU library "readline.h" by simplicity. The library just adds more feature (like going back and forward) when User has to enter text. Everything else is still made by us, it is just that specific small  part that was replaced for convenience.
 //! 
 //! The basic function below of course works, feel free to uncomment this one and comment to the other (and remove the <readline/*> includes) to test it
 //!
+//! If you get an error message saying, that the file was not found, you can install it with
+//! "sudo apt-get install lib32readline8 lib32readline-dev" and "sudo apt-get install libreadline-dev"
+//!
+
 
 /*const char* readInput() {
     int crt_size = MAX_INPUT;

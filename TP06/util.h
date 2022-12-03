@@ -16,8 +16,7 @@
     // if savedErr == 0 then strerror(savedError) will return "success" which wouldn't make any sense for an error message.
 
 //* Macro that Prints given (printf formatted) message to stderr and returns -1. See 'printErr' for more info
-#define printRErr(mess, args...) \
-    { printErr(mess, args); return -1; }
+#define printRErr(mess, args...) { printErr(mess, args); return -1; }
 
 
 /** 
@@ -37,7 +36,7 @@ void hdlOOM();
 
 /**
  * If *alloc (malloc, calloc ...) returned null exits (i.e. hdlOOM()) if it didn't return the alloc return.
- * mostly useful to be able do things like ' smth = tryalc( *alloc(...) ) ' (i.e. directly doing and the malloc and the test)
+ * mostly useful to be able do things like ' smith = tryalc( *alloc(...) ) ' (i.e. directly doing and the malloc and the test)
  * 
  * @param allocReturn The return value of alloc.
  * @return allocReturn if it's not null, exit otherwise
@@ -47,7 +46,7 @@ void* tryalc(void* allocReturn);
 /**
  * Utility function for basic error handling
  * 
- * Justs Prints an error message to stderr return -1
+ * Just Prints an error message to stderr return -1
  * @return -1
  */
 int hdlBasicErr();
@@ -61,7 +60,7 @@ int hdlBasicErr();
  * @param needsExit int, If non-zero, program will exit with the saved error code from errno. (otherwise do nothing)
  * @return -1 or, exits with saved errno, if needsExit was != 0.
  */
-int hdlOpenErr(const char* filename, int exit);
+int hdlOpenErr(const char* filename, int needsExit);
 
 
 /**
@@ -70,10 +69,10 @@ int hdlOpenErr(const char* filename, int exit);
  * Prints an error message to stderr and exits with the error code if needsExit is true, otherwise
  * ust returns -1
  * @param filename Name of the file that could not be closed.
- * @param needsExit int, If non-zero, program will exit with the saved error code from errno. (otherwise do nothing)
+ * @param needsExit int, If non-zero, program will needsExit with the saved error code from errno. (otherwise do nothing)
  * @return -1 or, exits with saved errno, if needsExit was != 0.
  */
-int hdlCloseErr(const char* filename, int exit);
+int hdlCloseErr(const char* filename, int needsExit);
 
 /**
  * Utility function for basic handling of error related to file reading.
