@@ -242,13 +242,12 @@ int executeJob(Shell* sh, const char* cmd_name, char* const argv[], int isForegr
             if (wait_s(&child_exitcode) == EXIT_SUCCESS) {
                 sh->child_number -= 1;
                 printExitCode(child_exitcode, isForeground);
-                return EXIT_SUCCESS;
-
             } else return -1;
-
         } else {
             set_BJ(sh, t_pid);
         }
+        return EXIT_SUCCESS;
+
     }
     if (t_pid == 0) {
         //* In child_number
@@ -289,7 +288,7 @@ int sh_getAndResolveCmd(Shell* sh) {
                 int lastArgLen = strlen(lastArg);
                 isForeground = lastArg[lastArgLen-1] != '&';
             }
-
+            printf("isForeground %d\n", isForeground);
             if (executeJob(sh, cmd_name, argv, isForeground) < 0) return -1;
         }
     }
