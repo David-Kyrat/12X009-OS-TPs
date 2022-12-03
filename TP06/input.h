@@ -14,7 +14,9 @@ const char* readInput();
  * Reads user input from stdin, then parses it (if it was correctly read)
  * and stores the argc into the given 'argc' variable.
  * 
- * @param argc ptr to variable in whcih to store the number of argument
+ * @param argc ptr to variable in which to store the number of argument
+ * @param isForeground ptr to ptr to variable in which to store if the line contained a '&' at the end
+
  * @return Array of argument
  */
-const char** readParseIn(int* argc);
+const char** readParseIn(int* argc, int* isForeground);

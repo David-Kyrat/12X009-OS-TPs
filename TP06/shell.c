@@ -268,8 +268,8 @@ int executeJob(Shell* sh, const char* cmd_name, char* const argv[], int isForegr
 
 int sh_getAndResolveCmd(Shell* sh) {
     //TODO: Check for & => and make background job
-    int argc = 0;
-    const char** argv = readParseIn(&argc);
+    int argc = 0, isForeground = 1;
+    const char** argv = readParseIn(&argc, &isForeground);
     if (argc <= 0 || argv == NULL)
         printRErr("%s: Could not parse user input - read %d argument.\n", argc); //returns -1
     const char* cmd_name = argv[0];
@@ -289,12 +289,17 @@ int sh_getAndResolveCmd(Shell* sh) {
             // execve to execute program requested by user
             //const char* const* args = argv;
             //TODO: handle background jobs
-            int isForeground = 1;
             // if argc <= 1 then there can be no '&' at the end because 'argv' is just {'cmd_name'}.
             if (argc > 1) {
-                const char* lastArg = argv[argc-1];
-                int lastArgLen = strlen(lastArg);
-                isForeground = lastArg[lastArgLen-1] != '&';
+
+                if (!isForeground) {
+                    puts(" ");
+                    for (int i = 0; i <= argc; i++) {
+                        printf("arg[%d] = \"%s\"\n", i, argv[i]);
+                    }
+                    puts(" ");
+                    //free(argv[argc]);
+                }
             }
             if (executeJob(sh, cmd_name, argv, isForeground) < 0) return -1;
         }

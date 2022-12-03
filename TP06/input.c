@@ -49,7 +49,7 @@ const char EOL = '\n', ARG_SEP = ' ';  //Tab and space are the only argument sep
 }*/
 
 const char* readInput() {
-    const char* buff = readline("");
+    const char* buff = readline("\0 ");
     if (buff == NULL || strlen(buff) <= 0) return  NULL;
     return strip(buff);
 }
@@ -75,18 +75,44 @@ int isWhiteSpace(const char* str) {
  * @param argc ptr to variable in whcih to store the number of argument
  * @return char* buffer i.e. 'inp' split with respect to 'ARG_SEP'
  */
-const char** parseInput(const char* inp, int* argc) {
-    *argc = 0;
-    char** argv = strsplit(inp, &ARG_SEP, (size_t*) argc);
+const char** parseInput(const char* inp, int* argc, int* isForeground) {
+    *argc = 0; *isForeground = 1;
+    // inp is already right stripped so if required job must be launched in background then
+    // the '&' has to be end at the last position of 'inp' 
+    char* tosplit = tryalc(malloc(1));
+    tosplit = inp;
+    size_t inp_len = strlen(inp);
+   
+    if (inp_len > 1 && inp[inp_len - 1] == '&') {
+        *isForeground = 0;
+        printf("inp[last] = %c == &? %d\n", inp[inp_len-1], (inp[inp_len -1] == '&'));
+        //if there is a '&' then there is a space at the end
+        tosplit[inp_len - 2] = '\0';
+    } else {
+        *isForeground = 1;
+    } 
     
-    //TODO: maybe make it to more stuff later if needed
+    printf("isForeground: %d\n", *isForeground);
+    const char** argv = strsplit(tosplit, &ARG_SEP, argc);
+    for (int i = 0; i < *argc; i++) {
+        printf("argv[%d] = \"%s\"\n", i, argv[i]);
+    }
 
+    free(tosplit);
+
+    //printf("inp[last] = %c == &? %d\n", inp[inp_len-1], (inp[inp_len -1] == '&'));
+//    printf("isForeground: %d\n", *isForeground);
+    if ((*isForeground) == 0) {
+        *argc = *argc - 1;
+    }
+
+    printf("argc: %d\n", *argc);
     return argv;
 }
 
 
-const char** readParseIn(int* argc) {
+const char** readParseIn(int* argc, int* isForeground) {
     const char* tmp = readInput();
     if (tmp == NULL) return NULL;
-    return parseInput(tmp, argc);
+    return parseInput(tmp, argc, isForeground);
 }
