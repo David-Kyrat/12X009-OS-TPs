@@ -38,9 +38,9 @@ struct Shell {
      * Copy of current working directory as a field, to not having to refetch it everytime since
      * 'getcwd()' copies the actual each time it is called */
     char* crt_path;
-    // Pid of current process launched as foreground job => Reset to 0 when child_number is terminated
+    // Pid of current process launched as foreground job
     pid_t foreground_job;
-    // Pid of current process launched as background job => Reset to 0 when child_number is terminated
+    // Pid of current process launched as background job
     pid_t background_job;
     // Number of current non-waited/terminated child
     uint child_number;
@@ -175,7 +175,7 @@ int update_path(Shell* sh) {
 
 
 /**
- * Exit shell with given exitcode
+ * Exit shell with given exitcode by calling 'clean_exit()' once 'arg' was parsed into an int
  * @param arg exitcode as string
  */
 void exit_shell(Shell* sh, const char* arg) {
@@ -242,6 +242,8 @@ int executeJob(Shell* sh, const char* cmd_name, char* const argv[], int isForegr
             if (wait_s(&child_exitcode) == EXIT_SUCCESS) {
                 sh->child_number -= 1;
                 printExitCode(child_exitcode, isForeground);
+                return EXIT_SUCCESS;
+
             } else return -1;
 
         } else {
@@ -261,8 +263,8 @@ int sh_getAndResolveCmd(Shell* sh) {
     //TODO: Check for & => and make background job
     int argc;
     const char** argv = readParseIn(&argc);
-    if (argc <= 0 || argv == NULL) printRErr("%s: Could not parse user input - %d argument entered\n",
-                                             argc); //returns -1
+    if (argc <= 0 || argv == NULL)
+        printRErr("%s: Could not parse user input - %d argument entered\n", argc); //returns -1
     const char* cmd_name = argv[0];
     switch (strswitch(cmd_name, CMDS, CMD_NB)) {
 
@@ -276,11 +278,20 @@ int sh_getAndResolveCmd(Shell* sh) {
             // if no exit code 2nd arg is blank => exit with default code
             exit_shell(sh, (argc <= 1 || *argv[1] == '\n') ? NULL : argv[1]);
 
-        default:
+        default: {
             // execve to execute program requested by user
             //const char* const* args = argv;
             //TODO: handle background jobs
-            if (executeJob(sh, cmd_name, argv, 1) < 0) return -1;
+            int isForeground = 1;
+            // if argc <= 1 then there can be no '&' at the end because 'argv' is just {'cmd_name'}.
+            if (argc > 1) {
+                const char* lastArg = argv[argc-1];
+                int lastArgLen = strlen(lastArg);
+                isForeground = lastArg[lastArgLen-1] != '&';
+            }
+
+            if (executeJob(sh, cmd_name, argv, isForeground) < 0) return -1;
+        }
     }
 
     return EXIT_SUCCESS;
@@ -320,9 +331,9 @@ void resetCol() {
     setOutColor(0);
 }
 
-void sh_prettyPrintPath() {
+void sh_prettyPrintPath(Shell* sh) {
     printf("%s( %s", colors[1], colors[6]);
-    //printf("%s", crt_path);
+    printf("%s", pwd(sh));
     printf("%s )\n|_ ", colors[1]);
     printf("%s$ ", colors[5]);
     resetCol();

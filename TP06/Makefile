@@ -19,9 +19,9 @@ EXEC = main.out
 #
 # All headers. i.e. dependency of the out/main.o target
 #
-HDRS = shellstruct.h shell.h files.h input.h util.h
+HDRS = shellstruct.h files.h input.h util.h
 
-OBJS = out/main.o out/shellstruct.o out/shell.o out/files.o out/input.o out/util.o
+OBJS = out/main.o out/shellstruct.o out/files.o out/input.o out/util.o
 
 
 all: $(EXEC)

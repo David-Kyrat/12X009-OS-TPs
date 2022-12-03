@@ -5,20 +5,17 @@
 #include <limits.h>
 
 #include "input.h"
-#include "shell.h"
-
+#include "shellstruct.h"
 
 int main(int argc, char* argv[]) {
 
     int err = EXIT_SUCCESS;
-
-    //init shell, todo: remove this after when proper struct was implemented
-    sh_init();
+    Shell* shell = new_Shell();
 
     for (;;) {
-        sh_prettyPrintPath();
+        sh_prettyPrintPath(shell);
 
-        if (sh_getAndResolveCmd() < 0 ) {
+        if (sh_getAndResolveCmd(shell) < 0 ) {
             err = EXIT_FAILURE;
             fprintf(stderr, "Command could not be resolved. Please try again.\n\n");
         }

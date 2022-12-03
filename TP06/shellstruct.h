@@ -60,7 +60,7 @@ pid_t sh_FJ(Shell* sh);
 /**
  * Print the current working directory to console output
  */
-void sh_prettyPrintPath();
+void sh_prettyPrintPath(Shell* sh);
 
 //
 // NB: returned string as allocated with malloc. Don't forget to free.
