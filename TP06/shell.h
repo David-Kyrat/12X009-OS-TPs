@@ -19,13 +19,13 @@ const char* pwd();
  * 
  * @return Exit code. 0 on success, -1 otherwise.
  */
-int getAndResolveCmd();
+int sh_getAndResolveCmd();
 
 
 /**
  * Print the current working directory to console output
  */
-void prettyPrintPath();
+void sh_prettyPrintPath();
 
 /** init shell, todo: remove this after when proper struct was implemented */
 void sh_init();

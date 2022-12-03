@@ -42,10 +42,10 @@ int isDir(const char* path);
 
 
 /**
- * Takes a parent path and a child path and returns their concatenation
+ * Takes a parent path and a child_number path and returns their concatenation
  * 
  * @param parent The parent path
- * @param child the child path
+ * @param child the child_number path
  * 
  * @return New concatenated path or null if an error happened.
  */

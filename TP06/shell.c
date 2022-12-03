@@ -146,7 +146,7 @@ int executeJob(const char* cmd_name, char *const argv[]) {
             if (t_pid > 0) wait(&child_exitcode);
 
             if (t_pid == 0) {
-                //* In child
+                //* In child_number
                 if (exec(cmd_name, argv) < 0) 
                         exit(EXIT_FAILURE);
                 // if it is not programm that was called shouldve exited
@@ -157,7 +157,7 @@ int executeJob(const char* cmd_name, char *const argv[]) {
 }
 
 
-int getAndResolveCmd() {
+int sh_getAndResolveCmd() {
     //TODO: Check for & => and make background job
     int argc; 
     const char** argv = readParseIn(&argc);
@@ -210,7 +210,7 @@ void setOutColor(int color) {
 void resetCol() {
 	setOutColor(0);
 }
-void prettyPrintPath() {
+void sh_prettyPrintPath() {
     printf("%s( %s", colors[1], colors[6]);
     printf("%s", crt_path);
     printf("%s )\n|_ ", colors[1]);

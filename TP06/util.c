@@ -237,3 +237,16 @@ const char* strip(char* str) {
     return stripr(stripl(str));
 }
 
+
+int wait_s(int* exitStatus) {
+    if (wait(exitStatus) == -1) {
+        int savedErr = errno;
+        if (savedErr != EINTR && savedErr != ECHILD) {
+            fprintf(stderr, "%s: cannot kill child.\n", strerror(savedErr));
+            return -1;
+        }
+        else if (savedErr == EINTR) wait_s(exitStatus);
+
+    }
+    return EXIT_SUCCESS;
+}

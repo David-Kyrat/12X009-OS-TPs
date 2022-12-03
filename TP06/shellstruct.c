@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
+//#include <unistd.h>
 #include <limits.h>
 #include <ctype.h>
 
@@ -15,67 +15,119 @@
 #include "input.h"
 #include "files.h"
 #include <sys/types.h> //pid_t
+#include <sys/wait.h>
 
-#define printExitCode(exitcode) \
-    printf("%s  -Foreground job exited with exit code %d\033[0m\n\n", "\033[2m", exitcode);
+#include "/usr/include/unistd.h"
+
+/**
+ * If 'isForground' is -1 prints "job exited with exit code 'exitcode'"
+ * else if 'isForeground' is 0 prints "Background job exited with exit code 'exitcode'"
+ * else prints "Foreground job exited with exit code 'exitcode'"
+ */
+#define printExitCode(exitcode, isForeground) \
+    printf("%s -%s job exited with exit code %d\033[0m\n\n", "\033[2m", (isForeground == -1 ? " " : \
+    (isForeground ? "Foreground" : "Background")), exitcode);
 #define CMD_CD ("cd")
 #define CMD_EXIT ("exit")
 
 const int CMD_NB = 2;
 const char* CMDS[] = {CMD_CD, CMD_EXIT};
 
-int update_path(Shell* sh);
-
 struct Shell {
-    /** Contains the cwd (of Size PATH_MAX) */
-    char** environment;
-    /** copy of current working directory as a field, to not having to refetch it everytime since
+    /** Contains the cwd (of Size PATH_MAX).
+     * Copy of current working directory as a field, to not having to refetch it everytime since
      * 'getcwd()' copies the actual each time it is called */
     char* crt_path;
+    // Pid of current process launched as foreground job => Reset to 0 when child_number is terminated
     pid_t foreground_job;
+    // Pid of current process launched as background job => Reset to 0 when child_number is terminated
     pid_t background_job;
+    // Number of current non-waited/terminated child
+    uint child_number;
 };
 
 
 const char* pwd(Shell* sh) { return sh->crt_path; }
-pid_t get_BJ(Shell* sh) { return sh->background_job; }
-pid_t get_FJ(Shell* sh) { return sh->foreground_job; }
-
+pid_t sh_BJ(Shell* sh) { return sh->background_job; }
+pid_t sh_FJ(Shell* sh) { return sh->foreground_job; }
+/** Getter for 'child_number' field
+ * @return Number of current non-waited/terminated child */
+uint child(Shell* sh) { return sh->child_number; }
 
 /**
- * "Private" setter for background job
+ * "Private" setter for 'crt_path' field
+ * @param sh Shell instance
+ * @param newPath new path
+ */
+void set_crt_path(Shell* sh, const char* newPath) {
+    sh->crt_path = newPath;
+    //maybe handle dynamically here memory allocated to crt_path if it doesn't cause too much overhead to call realloc that many times
+}
+
+/**
+ * "Private" setter for 'background_job' field
  * @param sh Shell instance
  * @param background_job  pid of background job
  */
 void set_BJ(Shell* sh, pid_t background_job) { sh->background_job = background_job; }
 
 /**
- * "Private" setter for foreground job
+ * "Private" setter for 'foreground_job' field
  * @param sh Shell instance
  * @param foreground_job  pid of foreground job
  */
 void set_FJ(Shell* sh, pid_t foreground_job) { sh->foreground_job = foreground_job; }
 
-
-// copy of pwd environment variable as a field, to not having to refetch it everytime
-//char crt_path[PATH_MAX];
-
+//Global variable referring to the current environment
 extern char** environ;
 
 Shell* new_Shell() {
     Shell* sh = tryalc(malloc(sizeof(Shell)));
-    sh->environment = environ;
     sh->crt_path = tryalc(malloc(PATH_MAX));
 
     if (getcwd(sh->crt_path, PATH_MAX) == NULL) {
-        printErr("%s - cannot initialize pwd (%s)\n", sh->crt_path);
+        printErr("%s - cannot initialize cwd (%s)\n", sh->crt_path);
         return NULL;
     }
-
-    sh->background_job = -1;
-    sh->foreground_job = -1;
-
+    sh->background_job = 0;
+    sh->foreground_job = 0;
+    sh->child_number = 0;
+    //maybe register a function to wait for children in atexit
     return sh;
+}
+
+/**
+ * Wait for all children to die, then terminates them with wait()
+ */
+void terminate_all_children(Shell* sh) {
+    // until shell process has child:
+    while (child(sh) > 0) {
+        int exitStatus;
+        /*int decrement = 1;
+        if (wait(&exitStatus) == -1) {
+            int savedErr = errno;
+            if (savedErr != EINTR && savedErr != ECHILD)
+                fprintf(stderr, "clean_exit: %s: cannot kill child.\n", strerror(savedErr));
+            else if (savedErr == EINTR) decrement = 0; // for that error just retry
+        }*/
+        wait_s(&exitStatus);
+        printExitCode(exitStatus, -1);
+        sh->child_number -= 1;
+    }
+}
+
+/**
+ * Perform different cleanup actions before exiting.
+ * E.g. kill/wait for all childs still alive / zombified to avoid orphans,
+ * free fields 'sh'... Then exits
+ *
+ * @param sh ptr to Shell instance
+ * @param exitCode exit code to exit with
+ */
+void clean_exit(Shell* sh, int exitCode) {
+    terminate_all_children(sh);
+    if (sh != NULL) sh_free(sh);
+    exit(exitCode);
 }
 
 /**
@@ -100,11 +152,8 @@ int cd(Shell* sh, const char* path) {
 
     if (chdir(resolvedPath) < 0) {
         printRErr("cd : %s - %s\n", path);
-    } else {
-        
-    }
-
-    //else if (update_path(NULL) < 0) return -1;
+    } else
+        set_crt_path(sh, resolvedPath);
 
     // if successfully changed path:
     return EXIT_SUCCESS;
@@ -122,12 +171,14 @@ int update_path(Shell* sh) {
 }
 */
 
+//TODO: set pid of crt jbs when launched and reset them when they were waited on and terminated
+
 
 /**
  * Exit shell with given exitcode
  * @param arg exitcode as string
  */
-void exit_shell(const char* arg) {
+void exit_shell(Shell* sh, const char* arg) {
     int exit_code;
     if (!arg) exit_code = 0;
     else {
@@ -136,7 +187,8 @@ void exit_shell(const char* arg) {
         if (err < 0 && exit_code == EXIT_SUCCESS) exit_code = EXIT_FAILURE;
     }
     printf("Exit with exit code %d\n\n", exit_code);
-    exit(exit_code);
+
+    clean_exit(sh, exit_code);
 }
 
 /** Utility function if we ever need to do something to environ (e.g. pretreat it...) before returing it*/
@@ -144,54 +196,68 @@ char** getEnvp() {
     return environ;
 }
 
-void listEnv() {
-    for (char** current = environ; *current; current++) puts(*current);
-}
-
 /**
- * Call execvpe, handle errors and print "Foreground job exited with exit code <errorcode extracted when handling error>" 
+ * Call execvpe, handle errors and print "Foreground job exited with exit code <errorcode extracted when handling error>"
  */
-int exec(const char* filename, char* const argv[]) {
+int exec(Shell* sh, const char* filename, char* const argv[], int isForeground) {
     errno = 0;
     int exitcode = 0;
+    //TODO: replace execvpe by another exec* because it is a GNU extension (not POSIX)
+    // "The execvpe() function is a GNU extension." source: man excevpe
+
     if (execvpe(filename, argv, getEnvp()) < 0) {
+        // sets
+        if (isForeground) sh->foreground_job = -1;
+        else sh->background_job = -1;
         exitcode = errno;
         fprintf(stderr, "%s: \"%s\" \n", exitcode == ENOENT ? "command not found" : strerror(exitcode), filename);
     }
-
     return -1;
     // if exec command returns then there have been an error somewhere
 }
 
-int executeJob(const char* cmd_name, char* const argv[]) {
+
+
+//TODO: document this
+
+int executeJob(Shell* sh, const char* cmd_name, char* const argv[], int isForeground) {
     if (cmd_name == NULL || strlen(cmd_name) <= 0) return -1;
     pid_t t_pid = fork();
     int child_exitcode = EXIT_FAILURE;
 
     if (t_pid < 0) {
-        printErr("%s: %s - Cannot Fork.\n", argv[0]);
+        printErr("executeJob: %s, %s - Cannot Fork.\n", argv[0]);
         //printf("Foreground job exited\n\n");
-        //exit(EXIT_FAILURE);
-        printExitCode(child_exitcode);
+        //printExitCode(child_exitcode, isForeground);
+        //- No job exited because no job were created in the first place
         return -1;
     }
 
     //* In parent
-    if (t_pid > 0) wait(&child_exitcode);
+    if (t_pid > 0) {
+        sh->child_number += 1;
+        if (isForeground) {
+            set_FJ(sh, t_pid);
+            //- Only wait for foreground jobs
+            if (wait_s(&child_exitcode) == EXIT_SUCCESS) {
+                sh->child_number -= 1;
+                printExitCode(child_exitcode, isForeground);
+            } else return -1;
 
-    if (t_pid == 0) {
-        //* In child
-        if (exec(cmd_name, argv) < 0)
-            exit(EXIT_FAILURE);
-        // if it is not programm that was called shouldve exited
+        } else {
+            set_BJ(sh, t_pid);
+        }
     }
-    printExitCode(child_exitcode);
-    //printf("%s  -Foreground job exited with exit code %d%s\n\n", colors[7], child_exitcode,  colors[0]);
-    return EXIT_SUCCESS;
+    if (t_pid == 0) {
+        //* In child_number
+        if (exec(sh, cmd_name, argv, isForeground) < 0)
+            exit(EXIT_FAILURE);
+    }
+    //- If we're in parent we've returned with the return above and if we're child we've exited
 }
 
 
-int getAndResolveCmd() {
+int sh_getAndResolveCmd(Shell* sh) {
     //TODO: Check for & => and make background job
     int argc;
     const char** argv = readParseIn(&argc);
@@ -202,27 +268,30 @@ int getAndResolveCmd() {
 
         case 0:
             // CMDS[0] is "cd". => cd to 2nd argument in argv ignoring the rest.
-            if (cd(argc <= 1 ? NULL : argv[1]) < 0) return -1;
+            if (cd(sh, argc <= 1 ? NULL : argv[1]) < 0) return -1;
             printf("\n");
             break;
         case 1:
             // CMDS[1] is "exit"
             // if no exit code 2nd arg is blank => exit with default code
-            exit_shell((argc <= 1 || *argv[1] == '\n') ? NULL : argv[1]);
+            exit_shell(sh, (argc <= 1 || *argv[1] == '\n') ? NULL : argv[1]);
 
-            //? break here is useless since we exit, but do we have to add it for good practices ?
-            // answer: no.
-
-        default:;
+        default:
             // execve to execute program requested by user
             //const char* const* args = argv;
-            if (executeJob(cmd_name, argv) < 0) return -1;
-
+            //TODO: handle background jobs
+            if (executeJob(sh, cmd_name, argv, 1) < 0) return -1;
     }
 
     return EXIT_SUCCESS;
 }
 
+
+void sh_free(Shell* sh) {
+    free(sh->crt_path);
+    free(sh);
+    // 'crt_path' and 'sh' were the only "malloc'ed" variables
+}
 
 
 // ================ Printing functions ====================
@@ -232,6 +301,9 @@ int getAndResolveCmd() {
         printf(msg, getpid());
 } */
 
+void listEnv() {
+    for (char** current = getEnvp(); *current; current++) puts(*current);
+}
 
 //! 0:default,  1:red, 2:Green,  3:Blue, 4:Purple, 5:yellow,  6:cyan,  7:grey
 const char* colors[] = {"\033[0m", "\033[0;31m", "\033[0;32m", "\033[0;34m", "\033[0;35m", "\033[0;33m", "\033[0;36m",
@@ -248,9 +320,9 @@ void resetCol() {
     setOutColor(0);
 }
 
-void prettyPrintPath() {
+void sh_prettyPrintPath() {
     printf("%s( %s", colors[1], colors[6]);
-    printf("%s", crt_path);
+    //printf("%s", crt_path);
     printf("%s )\n|_ ", colors[1]);
     printf("%s$ ", colors[5]);
     resetCol();

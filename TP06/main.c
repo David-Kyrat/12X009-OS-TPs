@@ -16,9 +16,9 @@ int main(int argc, char* argv[]) {
     sh_init();
 
     for (;;) {
-        prettyPrintPath();
+        sh_prettyPrintPath();
 
-        if ( getAndResolveCmd() < 0 ) {
+        if (sh_getAndResolveCmd() < 0 ) {
             err = EXIT_FAILURE;
             fprintf(stderr, "Command could not be resolved. Please try again.\n\n");
         }

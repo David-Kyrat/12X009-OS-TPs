@@ -263,5 +263,12 @@ const char* stripr(char* str);
 const char* strip(char* str);
 
 
+/**
+ * Wrapper around 'wait()' that handles error when necessary and retries when EINTR happened
+ * @param exitStatus variable into which store the exit status of the child
+ * @return 0 for success, -1 for errors
+ */
+int wait_s(int* exitStatus);
+
 #endif // __UTIL__
  
