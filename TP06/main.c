@@ -10,8 +10,7 @@ int main(int argc, char* argv[]) {
     Shell* shell = new_Shell();
 
     for (;;) {
-        // Sometimes errors stays stuck on stderr which prevents programm from displaying
-        // what should be in stdout correctly
+
 
         sh_prettyPrintPath(shell);
 
@@ -19,7 +18,10 @@ int main(int argc, char* argv[]) {
             err = EXIT_FAILURE;
             fprintf(stderr, "Command could not be resolved. Please try again.\n\n");
         }
+        // Sometimes errors stays stuck on stderr which prevents programm from displaying
+        // what should be in stdout correctly
         fflush(stderr);
+        fflush(stdout);
     }
 
     return err;

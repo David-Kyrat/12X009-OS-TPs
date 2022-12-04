@@ -77,32 +77,18 @@ int isWhiteSpace(const char* str) {
  * @return string buffer (usually argv)  i.e. 'inp' split with respect to 'ARG_SEP'
  */
 const char** parseInput(const char* inp, int* argc, int* isForeground) {
-    uint isFg = 1; size_t argcTmp = 0;
-    // inp is already right stripped so if required job must be launched in background then
-    // the '&' has to be end at the last position of 'inp' 
+    uint isFg; size_t argcTmp = 0, inp_len;
+    // inp is already right stripped so if required job must be launched in background, the '&' has to be end at the last position of 'inp'
     char* tosplit = tryalc(malloc(1));
-    tosplit = inp;
-    size_t inp_len = strlen(inp);
-   
+    tosplit = inp; inp_len = strlen(inp);
+
     if (inp_len > 1 && inp[inp_len - 1] == '&') {
         isFg = 0;
-        //printf("inp[last] = %c == &? %d\n", inp[inp_len-1], (inp[inp_len -1] == '&'));
-        //if there is a '&' then there is a space at the end
-        tosplit[inp_len - 2] = '\0';
-    } else {
-        isFg = 1;
-    } 
+        tosplit[inp_len - 2] = '\0'; //if there is a '&' then there is a space at the end
+    } else isFg = 1;
     
-    //printf("isForeground: %d\n", *isForeground);
     const char** argv = strsplit(tosplit, &ARG_SEP, &argcTmp);
-    //for (int i = 0; i < *argc; i++) printf("argv[%d] = \"%s\"\n", i, argv[i]);
-
     free(tosplit);
-
-    //printf("inp[last] = %c == &? %d\n", inp[inp_len-1], (inp[inp_len -1] == '&'));
-//    printf("isForeground: %d\n", *isForeground);
-    if (isFg == 0)
-        argcTmp -= 1;
 
     *isForeground = isFg; *argc = (int) argcTmp;
     return argv;
