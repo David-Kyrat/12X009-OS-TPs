@@ -250,9 +250,10 @@ int executeJob(Shell* sh, const char* cmd_name, char* const argv[], int isForegr
             } else return -1;
 
         } else {
+            set_BJ(sh, t_pid);
+            printf("[1]\t[%d] - %s\n", sh_BJ(sh), cmd_name);
 
             redirectIO();
-            set_BJ(sh, t_pid);
             return EXIT_SUCCESS;
         }
     }
@@ -270,8 +271,10 @@ int sh_getAndResolveCmd(Shell* sh) {
     //TODO: Check for & => and make background job
     int argc = 0, isForeground = 1;
     const char** argv = readParseIn(&argc, &isForeground);
-    if (argc <= 0 || argv == NULL)
+    if (argc <= 0 || argv == NULL) {
         printRErr("%s: Could not parse user input - read %d argument.\n", argc); //returns -1
+        puts(" as");
+    }
     const char* cmd_name = argv[0];
     switch (strswitch(cmd_name, CMDS, CMD_NB)) {
 
@@ -328,8 +331,9 @@ void listEnv() {
 }
 
 //! 0:default,  1:red, 2:Green,  3:Blue, 4:Purple, 5:yellow,  6:cyan,  7:grey
-const char* colors[] = {"\033[0m", "\033[0;31m", "\033[0;32m", "\033[0;34m", "\033[0;35m", "\033[0;33m", "\033[0;36m",
-                        "\033[2m"};
+//const char* colors[] = {"\033[0m", "\033[0;31m", "\033[0;32m", "\033[0;34m", "\033[0;35m", "\033[0;33m", "\033[0;36m",
+  //                      "\033[2m"};
+extern char* colors[];
 
 /**
  * 0:default,  1:red, 2:Green,  3:Blue, 4:Purple, 5:yellow,  6:cyan
@@ -345,7 +349,7 @@ void resetCol() {
 void sh_prettyPrintPath(Shell* sh) {
     printf("%s( %s", colors[1], colors[6]);
     printf("%s", pwd(sh));
-    printf("%s )\n|_ ", colors[1]);
-    printf("%s$ ", colors[5]);
+    printf("%s )\n", colors[1]);
+    //printf("|_ %s$ ", colors[5]);
     resetCol();
 }

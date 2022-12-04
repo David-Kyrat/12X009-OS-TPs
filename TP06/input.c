@@ -9,13 +9,10 @@
 #include <ctype.h> // isBlank
 #include <readline/readline.h>
 #include <readline/history.h>
-
-
 #include "input.h"
 #include "util.h"
 
 const char EOL = '\n', ARG_SEP = ' ';  //Tab and space are the only argument separator
-
 //!
 //! Below is the basic code of readInput() (function that returns what the user entered) which I preferred to replace by the GNU library "readline.h" by simplicity. The library just adds more feature (like going back and forward) when User has to enter text. Everything else is still made by us, it is just that specific small  part that was replaced for convenience.
 //! 
@@ -24,9 +21,11 @@ const char EOL = '\n', ARG_SEP = ' ';  //Tab and space are the only argument sep
 //! If you get an error message saying, that the file was not found, you can install it with
 //! "sudo apt-get install lib32readline8 lib32readline-dev" and "sudo apt-get install libreadline-dev"
 //!
-
+//! 0:default,  1:red, 2:Green,  3:Blue, 4:Purple, 5:yellow,  6:cyan,  7:grey
+const char* colors[] = {"\033[0m", "\033[0;31m", "\033[0;32m", "\033[0;34m", "\033[0;35m", "\033[0;33m", "\033[0;36m","\033[2m"};
 
 /*const char* readInput() {
+    printf("%s|_ %s$ %s ", colors[1], colors[5], colors[0]);
     int crt_size = MAX_INPUT;
     char* buff = tryalc(malloc(crt_size + 1));
     memset(buff, 0, crt_size);
@@ -49,7 +48,9 @@ const char EOL = '\n', ARG_SEP = ' ';  //Tab and space are the only argument sep
 }*/
 
 const char* readInput() {
-    const char* buff = readline("\0 ");
+    char msg[25];
+    snprintf(msg, 24, "%s|_ %s$ %s ", colors[1], colors[5], colors[0]);
+    const char* buff = readline(msg);
     if (buff == NULL || strlen(buff) <= 0) return  NULL;
     return strip(buff);
 }
@@ -73,10 +74,10 @@ int isWhiteSpace(const char* str) {
  * 
  * @param inp raw user input
  * @param argc ptr to variable in whcih to store the number of argument
- * @return char* buffer i.e. 'inp' split with respect to 'ARG_SEP'
+ * @return string buffer (usually argv)  i.e. 'inp' split with respect to 'ARG_SEP'
  */
 const char** parseInput(const char* inp, int* argc, int* isForeground) {
-    *argc = 0; *isForeground = 1;
+    uint isFg = 1; size_t argcTmp = 0;
     // inp is already right stripped so if required job must be launched in background then
     // the '&' has to be end at the last position of 'inp' 
     char* tosplit = tryalc(malloc(1));
@@ -84,29 +85,26 @@ const char** parseInput(const char* inp, int* argc, int* isForeground) {
     size_t inp_len = strlen(inp);
    
     if (inp_len > 1 && inp[inp_len - 1] == '&') {
-        *isForeground = 0;
-        printf("inp[last] = %c == &? %d\n", inp[inp_len-1], (inp[inp_len -1] == '&'));
+        isFg = 0;
+        //printf("inp[last] = %c == &? %d\n", inp[inp_len-1], (inp[inp_len -1] == '&'));
         //if there is a '&' then there is a space at the end
         tosplit[inp_len - 2] = '\0';
     } else {
-        *isForeground = 1;
+        isFg = 1;
     } 
     
-    printf("isForeground: %d\n", *isForeground);
-    const char** argv = strsplit(tosplit, &ARG_SEP, argc);
-    for (int i = 0; i < *argc; i++) {
-        printf("argv[%d] = \"%s\"\n", i, argv[i]);
-    }
+    //printf("isForeground: %d\n", *isForeground);
+    const char** argv = strsplit(tosplit, &ARG_SEP, &argcTmp);
+    //for (int i = 0; i < *argc; i++) printf("argv[%d] = \"%s\"\n", i, argv[i]);
 
     free(tosplit);
 
     //printf("inp[last] = %c == &? %d\n", inp[inp_len-1], (inp[inp_len -1] == '&'));
 //    printf("isForeground: %d\n", *isForeground);
-    if ((*isForeground) == 0) {
-        *argc = *argc - 1;
-    }
+    if (isFg == 0)
+        argcTmp -= 1;
 
-    printf("argc: %d\n", *argc);
+    *isForeground = isFg; *argc = (int) argcTmp;
     return argv;
 }
 

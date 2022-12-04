@@ -176,7 +176,6 @@ int strstartwith(const char* str, const char* prefix) {
 
 char** strsplit(char* string, const char* separator, size_t* size) {
     if (string == NULL) {
-        *size = 0;
         errno = EINVAL;
         return NULL;
     }
