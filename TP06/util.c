@@ -57,7 +57,7 @@ int hdlCloseErr(const char* filename, int needsExit) {
 int hdlReadErr(const char* filename, int needsExit, int needsClose, int fd) {
     int savedErr = errno;
     int isbadf = savedErr == EBADF; //strerror for ebadf is very unclear
-    fprintf(stderr, "Could not read from file %s : %s %s\n", filename, strerror(savedErr), isbadf ? " or is not open for reading" : "");
+    fprintf(stderr, "Could not read from file %s : %s %s\n", filename, strerror(savedErr == 0 ? 1 : savedErr), isbadf ? " or is not open for reading" : "");
     if (needsClose) {
         if (close(fd)) hdlCloseErr(filename, needsExit);
     }
@@ -69,14 +69,14 @@ int hdlReadErr(const char* filename, int needsExit, int needsClose, int fd) {
 
 int hdlReadInErr(int needsExit) {
     int savedErr = errno;
-    fprintf(stderr, "Cannot read from standard input or input was empty: %s.\n", strerror(savedErr));
+    fprintf(stderr, "Cannot read from standard input or input was empty: %s.\n", strerror(savedErr == 0 ? 1 : savedErr));
     if (needsExit) exit(savedErr);
     return -1;
 }
 
 int hdlWriteErr(const char* filename, int needsExit, int needsClose, int fd) {
     int savedErr = errno;
-    fprintf(stderr, "Could not write to file %s : %s\n", filename, strerror(savedErr));
+    fprintf(stderr, "Could not write to file %s : %s\n", filename, strerror(savedErr == 0 ? 1 : savedErr));
     if (needsClose) {
         if (close(fd)) hdlCloseErr(filename, needsExit);
     }
@@ -86,7 +86,7 @@ int hdlWriteErr(const char* filename, int needsExit, int needsClose, int fd) {
 
 int hdlCopyErr(const char* from, const char* to, int needsExit, int needsClose, int fd_from, int fd_to) {
     int savedErr = errno;
-    fprintf(stderr, "Could not copy %s to %s: %s\n", from, to, strerror(savedErr));
+    fprintf(stderr, "Could not copy %s to %s: %s\n", from, to, strerror(savedErr == 0 ? 1 : savedErr));
     if (needsClose) {
         if (close(fd_from)) hdlCloseErr(from, needsExit);
         if (close(fd_to)) hdlCloseErr(to, needsExit);
@@ -98,7 +98,7 @@ int hdlCopyErr(const char* from, const char* to, int needsExit, int needsClose, 
 
 int hdlCatErr(const char* current) {
     int savedErr = errno;
-    fprintf(stderr, "Cannot build path containing %s: %s\n", current, strerror(savedErr));
+    fprintf(stderr, "Cannot build path containing %s: %s\n", current, strerror(savedErr == 0 ? 1 : savedErr));
     return -1;
 }
 

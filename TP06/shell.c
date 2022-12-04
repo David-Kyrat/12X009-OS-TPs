@@ -189,13 +189,13 @@ void redirectIO() {
     const char* redirection = "/dev/null";
     //close stdin, stdout stderr
     for (int i = 0; i < 3; i++)
-        if (close(i) < 0) hdlCloseErr("stdin", 1);
+        if (close(i) < 0) hdlCloseErr("stdin/out/err", 0);
 
     // reopens 3times /dev/null, so that the 3 first file descriptors points to it.
     // (3rd first fd's are always std in/out/err)
     for (int i = 0; i < 3; i++) {
         if (open(redirection, (i == 0 ? O_RDONLY : O_RDWR) | O_EXCL))
-            hdlOpenErr(redirection, 1);
+            hdlOpenErr(redirection, 0);
     }
 }
 
@@ -251,14 +251,13 @@ int executeJob(Shell* sh, const char* cmd_name, char* const argv[], int isForegr
 
         } else {
             set_BJ(sh, t_pid);
-            printf("[1]\t[%d] - %s\n", sh_BJ(sh), cmd_name);
-
-            redirectIO();
+            printf("[1] \t[%d] - %s\n", sh_BJ(sh), cmd_name);
             return EXIT_SUCCESS;
         }
     }
     if (t_pid == 0) {
-        //* In child_number
+        //* In child
+        if (!isForeground) redirectIO();
         if (exec(sh, cmd_name, argv, isForeground) < 0)
             exit(EXIT_FAILURE);
     }
@@ -289,21 +288,7 @@ int sh_getAndResolveCmd(Shell* sh) {
             exit_shell(sh, (argc <= 1 || *argv[1] == '\n') ? NULL : argv[1]);
 
         default: {
-            // execve to execute program requested by user
-            //const char* const* args = argv;
             //TODO: handle background jobs
-            // if argc <= 1 then there can be no '&' at the end because 'argv' is just {'cmd_name'}.
-            if (argc > 1) {
-
-                if (!isForeground) {
-                    puts(" ");
-                    for (int i = 0; i <= argc; i++) {
-                        printf("arg[%d] = \"%s\"\n", i, argv[i]);
-                    }
-                    puts(" ");
-                    //free(argv[argc]);
-                }
-            }
             if (executeJob(sh, cmd_name, argv, isForeground) < 0) return -1;
         }
     }

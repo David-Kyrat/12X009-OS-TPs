@@ -85,6 +85,7 @@ const char** parseInput(const char* inp, int* argc, int* isForeground) {
     if (inp_len > 1 && inp[inp_len - 1] == '&') {
         isFg = 0;
         tosplit[inp_len - 2] = '\0'; //if there is a '&' then there is a space at the end
+        tosplit = stripr(tosplit);
     } else isFg = 1;
     
     const char** argv = strsplit(tosplit, &ARG_SEP, &argcTmp);

@@ -13,8 +13,8 @@ int main(int argc, char* argv[]) {
 
 
         sh_prettyPrintPath(shell);
-
-        if (sh_getAndResolveCmd(shell) < 0 ) {
+        int tmp = sh_getAndResolveCmd(shell);
+        if (tmp < 0 ) {
             err = EXIT_FAILURE;
             fprintf(stderr, "Command could not be resolved. Please try again.\n\n");
         }
