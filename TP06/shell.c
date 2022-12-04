@@ -188,15 +188,23 @@ char** getEnvp() {
 void redirectIO() {
     const char* redirection = "/dev/null";
     //close stdin, stdout stderr
-    for (int i = 0; i < 3; i++)
-        if (close(i) < 0) hdlCloseErr("stdin/out/err", 1);
+    close(2);
+    int fd = open(redirection, O_RDWR);
+    for (int i = 0; i < 3; i++) {
+        dup2(fd, i);
+    }
+
+    /*for (int i = 0; i < 3; i++)
+        dup2()
+
+        if (close(i) < 0) hdlCloseErr("stdin/out/err", 1);*/
 
     // reopens 3times /dev/null, so that the 3 first file descriptors points to it.
     // (3rd first fd's are always std in/out/err)
-    for (int i = 0; i < 3; i++) {
+    /*for (int i = 0; i < 3; i++) {
         if (open(redirection, (i == 0 ? O_RDONLY : O_RDWR) | O_EXCL))
             hdlOpenErr(redirection, 1);
-    }
+    }*/
 }
 
 
