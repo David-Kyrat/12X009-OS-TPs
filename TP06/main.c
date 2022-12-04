@@ -20,8 +20,8 @@ int main(int argc, char* argv[]) {
         }
         // Sometimes errors stays stuck on stderr which prevents programm from displaying
         // what should be in stdout correctly
-        fflush(stderr);
-        fflush(stdout);
+        /*fflush(stderr);
+        fflush(stdout);*/
     }
 
     return err;

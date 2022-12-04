@@ -189,13 +189,13 @@ void redirectIO() {
     const char* redirection = "/dev/null";
     //close stdin, stdout stderr
     for (int i = 0; i < 3; i++)
-        if (close(i) < 0) hdlCloseErr("stdin/out/err", 0);
+        if (close(i) < 0) hdlCloseErr("stdin/out/err", 1);
 
     // reopens 3times /dev/null, so that the 3 first file descriptors points to it.
     // (3rd first fd's are always std in/out/err)
     for (int i = 0; i < 3; i++) {
         if (open(redirection, (i == 0 ? O_RDONLY : O_RDWR) | O_EXCL))
-            hdlOpenErr(redirection, 0);
+            hdlOpenErr(redirection, 1);
     }
 }
 
