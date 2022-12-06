@@ -103,13 +103,6 @@ void terminate_all_children(Shell* sh) {
     // until shell process has child:
     while (child(sh) > 0) {
         int exitStatus;
-        /*int decrement = 1;
-        if (wait(&exitStatus) == -1) {
-            int savedErr = errno;
-            if (savedErr != EINTR && savedErr != ECHILD)
-                fprintf(stderr, "clean_exit: %s: cannot kill child.\n", strerror(savedErr));
-            else if (savedErr == EINTR) decrement = 0; // for that error just retry
-        }*/
         wait_s(&exitStatus);
         printExitCode(exitStatus, -1);
         sh->child_number -= 1;
@@ -186,12 +179,12 @@ char** getEnvp() {
 //void because exit on error
 void redirectIO() {
     const char* redirection = "/dev/null";
-    //close stdin, stdout stderr
-    close(2);
+    //close stdin, stdout
+    //- do not close stderr
+    close(STDOUT_FILENO);
     int fd = open(redirection, O_RDWR);
-    for (int i = 0; i < 3; i++) {
-        dup2(fd, i);
-    }
+    for (int i = 0; i < 2; i++) dup2(fd, i);
+
 
     /*for (int i = 0; i < 3; i++)
         dup2()
