@@ -315,83 +315,6 @@ void sh_free(Shell* sh) {
 }
 
 
-
-// -----------------  Signal handling ---------------------
-
-struct sigaction sa;
-printf("Pid: %d\n", getpid());
-
-sa.sa_sigaction = manage_signals;
-
-sigemptyset(&sa.sa_mask);
-
-sigaddset(&sa.sa_mask, SIGTERM);
-sigaddset(&sa.sa_mask, SIGQUIT);
-sigaddset(&sa.sa_mask, SIGINT);
-sigaddset(&sa.sa_mask, SIGHUP);
-sigaddset(&sa.sa_mask, SIGCHLD);
-
-sa.sa_flags = 0;
-
-if (sigaction(SIGUSR1, &sa, NULL) == -1) {
-    perror("setting up SIGUSR1");
-    return 1;
-}
-
-if (sigaction(SIGTERM, &sa, NULL) == -1) {
-    perror("setting up SIGTERM");
-    return 1;
-}
-sa.sa_handler = usr2_exit;
-sigemptyset(&sa.sa_mask);
-if (sigaction(SIGUSR2, &sa, NULL) == -1) {
-    perror("setting up SIGUSR1");
-    return 1;
-}
-
-
-void manage_signals(int sig) {
-    switch (sig) {
-
-    case SIGTERM:
-        // something here
-        break;
-
-    case SIGQUIT:
-        // something here
-        break;
-
-    case SIGINT:
-        // something here
-        break;
-    
-    case SIGHUP:
-        // something here
-        break;
-    
-    case SIGCHLD:
-        // something here
-        break;
-
-    default:
-        break;
-
-    }
-}
-
-// ---------------------------------------------------------
-
-
-
-
-
-
-
-
-
-
-
-
 // ================ Printing functions ====================
 
 /* void printPid(int in) {
@@ -426,3 +349,67 @@ void sh_prettyPrintPath(Shell* sh) {
     //printf("|_ %s$ ", colors[5]);
     resetCol();
 }
+
+
+// -----------------  Signal handling ---------------------
+int main() {
+
+    
+    void manage_signals(int sig) {
+        switch (sig) {
+
+        case SIGTERM:
+            // something here
+            break;
+
+        case SIGQUIT:
+            // something here
+            break;
+
+        case SIGINT:
+            // something here
+            break;
+
+        case SIGHUP:
+            // something here
+            break;
+
+        case SIGCHLD:
+            // something here
+            break;
+
+        default:
+            break;
+
+        }
+
+    struct sigaction sa;
+    printf("Pid: %d\n", getpid());
+
+    sa.sa_sigaction = manage_signals;
+
+    sigemptyset(&sa.sa_mask);
+
+    sigaddset(&sa.sa_mask, SIGTERM);
+    sigaddset(&sa.sa_mask, SIGQUIT);
+    sigaddset(&sa.sa_mask, SIGINT);
+    sigaddset(&sa.sa_mask, SIGHUP);
+    sigaddset(&sa.sa_mask, SIGCHLD);
+
+    sa.sa_flags = 0;
+
+    if (sigaction(SIGUSR1, &sa, NULL) == -1) {
+        perror("setting up SIGUSR1");
+        return 1;
+    }
+
+    if (sigaction(SIGTERM, &sa, NULL) == -1) {
+        perror("setting up SIGTERM");
+        return 1;
+    }
+
+        }
+    
+}
+
+// ---------------------------------------------------------
