@@ -338,7 +338,6 @@ void manage_signals(Shell* sh, int sig) {
             //=> use sig_action and pass Shell* sh as void pointer$
             //! => So initSigHandlers has to be called in constructor i.e. in "new_Shell()"
             kill(sh->foreground_job, SIGTERM);
-            write(1, "sigint\n", 7);
             // killing foreground job of sh
             break;
 
@@ -398,6 +397,7 @@ int initSigHandlers(Shell* sh) {
     //! Ignore Signals to ignore
     //
     sa.sa_handler = SIG_IGN;
+    sa.sa_sigaction = NULL;
     for (int i = 0; i < IGNORE_NB; i++) {
         if (sigaction(SIG_TO_IGNORE[i], &sa, NULL) == -1) {
             const char msg[15];
