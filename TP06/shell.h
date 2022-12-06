@@ -1,6 +1,8 @@
 #ifndef __SHELLS__
 #define __SHELLS__
 
+#include <unistd.h>
+
 /**
  * Represents a Shell with a crt_path (pwd) a foreground job and 
  * a background_job. Crt_path default value is where the executable was called
