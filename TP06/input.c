@@ -98,6 +98,7 @@ const char** parseInput(const char* inp, int* argc, int* isForeground) {
 
 const char** readParseIn(int* argc, int* isForeground) {
     const char* tmp = readInput();
+    printf("%s", colors[0]); //reset colors because it seems to stay stuck in red.
     if (tmp == NULL) return NULL;
     return parseInput(tmp, argc, isForeground);
 }
