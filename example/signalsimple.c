@@ -34,7 +34,7 @@ int main() {
     sigaddset(&sa.sa_mask, SIGUSR1);
     sigaddset(&sa.sa_mask, SIGTERM);
     sa.sa_flags = 0;
-    if (sigaction(SIGUSR1, &sa, NULL) == -1) {
+    if (sigaction(SIGUSR1, &sa, NULL) == -1) { // "enables" using the handles/function given the struct in sa
         perror("setting up SIGUSR1");
         return 1;
     }
