@@ -12,7 +12,8 @@
 #include "input.h"
 #include "util.h"
 
-const char EOL = '\n', ARG_SEP = ' ';  //Tab and space are the only argument separator
+const char EOL = '\n';
+const char* ARG_SEP = " ";  //Tab and space are the only argument separator
 //!
 //! Below is the basic code of readInput() (function that returns what the user entered) which I preferred to replace by the GNU library "readline.h" by simplicity. The library just adds more feature (like going back and forward) when User has to enter text. Everything else is still made by us, it is just that specific small  part that was replaced for convenience.
 //! 
@@ -21,8 +22,6 @@ const char EOL = '\n', ARG_SEP = ' ';  //Tab and space are the only argument sep
 //! If you get an error message saying, that the file was not found, you can install it with
 //! "sudo apt-get install lib32readline8 lib32readline-dev" and "sudo apt-get install libreadline-dev"
 //!
-//! 0:default,  1:red, 2:Green,  3:Blue, 4:Purple, 5:yellow,  6:cyan,  7:grey
-const char* colors[] = {"\033[0m", "\033[0;31m", "\033[0;32m", "\033[0;34m", "\033[0;35m", "\033[0;33m", "\033[0;36m","\033[2m"};
 
 /*const char* readInput() {
     printf("%s|_ %s$ %s ", colors[1], colors[5], colors[0]);
@@ -46,6 +45,9 @@ const char* colors[] = {"\033[0m", "\033[0;31m", "\033[0;32m", "\033[0;34m", "\0
     buff[readNb] = '\0';  //Null terminate string in case anything happened
     return strip(buff);
 }*/
+
+// 0:default,  1:red, 2:Green,  3:Blue, 4:Purple, 5:yellow,  6:cyan,  7:grey
+const char* colors[] = {"\033[0m", "\033[0;31m", "\033[0;32m", "\033[0;34m", "\033[0;35m", "\033[0;33m", "\033[0;36m","\033[2m"};
 
 const char* readInput() {
     char msg[25];
@@ -88,7 +90,7 @@ const char** parseInput(const char* inp, int* argc, int* isForeground) {
         tosplit = stripr(tosplit);
     } else isFg = 1;
     
-    const char** argv = strsplit(tosplit, &ARG_SEP, &argcTmp);
+    const char** argv = strsplit(tosplit, ARG_SEP, &argcTmp);
     free(tosplit);
 
     *isForeground = isFg; *argc = (int) argcTmp;
@@ -98,7 +100,7 @@ const char** parseInput(const char* inp, int* argc, int* isForeground) {
 
 const char** readParseIn(int* argc, int* isForeground) {
     const char* tmp = readInput();
-    printf("%s", colors[0]); //reset colors because it seems to stay stuck in red.
+    //printf("%s", colors[0]); //reset colors because it seems to stay stuck in red.
     if (tmp == NULL) return NULL;
     return parseInput(tmp, argc, isForeground);
 }
