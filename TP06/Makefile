@@ -19,9 +19,9 @@ EXEC = main.out
 #
 # All headers. i.e. dependency of the out/main.o target
 #
-HDRS = shell.h files.h input.h util.h
+HDRS = shell.h input.h files.h util.h
 
-OBJS = out/main.o out/shell.o out/files.o out/input.o out/util.o
+OBJS = out/main.o out/shell.o out/input.o out/files.o out/util.o
 
 
 all: $(EXEC)
@@ -34,8 +34,10 @@ $(EXEC): $(OBJS)
 test: test.c $(OBJS)
 	$(CC) test.c out/shell.o out/input.o out/util.o $(CFLAGS) $(DBGFLAGS) -o test.out
 
+
 main: $(OBJS)
 	$(CC) $(OBJS) -o main -lreadline
+
 
 out/main.o: main.c $(HDRS)
 	$(CC) -c main.c $(CFLAGS) $(DBGFLAGS) -o out/main.o
