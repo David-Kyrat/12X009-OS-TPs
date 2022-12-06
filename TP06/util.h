@@ -4,8 +4,8 @@
  * 
  */
 
-#ifndef __UTIL__
-#define __UTIL__
+#ifndef UTIL_H
+#define UTIL_H
 
 
 /** Macro that Prints given message to stderr. Message should be printf formatted and the first arg is always strerror(savedErr) where savedErr is the saved value of errno.
@@ -280,5 +280,5 @@ const char* strip(char* str);
  */
 int wait_s(int* exitStatus);
 
-#endif /* __UTIL__ */
+#endif /* UTIL_H */
  

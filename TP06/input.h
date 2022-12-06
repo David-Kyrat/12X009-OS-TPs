@@ -1,5 +1,5 @@
-#ifndef __INPUT__
-#define __INPUT__
+#ifndef INPUT_H
+#define INPUT_H
 
 /**
  * 
@@ -24,4 +24,4 @@ const char** readParseIn(int* argc, int* isForeground);
 
 
 
-#endif /* __INPUT__ */
+#endif /* INPUT_H */

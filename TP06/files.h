@@ -1,5 +1,5 @@
-#ifndef __FILES__
-#define __FILES__
+#ifndef FILES_H
+#define FILES_H
 
 
 /**
@@ -91,4 +91,4 @@ char* buffeReadFd(int fd, int chunkSize, int totalSize);
 
 
 
-#endif /* __FILES__ */
+#endif /* FILES_H */

@@ -1,5 +1,5 @@
-#ifndef __SHELL__
-#define __SHELL__
+#ifndef SHELL_H
+#define SHELL_H
 
 #include <unistd.h>
 
@@ -69,4 +69,4 @@ void sh_prettyPrintPath(Shell* sh);
 
 
 
-#endif /* __SHELL__ */
+#endif /* SHELL_H */
