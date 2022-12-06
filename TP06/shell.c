@@ -398,10 +398,9 @@ int initSigHandlers(Shell* sh) {
     //
     struct sigaction sa_ign; //use same sa make everything bug
     sa_ign.sa_handler = SIG_IGN;
-    sa_ign.sa_sigaction = NULL;
     sa_ign.sa_flags = 0;
     for (int i = 0; i < IGNORE_NB; i++) {
-        if (sigaction(SIG_TO_IGNORE[i], &sa, NULL) == -1) {
+        if (sigaction(SIG_TO_IGNORE[i], &sa_ign, NULL) == -1) {
             const char msg[15];
             sprintf(msg, "SIG_TO_IGNORE[%d]\n", i);
             hdlSigHdlErr(msg, 0);
