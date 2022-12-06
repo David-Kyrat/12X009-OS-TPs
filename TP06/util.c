@@ -104,7 +104,7 @@ int hdlCatErr(const char* current) {
 
 int hdlSigHdlErr(const char* signame, int needsExit) {
     int savedErr = errno;
-    fprintf(stderr, "%s: Cannot change handler for %s\n", strerror(savedErr), signame);
+    fprintf(stderr, "%s: Cannot change handler for %s, exiting...\n", strerror(savedErr), signame);
     if (needsExit) exit(savedErr);
     return -1;
 }

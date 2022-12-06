@@ -312,7 +312,7 @@ void sh_free(Shell* sh) {
 
 
 /** List of signal to handle.*/
-const int SIG_TO_HDL[] = {SIGTERM, SIGKILL, SIGQUIT, SIGINT, SIGHUP, SIGCHLD};
+const int SIG_TO_HDL[] = {SIGTERM, SIGQUIT, SIGINT, SIGHUP, SIGCHLD};
 const int SIG_TO_IGNORE[] = {SIGTERM, SIGQUIT};
 const int SIG_NB = 5, IGNORE_NB = 2; // Number of signal to handle
 
@@ -328,9 +328,6 @@ void manage_signals(Shell* sh, int sig) {
             // something here
             break;
 
-        case SIGKILL:
-            kill(sh->foreground_job, SIGTERM);
-            break;
         case SIGINT:
             /*const char* msg = "I will not be stopped, I will not go easy.\n";
             lseek(STDOUT_FILENO, 5, 0);
@@ -344,7 +341,6 @@ void manage_signals(Shell* sh, int sig) {
             write(1, "sigint\n", 7);
             // killing foreground job of sh
             break;
-
 
         case SIGHUP:
             // something here
