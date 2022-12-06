@@ -22,8 +22,6 @@ const char* ARG_SEP = " ";  //Tab and space are the only argument separator
 //! If you get an error message saying, that the file was not found, you can install it with
 //! "sudo apt-get install lib32readline8 lib32readline-dev" and "sudo apt-get install libreadline-dev"
 //!
-//! 0:default,  1:red, 2:Green,  3:Blue, 4:Purple, 5:yellow,  6:cyan,  7:grey
-const char* colors[] = {"\033[0m", "\033[0;31m", "\033[0;32m", "\033[0;34m", "\033[0;35m", "\033[0;33m", "\033[0;36m","\033[2m"};
 
 /*const char* readInput() {
     printf("%s|_ %s$ %s ", colors[1], colors[5], colors[0]);
@@ -47,6 +45,9 @@ const char* colors[] = {"\033[0m", "\033[0;31m", "\033[0;32m", "\033[0;34m", "\0
     buff[readNb] = '\0';  //Null terminate string in case anything happened
     return strip(buff);
 }*/
+
+// 0:default,  1:red, 2:Green,  3:Blue, 4:Purple, 5:yellow,  6:cyan,  7:grey
+const char* colors[] = {"\033[0m", "\033[0;31m", "\033[0;32m", "\033[0;34m", "\033[0;35m", "\033[0;33m", "\033[0;36m","\033[2m"};
 
 const char* readInput() {
     char msg[25];
