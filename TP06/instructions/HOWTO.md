@@ -60,6 +60,6 @@ When the users enters a non-builtin command:
 ```  
 
 
-Shell will wait for the child_number process to end then display its exit code
+Shell will wait for the child process to end then display its exit code
 if it's available. (e.g. "Foreground job exited withcode 0"),
 or if it is not: a simple message (e.g. "Foreground job exited")

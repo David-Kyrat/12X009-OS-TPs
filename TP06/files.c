@@ -33,23 +33,15 @@ int exists(const char* path) {
 }
 
 
-const char* concat_path(const char* parent, const char* child) {
-    int len_p = strlen(parent), len_c = strlen(child);
-    int len_tot = len_p + len_c;
-    char* newPath = tryalc(malloc(len_tot + 1));
+int concat_path(char buf[], const char* parent, const char* current) {
 
     // computes the name of the subdirectory and checks if it is not too long
-    int written = snprintf(newPath, len_tot+1, "%s/%s", parent, child);
-    if (written > PATH_MAX) {
-        written = -1;
+    if (snprintf(buf, PATH_MAX, "%s/%s", parent, current) >= PATH_MAX) {
         errno = ENAMETOOLONG;
-    }
-    if (written < 0) {
-        printErr("%s: %s/%s\n", parent, child); 
-        return NULL;
+        return -1;
     }
 
-    return newPath;
+    return EXIT_SUCCESS;
 }
 
 
@@ -65,23 +57,21 @@ int isDir(const char* path) {
 
 
 const char* getFileName(const char* path) {
-    const char* abs_path = realpath(path, NULL);
-    if (abs_path == NULL) {
+    const char* absPath = realpath(path, NULL);
+    if (absPath == NULL) {
         int savedErr = errno;
         fprintf(stderr, "%s, Cannot get fileName: %s\n", path, strerror(savedErr));
         return NULL;
     }
-    int len = strlen(abs_path)-1;
+    int len = strlen(absPath)-1;
 
-    while(abs_path[len] != '/' && len >= 0) len--;
-    //* Now abs_path[len] points to first '/' in abs_path (starting from the end)
-    const char* out = &(abs_path[len+1]); //extract a view on a sublist of abs_path. (i.e. pointer to some element in it)
+    while(absPath[len] != '/' && len >= 0) len--;
+    //* Now absPath[len] points to first '/' in absPath (starting from the end)
+    const char* out = &(absPath[len+1]); //extract a view on a sublist of absPath. (i.e. pointer to some element in it)
     return out;
 }
 
 const char* absPath(const char* path) {
-    if (path == NULL) return NULL;
-
     const char* out = realpath(path, NULL);
     if (out == NULL) {
         int savedErr = errno;
@@ -100,7 +90,7 @@ ssize_t getFileSize(const char* path) {
 
 
 
-char* buffeReadFd(int fd, int chunkSize, int totalSize) {
+char*   buffeReadFd(int fd, int chunkSize, int totalSize) {
     char* buff = tryalc(malloc(totalSize+1));
     ssize_t readNb; // number of bytes read by iteration
     size_t readTotNb = 0; int tmp = 0;
