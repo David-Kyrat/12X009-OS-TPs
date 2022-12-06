@@ -1,3 +1,6 @@
+#ifndef __FILES__
+#define __FILES__
+
 
 /**
  * Returns true if the given string is either "." or ".."
@@ -86,3 +89,6 @@ const char* absPath(const char* path);
  */
 char* buffeReadFd(int fd, int chunkSize, int totalSize);
 
+
+
+#endif /* __FILES__ */

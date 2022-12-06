@@ -15,9 +15,9 @@
 #include <signal.h> // Signals
 
 #include "shell.h"
-#include "util.h"
 #include "input.h"
 #include "files.h"
+#include "util.h"
 
 /**
  * If 'isForground' is -1 prints "job exited with exit code 'exitcode'"
@@ -209,7 +209,7 @@ int exec(Shell* sh, const char* filename, char* const argv[], int isForeground) 
     //TODO: replace execvpe by another exec* because it is a GNU extension (not POSIX)
     // "The execvpe() function is a GNU extension." source: man excevpe
 
-    if (execvpe(filename, argv, getEnvp()) < 0) {
+    if (execvp(filename, argv) < 0) {
         // sets
         if (isForeground) sh->foreground_job = -1;
         else sh->background_job = -1;
@@ -311,6 +311,10 @@ void sh_free(Shell* sh) {
  * =============================================================
  */
 
+const int SIG_TO_HDL[] = { SIGTERM, SIGQUIT, SIGINT, SIGHUP, SIGCHLD};
+
+
+
 void manage_signals(int sig) {
     switch (sig) {
         case SIGTERM:
@@ -359,14 +363,14 @@ int initSigHandlers() {
 
     if (sigaction(SIGUSR1, &sa, NULL) == -1) {
         perror("setting up SIGUSR1");
-        return 1;
+        return EXIT_FAILURE;
     }
 
     if (sigaction(SIGTERM, &sa, NULL) == -1) {
         perror("setting up SIGTERM");
-        return 1;
+        return EXIT_FAILURE;
     }
-
+    return EXIT_SUCCESS;
 }
 
 

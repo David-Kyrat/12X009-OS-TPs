@@ -1,5 +1,5 @@
-void printPid(int in);
-
+#ifndef __INPUT__
+#define __INPUT__
 
 /**
  * 
@@ -20,3 +20,8 @@ const char* readInput();
  * @return Array of argument
  */
 const char** readParseIn(int* argc, int* isForeground);
+
+
+
+
+#endif /* __INPUT__ */

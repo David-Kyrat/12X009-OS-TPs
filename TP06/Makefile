@@ -41,11 +41,9 @@ out/main.o: main.c $(HDRS)
 	$(CC) -c main.c $(CFLAGS) $(DBGFLAGS) -o out/main.o
 
 
-out/shell.o: shell.c shell.h util.h
+out/shell.o: shell.c shell.h files.h util.h
 	$(CC) -c shell.c $(CFLAGS) $(DBGFLAGS) -o out/shell.o
 
-out/files.o: files.c files.h util.h
-	$(CC) -c files.c $(CFLAGS) $(DBGFLAGS) -o out/shell.o
 
 out/input.o: input.c input.h util.h
 	$(CC) -c input.c $(CFLAGS) $(DBGFLAGS) -o out/input.o
@@ -68,7 +66,7 @@ out:
 	mkdir out
 
 clean:
-	rm *.out out/*.o out/*.out
+	- @rm *.out out/*.o
 
 
 #out/old-shell.o: old-shell.c old-shell.h files.h input.h util.h

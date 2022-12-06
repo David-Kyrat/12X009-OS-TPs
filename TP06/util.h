@@ -280,5 +280,5 @@ const char* strip(char* str);
  */
 int wait_s(int* exitStatus);
 
-#endif // __UTIL__
+#endif /* __UTIL__ */
  
