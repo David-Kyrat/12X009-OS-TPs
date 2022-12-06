@@ -316,6 +316,9 @@ const int SIG_TO_HDL[] = {SIGTERM, SIGQUIT, SIGINT, SIGHUP, SIGCHLD};
 const int SIG_TO_IGNORE[] = {SIGTERM, SIGQUIT};
 const int SIG_NB = 5, IGNORE_NB = 2; // Number of signal to handle
 
+//TODO: DIRE AUX ASSITANTS QU'IL YA UNE FAUTE DANS L'ENONCE SIGQUIT EST ENVOYÉ PAR CTRL+D
+//TODO: IL NE DOIT DONC PAS ETRE IGNORE
+
 void manage_signals(Shell* sh, int sig) {
     switch (sig) {
         case SIGTERM:
