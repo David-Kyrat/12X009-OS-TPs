@@ -136,6 +136,16 @@ int hdlCopyErr(const char* from, const char* to, int needsExit, int needsClose, 
  */
 int hdlCatErr(const char* current);
 
+
+/**
+ * Utility function for basic handling of error related to changing handlers of signals.
+ * (print an error message to standard error and return -1 or exit if necessary)
+ * @param signame name of signals e.g. SIGTERM
+ * @param needsExit If non-zero, the program will exit with the error code of the error that occured occurred.
+ * @return -1 or exit if necessary
+ */
+int hdlSigHdlErr(const char* signame, int needsExit);
+
 /**
  * shortcut for lstat, also handles error
  * @return stat structure of path's inode. If an error happened => the 'st_size' attribute is set to -1

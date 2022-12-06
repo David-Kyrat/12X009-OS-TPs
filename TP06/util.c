@@ -102,6 +102,13 @@ int hdlCatErr(const char* current) {
     return -1;
 }
 
+int hdlSigHdlErr(const char* signame, int needsExit) {
+    int savedErr = errno;
+    fprintf(stderr, "%s: Cannot change handler for %s\n", strerror(savedErr), signame);
+    if (needsExit) exit(savedErr);
+    return -1;
+}
+
 struct stat lstat_s(const char* path) {
     struct stat infos;
     if (lstat(path, &infos) < 0) {
