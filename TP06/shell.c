@@ -1,7 +1,3 @@
-//!
-//! Temporary file for the struct shell. => Made another one to keep a clean working one
-//!
-
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -80,6 +76,7 @@ void set_FJ(Shell* sh, pid_t foreground_job) { sh->foreground_job = foreground_j
 
 //Global variable referring to the current environment
 extern char** environ;
+int initSigHandlers(Shell* sh);
 
 Shell* new_Shell() {
     Shell* sh = tryalc(malloc(sizeof(Shell)));
@@ -89,10 +86,13 @@ Shell* new_Shell() {
         printErr("%s - cannot initialize cwd (%s)\n", sh->crt_path);
         return NULL;
     }
-    sh->background_job = 0;
-    sh->foreground_job = 0;
+    sh->background_job = -1;
+    sh->foreground_job = -1;
     sh->child_number = 0;
     //maybe register a function to wait for children in atexit
+
+    initSigHandlers(sh);
+
     return sh;
 }
 
@@ -206,8 +206,6 @@ void redirectIO() {
 int exec(Shell* sh, const char* filename, char* const argv[], int isForeground) {
     errno = 0;
     int exitcode = 0;
-    //TODO: replace execvpe by another exec* because it is a GNU extension (not POSIX)
-    // "The execvpe() function is a GNU extension." source: man excevpe
 
     if (execvp(filename, argv) < 0) {
         // sets
@@ -227,6 +225,8 @@ int executeJob(Shell* sh, const char* cmd_name, char* const argv[], int isForegr
     if (cmd_name == NULL || strlen(cmd_name) <= 0) return -1;
     pid_t t_pid = fork();
     int child_exitcode = EXIT_FAILURE;
+    printf("FG: %d\n", sh->foreground_job);
+    printf("BG: %d\n", sh->background_job);
 
     if (t_pid < 0) {
         printErr("executeJob: %s, %s - Cannot Fork.\n", argv[0]);
@@ -304,30 +304,47 @@ void sh_free(Shell* sh) {
 }
 
 
-
-/**
+/*
  * =============================================================
  * -------------------  Signal handling ------------------------
  * =============================================================
  */
 
-const int SIG_TO_HDL[] = { SIGTERM, SIGQUIT, SIGINT, SIGHUP, SIGCHLD};
 
+/** List of signal to handle.*/
+const int SIG_TO_HDL[] = {SIGTERM, SIGKILL, SIGQUIT, SIGINT, SIGHUP, SIGCHLD};
+const int SIG_TO_IGNORE[] = {SIGTERM, SIGQUIT};
+const int SIG_NB = 5, IGNORE_NB = 2; // Number of signal to handle
 
-
-void manage_signals(int sig) {
+void manage_signals(Shell* sh, int sig) {
     switch (sig) {
         case SIGTERM:
             // something here
+            exit(0);
+            // Do nothing when ctrl+d is pressed for some reason, => CTRL+D is not SIGTERM ?
             break;
 
         case SIGQUIT:
             // something here
             break;
 
-        case SIGINT:
-            // something here
+        case SIGKILL:
+            kill(sh->foreground_job, SIGTERM);
             break;
+        case SIGINT:
+            /*const char* msg = "I will not be stopped, I will not go easy.\n";
+            lseek(STDOUT_FILENO, 5, 0);
+            write(STDOUT_FILENO, msg, strlen(msg)+1);*/
+
+            //TODO: Kill foreground job
+            //How to get the pid of the foreground job ???
+            //=> use sig_action and pass Shell* sh as void pointer$
+            //! => So initSigHandlers has to be called in constructor i.e. in "new_Shell()"
+            kill(sh->foreground_job, SIGTERM);
+            write(1, "sigint\n", 7);
+            // killing foreground job of sh
+            break;
+
 
         case SIGHUP:
             // something here
@@ -343,33 +360,57 @@ void manage_signals(int sig) {
     }
 }
 
-int initSigHandlers() {
 
+
+void manage_signals_wrapper(int signum, siginfo_t info, void* mydata) {
+    // Casting Shell pointer to data because it is the only "complex"
+    // argument required by the manage_signal function.
+    // i.e. mydata should be of type Shell* and --nothing else--
+    Shell* sh = (Shell*) mydata;
+    manage_signals(sh, signum);
+    //return NULL;
+    // we have to return something to match the required signature
+}
+
+
+//TODO: COMMENT THIS
+
+int initSigHandlers(Shell* sh) {
     struct sigaction sa;
     printf("Pid: %d\n", getpid());
 
     //sa.sa_sigaction = manage_signals;
-    sa.sa_handler = manage_signals;
-
-    sigemptyset(&sa.sa_mask);
-
-    sigaddset(&sa.sa_mask, SIGTERM);
-    sigaddset(&sa.sa_mask, SIGQUIT);
-    sigaddset(&sa.sa_mask, SIGINT);
-    sigaddset(&sa.sa_mask, SIGHUP);
-    sigaddset(&sa.sa_mask, SIGCHLD);
+    sa.sa_sigaction = manage_signals_wrapper;
 
     sa.sa_flags = 0;
 
-    if (sigaction(SIGUSR1, &sa, NULL) == -1) {
-        perror("setting up SIGUSR1");
-        return EXIT_FAILURE;
+    sigemptyset(&sa.sa_mask);
+    for (int i = 0; i < SIG_NB; i++)
+        sigaddset(&sa.sa_mask, SIG_TO_HDL[i]);
+
+    //
+    //! Handle Signals to handle
+    //
+    for (int i = 0; i < SIG_NB; i++) {
+        if (sigaction(SIG_TO_HDL[i], &sa, NULL) == -1) {
+            const char msg[15];
+            sprintf(msg, "SIG_TO_HDL[%d]\n", i);
+            hdlSigHdlErr(msg, 1);
+        }
+    }
+    //
+    //! Ignore Signals to ignore
+    //
+    sa.sa_handler = SIG_IGN;
+    for (int i = 0; i < IGNORE_NB; i++) {
+        if (sigaction(SIG_TO_IGNORE[i], &sa, NULL) == -1) {
+            const char msg[15];
+            sprintf(msg, "SIG_TO_IGNORE[%d]\n", i);
+            hdlSigHdlErr(msg, 0);
+        }
+
     }
 
-    if (sigaction(SIGTERM, &sa, NULL) == -1) {
-        perror("setting up SIGTERM");
-        return EXIT_FAILURE;
-    }
     return EXIT_SUCCESS;
 }
 

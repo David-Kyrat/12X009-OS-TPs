@@ -6,7 +6,7 @@
 /**
  * Represents a Shell with a crt_path (pwd) a foreground job and 
  * a background_job. Crt_path default value is where the executable was called
- * and foreground_job & background_job default value are 0.
+ *
  *
  *  NB: All shell methods/functions starts with sh_ to easily identify them (except 'new_Shell' and 'pwd')
  */
@@ -16,7 +16,7 @@ typedef struct Shell Shell;
 /**
  * Shell primary constructor. Return a pointer to a new instance
  * of Shell with crt_path initialized at where the executable was called
- * and no foreground_job nor background_job (0 value)
+ * and no foreground_job nor background_job
  * 
  * @return pointer to a new instance of Shell
  */
@@ -63,10 +63,6 @@ pid_t sh_FJ(Shell* sh);
  * Print the current working directory to console output
  */
 void sh_prettyPrintPath(Shell* sh);
-
-//
-// NB: returned string as allocated with malloc. Don't forget to free.
-
 
 
 #endif /* SHELL_H */
