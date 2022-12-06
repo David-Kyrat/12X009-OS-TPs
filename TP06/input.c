@@ -12,7 +12,8 @@
 #include "input.h"
 #include "util.h"
 
-const char EOL = '\n', ARG_SEP = ' ';  //Tab and space are the only argument separator
+const char EOL = '\n';
+const char* ARG_SEP = " ";  //Tab and space are the only argument separator
 //!
 //! Below is the basic code of readInput() (function that returns what the user entered) which I preferred to replace by the GNU library "readline.h" by simplicity. The library just adds more feature (like going back and forward) when User has to enter text. Everything else is still made by us, it is just that specific small  part that was replaced for convenience.
 //! 
@@ -88,7 +89,7 @@ const char** parseInput(const char* inp, int* argc, int* isForeground) {
         tosplit = stripr(tosplit);
     } else isFg = 1;
     
-    const char** argv = strsplit(tosplit, &ARG_SEP, &argcTmp);
+    const char** argv = strsplit(tosplit, ARG_SEP, &argcTmp);
     free(tosplit);
 
     *isForeground = isFg; *argc = (int) argcTmp;
@@ -98,7 +99,7 @@ const char** parseInput(const char* inp, int* argc, int* isForeground) {
 
 const char** readParseIn(int* argc, int* isForeground) {
     const char* tmp = readInput();
-    printf("%s", colors[0]); //reset colors because it seems to stay stuck in red.
+    //printf("%s", colors[0]); //reset colors because it seems to stay stuck in red.
     if (tmp == NULL) return NULL;
     return parseInput(tmp, argc, isForeground);
 }
