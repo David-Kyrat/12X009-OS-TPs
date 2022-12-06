@@ -34,14 +34,18 @@ $(EXEC): $(OBJS)
 test: test.c $(OBJS)
 	$(CC) test.c out/shell.o out/input.o out/util.o $(CFLAGS) $(DBGFLAGS) -o test.out
 
+main: $(OBJS)
+	$(CC) $(OBJS) -o main -lreadline
 
 out/main.o: main.c $(HDRS)
 	$(CC) -c main.c $(CFLAGS) $(DBGFLAGS) -o out/main.o
 
 
-out/shell.o: shell.c shell.h
+out/shell.o: shell.c shell.h util.h
 	$(CC) -c shell.c $(CFLAGS) $(DBGFLAGS) -o out/shell.o
 
+out/files.o: files.c files.h util.h
+	$(CC) -c files.c $(CFLAGS) $(DBGFLAGS) -o out/shell.o
 
 out/input.o: input.c input.h util.h
 	$(CC) -c input.c $(CFLAGS) $(DBGFLAGS) -o out/input.o

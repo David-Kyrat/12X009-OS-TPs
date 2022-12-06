@@ -6,22 +6,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-//#include <unistd.h>
+#include <unistd.h>
 #include <limits.h>
 #include <ctype.h>
-
 #include <fcntl.h>
+#include <sys/types.h> //pid_t
+#include <sys/wait.h>
+#include <signal.h> // Signals
+
 #include "shell.h"
 #include "util.h"
 #include "input.h"
 #include "files.h"
-#include <sys/types.h> //pid_t
-#include <sys/wait.h>
-
-// Signals
-#include <signal.h>
-
-#include "/usr/include/unistd.h"
 
 /**
  * If 'isForground' is -1 prints "job exited with exit code 'exitcode'"
@@ -315,49 +311,15 @@ void sh_free(Shell* sh) {
 }
 
 
-// ================ Printing functions ====================
-
-/* void printPid(int in) {
-    char* msg = in ? "PID=%d> " : "[PID=%d] ";
-        printf(msg, getpid());
-} */
-
-void listEnv() {
-    for (char** current = getEnvp(); *current; current++) puts(*current);
-}
-
-//! 0:default,  1:red, 2:Green,  3:Blue, 4:Purple, 5:yellow,  6:cyan,  7:grey
-//const char* colors[] = {"\033[0m", "\033[0;31m", "\033[0;32m", "\033[0;34m", "\033[0;35m", "\033[0;33m", "\033[0;36m",
-  //                      "\033[2m"};
-extern char* colors[];
 
 /**
- * 0:default,  1:red, 2:Green,  3:Blue, 4:Purple, 5:yellow,  6:cyan
+ * =============================================================
+ * -------------------  Signal handling ------------------------
+ * =============================================================
  */
-void setOutColor(int color) {
-    printf("%s", colors[color]);
-}
 
-void resetCol() {
-    setOutColor(0);
-}
-
-void sh_prettyPrintPath(Shell* sh) {
-    printf("%s( %s", colors[1], colors[6]);
-    printf("%s", pwd(sh));
-    printf("%s )\n", colors[1]);
-    //printf("|_ %s$ ", colors[5]);
-    resetCol();
-}
-
-
-// -----------------  Signal handling ---------------------
-int main() {
-
-    
-    void manage_signals(int sig) {
-        switch (sig) {
-
+void manage_signals(int sig) {
+    switch (sig) {
         case SIGTERM:
             // something here
             break;
@@ -381,12 +343,16 @@ int main() {
         default:
             break;
 
-        }
+    }
+}
+
+int initSigHandlers() {
 
     struct sigaction sa;
     printf("Pid: %d\n", getpid());
 
-    sa.sa_sigaction = manage_signals;
+    //sa.sa_sigaction = manage_signals;
+    sa.sa_handler = manage_signals;
 
     sigemptyset(&sa.sa_mask);
 
@@ -408,8 +374,46 @@ int main() {
         return 1;
     }
 
-        }
-    
 }
 
-// ---------------------------------------------------------
+
+// ------------------- END SIGNALS -----------------
+
+
+
+/**
+ * ========================================================
+ * ---------------- Printing functions --------------------
+ * ========================================================
+ */
+
+/* void printPid(int in) {
+    char* msg = in ? "PID=%d> " : "[PID=%d] ";
+        printf(msg, getpid());
+} */
+
+void listEnv() {
+    for (char** current = getEnvp(); *current; current++) puts(*current);
+}
+
+//! 0:default,  1:red, 2:Green,  3:Blue, 4:Purple, 5:yellow,  6:cyan,  7:grey
+extern char* colors[];
+
+/**
+ * 0:default,  1:red, 2:Green,  3:Blue, 4:Purple, 5:yellow,  6:cyan
+ */
+void setOutColor(int color) {
+    printf("%s", colors[color]);
+}
+
+void resetCol() {
+    setOutColor(0);
+}
+
+void sh_prettyPrintPath(Shell* sh) {
+    printf("%s( %s", colors[1], colors[6]);
+    printf("%s", pwd(sh));
+    printf("%s )\n", colors[1]);
+    //printf("|_ %s$ ", colors[5]);
+    resetCol();
+}
