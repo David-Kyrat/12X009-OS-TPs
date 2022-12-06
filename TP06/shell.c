@@ -396,8 +396,10 @@ int initSigHandlers(Shell* sh) {
     //
     //! Ignore Signals to ignore
     //
-    sa.sa_handler = SIG_IGN;
-    sa.sa_sigaction = NULL;
+    struct sigaction sa_ign; //use same sa make everything bug
+    sa_ign.sa_handler = SIG_IGN;
+    sa_ign.sa_sigaction = NULL;
+    sa_ign.flag = 0;
     for (int i = 0; i < IGNORE_NB; i++) {
         if (sigaction(SIG_TO_IGNORE[i], &sa, NULL) == -1) {
             const char msg[15];
