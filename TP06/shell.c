@@ -39,7 +39,7 @@ struct Shell {
     // Pid of current process launched as background job
     pid_t background_job;
     // Number of current non-waited/terminated child
-    uint child_number;
+    int child_number;
 };
 
 
@@ -48,7 +48,7 @@ pid_t sh_BJ(Shell* sh) { return sh->background_job; }
 pid_t sh_FJ(Shell* sh) { return sh->foreground_job; }
 /** Getter for 'child_number' field
  * @return Number of current non-waited/terminated child */
-uint child(Shell* sh) { return sh->child_number; }
+int child(Shell* sh) { return sh->child_number; }
 
 /**
  * "Private" setter for 'crt_path' field
@@ -73,6 +73,19 @@ void set_BJ(Shell* sh, pid_t background_job) { sh->background_job = background_j
  * @param foreground_job  pid of foreground job
  */
 void set_FJ(Shell* sh, pid_t foreground_job) { sh->foreground_job = foreground_job; }
+
+int decrease_childNb(Shell* sh) {
+    if (sh->child_number > 0) {
+        sh->child_number -= 1;
+        return EXIT_SUCCESS;
+    }
+    return -1;
+}
+
+int increase_childNb(Shell* sh) {
+    sh->child_number += 1;
+    return sh->child_number <= 2 ? EXIT_SUCCESS : -1;
+}
 
 //Global variable referring to the current environment
 extern char** environ;
@@ -101,11 +114,21 @@ Shell* new_Shell() {
  */
 void terminate_all_children(Shell* sh) {
     // until shell process has child:
+    /*            if (wait(&exit_status) < 0) {
+                printErr("%s: hdl_sigint, FG pid: \n", sh->foreground_job);
+            }*/
     while (child(sh) > 0) {
         int exitStatus;
-        wait_s(&exitStatus);
-        printExitCode(exitStatus, -1);
-        sh->child_number -= 1;
+        //wait_s(&exitStatus);
+        
+        write(2, "waiting", 7);
+        fprintf(stderr, " child_nb: %d\n", child(sh));
+        wait_s(&exitStatus) ;
+        /*int se = errno;
+        fprintf(stderr, "waiting tal: %s\n", strerror(se));
+        printExitCode(exitStatus, -1);*/
+        decrease_childNb(sh);
+        fprintf(stderr, "decresead child_number\n");
     }
 }
 
@@ -119,7 +142,7 @@ void terminate_all_children(Shell* sh) {
  */
 void clean_exit(Shell* sh, int exitCode) {
     terminate_all_children(sh);
-    if (sh != NULL) sh_free(sh);
+    //sh_free(sh);
     exit(exitCode);
 }
 
@@ -238,13 +261,13 @@ int executeJob(Shell* sh, const char* cmd_name, char* const argv[], int isForegr
 
     //* In parent
     if (t_pid > 0) {
-        sh->child_number += 1;
+        increase_childNb(sh);
 
         if (isForeground) {
             set_FJ(sh, t_pid);
             //- Only wait for foreground jobs
             if (wait_s(&child_exitcode) == EXIT_SUCCESS) {
-                sh->child_number -= 1;
+                decrease_childNb(sh);
                 printExitCode(child_exitcode, isForeground);
                 return EXIT_SUCCESS;
             } else return -1;
@@ -298,9 +321,15 @@ int sh_getAndResolveCmd(Shell* sh) {
 
 
 void sh_free(Shell* sh) {
-    free(sh->crt_path);
-    free(sh);
+    if (sh != NULL) {
+        if (sh->crt_path != NULL) {
+            free(sh->crt_path);
+            sh-> crt_path = NULL;
+        }
+        free(sh);
+        sh = NULL;
     // 'crt_path' and 'sh' were the only "malloc'ed" variables
+    }
 }
 
 
@@ -313,46 +342,60 @@ void sh_free(Shell* sh) {
 
 /** List of signal to handle.*/
 const int SIG_TO_HDL[] = {SIGTERM, SIGQUIT, SIGINT, SIGHUP, SIGCHLD};
-const int SIG_TO_IGNORE[] = {SIGTERM, SIGQUIT};
+const int SIG_TO_IGNORE[] = {SIGQUIT};
 const int SIG_NB = 5, IGNORE_NB = 2; // Number of signal to handle
 
 //TODO: DIRE AUX ASSITANTS QU'IL YA UNE FAUTE DANS L'ENONCE SIGQUIT EST ENVOYÉ PAR CTRL+D
 //TODO: IL NE DOIT DONC PAS ETRE IGNORE
 
+void hdl_sigint(Shell* sh) {
+            kill(sh->foreground_job, SIGTERM);
+            int exit_status;
+            wait_s(&exit_status);
+//            sh->child_number -= 1;
+            decrease_childNb(sh);
+            printExitCode(exit_status, 1);
+}
+
 void manage_signals(Shell* sh, int sig) {
-    switch (sig) {
-        case SIGTERM:
-            // something here
-            exit(0);
+    switch (sig) {  
+        case SIGTERM: 
+            // cleanup before exiting => avoiding zombies and orphans
+            clean_exit(sh, 0);
             // Do nothing when ctrl+d is pressed for some reason, => CTRL+D is not SIGTERM ?
             break;
-
+        
         case SIGQUIT:
+            write(STDERR_FILENO, "quit\n", 6);
             // something here
             break;
 
-        case SIGINT:
+        case SIGINT: 
+            hdl_sigint(sh);
             /*const char* msg = "I will not be stopped, I will not go easy.\n";
             lseek(STDOUT_FILENO, 5, 0);
             write(STDOUT_FILENO, msg, strlen(msg)+1);*/
 
-            //TODO: Kill foreground job
             //How to get the pid of the foreground job ???
             //=> use sig_action and pass Shell* sh as void pointer$
             //! => So initSigHandlers has to be called in constructor i.e. in "new_Shell()"
-            kill(sh->foreground_job, SIGTERM);
+
             // killing foreground job of sh
             break;
 
         case SIGHUP:
+            write(STDERR_FILENO, "hup\n", 5);
             // something here
             break;
 
         case SIGCHLD:
             // something here
+            write(STDERR_FILENO, "child\n", 7);
             break;
 
         default:
+
+            write(STDERR_FILENO, "defa\n", 6);
             break;
 
     }
@@ -404,7 +447,7 @@ int initSigHandlers(Shell* sh) {
     sa_ign.sa_flags = 0;
     for (int i = 0; i < IGNORE_NB; i++) {
         if (sigaction(SIG_TO_IGNORE[i], &sa_ign, NULL) == -1) {
-            const char msg[15];
+            const char msg[20];
             sprintf(msg, "SIG_TO_IGNORE[%d]\n", i);
             hdlSigHdlErr(msg, 0);
         }

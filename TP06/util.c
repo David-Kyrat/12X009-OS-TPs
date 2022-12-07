@@ -273,7 +273,14 @@ int wait_s(int* exitStatus) {
             fprintf(stderr, "%s: cannot kill child.\n", strerror(savedErr));
             return -1;
         }
-        else if (savedErr == EINTR) wait_s(exitStatus);
+        else if (savedErr == EINTR) {
+            const char msg[] = "interrupted retrying\n";
+            write(2, msg, strlen(msg)+1);
+            wait_s(exitStatus);
+        } else {
+            const char msg[] = "no child \n";
+            write(2, msg, strlen(msg)+1);
+        }
 
     }
     return EXIT_SUCCESS;
