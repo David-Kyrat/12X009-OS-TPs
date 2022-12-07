@@ -9,6 +9,8 @@
 #include <sys/types.h> //pid_t
 #include <sys/wait.h>
 #include <signal.h> // Signals
+#include <ucontext.h>
+//#include <siginfo_t.h>
 
 #include "shell.h"
 #include "input.h"
@@ -28,6 +30,12 @@
 
 const int CMD_NB = 2;
 const char* CMDS[] = {CMD_CD, CMD_EXIT};
+/** 
+ * global variable to be able to see it when doing signal handling => won't be modified there though, because the handler mustn't modify global variables
+ * sums up the amount of child process for all instances of the struct Shell.
+ */
+int tot_child_nb;
+//TODO: find a way to keep it up to date even after signal managment that may terminate child without modifying this
 
 struct Shell {
     /** Contains the cwd (of Size PATH_MAX).
@@ -38,7 +46,7 @@ struct Shell {
     pid_t foreground_job;
     // Pid of current process launched as background job
     pid_t background_job;
-    // Number of current non-waited/terminated child
+    // Actual number of current non-waited/terminated child process createad by this specific instance of 'Shell'
     int child_number;
 };
 
@@ -47,8 +55,8 @@ const char* pwd(Shell* sh) { return sh->crt_path; }
 pid_t sh_BJ(Shell* sh) { return sh->background_job; }
 pid_t sh_FJ(Shell* sh) { return sh->foreground_job; }
 /** Getter for 'child_number' field
- * @return Number of current non-waited/terminated child */
-int child(Shell* sh) { return sh->child_number; }
+ * @return Number of current non-waited/terminated child process created by the given instance of 'Shell'*/
+int child(Shell* sh) {  return sh->child_number; }
 
 /**
  * "Private" setter for 'crt_path' field
@@ -72,20 +80,33 @@ void set_BJ(Shell* sh, pid_t background_job) { sh->background_job = background_j
  * @param sh Shell instance
  * @param foreground_job  pid of foreground job
  */
-void set_FJ(Shell* sh, pid_t foreground_job) { sh->foreground_job = foreground_job; }
+void set_FJ(Shell* sh, pid_t foreground_job) { sh->foreground_job = foreground_job;}
 
+
+/**
+ * Decrease the child_number attribute of the given instance as well as the total (global) one
+ * @param sh instance of shell that created/terminated said child
+ * @return int used for debuggin purposes. -1 if child number of 'sh' was already at 0, 1 otherwise
+ */
 int decrease_childNb(Shell* sh) {
-    if (sh->child_number > 0) {
+    //int chld_nb = *(sh->child_number);
+    if (sh->child_number  > 0) {
+        tot_child_nb -= 1;
         sh->child_number -= 1;
+        fprintf(stderr, "decreasead child_number, now at %d\n", tot_child_nb);
         return EXIT_SUCCESS;
     }
+    fprintf(stderr, "child_number already at 0, now at %d\n", tot_child_nb);
     return -1;
 }
 
-int increase_childNb(Shell* sh) {
+void increase_childNb(Shell* sh) {
+    tot_child_nb += 1;
     sh->child_number += 1;
-    return sh->child_number <= 2 ? EXIT_SUCCESS : -1;
+    //int chld_nb = *(sh->child_number);
+    //fprintf(stderr, "increased child_number, now at %d\n", chld_nb);
 }
+
 
 //Global variable referring to the current environment
 extern char** environ;
@@ -110,26 +131,43 @@ Shell* new_Shell() {
 }
 
 /**
- * Wait for all children to die, then terminates them with wait()
+ * Terminates for all children processes (created by the given instance of 'Shell') with wait()
  */
 void terminate_all_children(Shell* sh) {
     // until shell process has child:
     /*            if (wait(&exit_status) < 0) {
                 printErr("%s: hdl_sigint, FG pid: \n", sh->foreground_job);
             }*/
+    
+
     while (child(sh) > 0) {
         int exitStatus;
         //wait_s(&exitStatus);
         
         write(2, "waiting", 7);
-        fprintf(stderr, " child_nb: %d\n", child(sh));
+        fprintf(stderr, " chld_nb: %d\n", child(sh));
         wait_s(&exitStatus) ;
         /*int se = errno;
         fprintf(stderr, "waiting tal: %s\n", strerror(se));
         printExitCode(exitStatus, -1);*/
         decrease_childNb(sh);
-        fprintf(stderr, "decresead child_number\n");
     }
+}
+
+/**
+ * Terminates all children processes created by any instance of 'Shell' (of the process that called this function) with wait()
+ * @param modify - whether to modify the actual global variable or not. 
+ */
+void terminate_all_children_global(int modify) {
+    int child_nb_cp = tot_child_nb;
+    int exitStatus;
+    while (child_nb_cp > 0) {
+        wait_s(&exitStatus);
+        printExitCode(exitStatus, -1);
+        child_nb_cp -= 1;
+    }
+    if (modify) tot_child_nb = child_nb_cp;
+
 }
 
 /**
@@ -145,6 +183,8 @@ void clean_exit(Shell* sh, int exitCode) {
     //sh_free(sh);
     exit(exitCode);
 }
+
+
 
 /**
  * Changes the current working directory to the one specified by the path argument
@@ -248,8 +288,6 @@ int executeJob(Shell* sh, const char* cmd_name, char* const argv[], int isForegr
     if (cmd_name == NULL || strlen(cmd_name) <= 0) return -1;
     pid_t t_pid = fork();
     int child_exitcode = EXIT_FAILURE;
-    printf("FG: %d\n", sh->foreground_job);
-    printf("BG: %d\n", sh->background_job);
 
     if (t_pid < 0) {
         printErr("executeJob: %s, %s - Cannot Fork.\n", argv[0]);
@@ -262,21 +300,26 @@ int executeJob(Shell* sh, const char* cmd_name, char* const argv[], int isForegr
     //* In parent
     if (t_pid > 0) {
         increase_childNb(sh);
-
+        //printf("Child_nb: %d\n", child(sh));
         if (isForeground) {
             set_FJ(sh, t_pid);
+            printf("FG: %d\n", sh->foreground_job);
+            printf("BG: %d\n", sh->background_job);
             //- Only wait for foreground jobs
             if (wait_s(&child_exitcode) == EXIT_SUCCESS) {
                 decrease_childNb(sh);
                 printExitCode(child_exitcode, isForeground);
-                return EXIT_SUCCESS;
+                fprintf(stderr, "finished waiting\n");
             } else return -1;
 
         } else {
             set_BJ(sh, t_pid);
-            printf("[1] \t[%d] - %s\n", sh_BJ(sh), cmd_name);
-            return EXIT_SUCCESS;
+            printf("FG: %d\n", sh->foreground_job);
+            printf("BG: %d\n", sh->background_job);
+            printf("[1] \t[%d] - %s\n", sh_BJ(sh), cmd_name); // we have only 1 background job
         }
+
+        return EXIT_SUCCESS;
     }
     if (t_pid == 0) {
         //* In child
@@ -295,7 +338,6 @@ int sh_getAndResolveCmd(Shell* sh) {
     const char** argv = readParseIn(&argc, &isForeground);
     if (argc <= 0 || argv == NULL) {
         printRErr("%s: Could not parse user input - read %d argument.\n", argc); //returns -1
-        puts(" as");
     }
     const char* cmd_name = argv[0];
     switch (strswitch(cmd_name, CMDS, CMD_NB)) {
@@ -322,13 +364,11 @@ int sh_getAndResolveCmd(Shell* sh) {
 
 void sh_free(Shell* sh) {
     if (sh != NULL) {
-        if (sh->crt_path != NULL) {
-            free(sh->crt_path);
-            sh-> crt_path = NULL;
-        }
+        free(sh->crt_path);
+        sh-> crt_path = NULL;
         free(sh);
         sh = NULL;
-    // 'crt_path' and 'sh' were the only "malloc'ed" variables
+        // 'crt_path' and 'sh' were the only "malloc'ed" variables
     }
 }
 
@@ -357,11 +397,13 @@ void hdl_sigint(Shell* sh) {
             printExitCode(exit_status, 1);
 }
 
-void manage_signals(Shell* sh, int sig) {
+void manage_signals(int sig, siginfo_t* info) {
     switch (sig) {  
         case SIGTERM: 
+            terminate_all_children_global(0);
+            //fprintf(stderr, "term: chld_nb: %d \n", child(sh));
             // cleanup before exiting => avoiding zombies and orphans
-            clean_exit(sh, 0);
+
             // Do nothing when ctrl+d is pressed for some reason, => CTRL+D is not SIGTERM ?
             break;
         
@@ -371,13 +413,12 @@ void manage_signals(Shell* sh, int sig) {
             break;
 
         case SIGINT: 
-            hdl_sigint(sh);
+            //hdl_sigint(sh);
             /*const char* msg = "I will not be stopped, I will not go easy.\n";
-            lseek(STDOUT_FILENO, 5, 0);
             write(STDOUT_FILENO, msg, strlen(msg)+1);*/
 
             //How to get the pid of the foreground job ???
-            //=> use sig_action and pass Shell* sh as void pointer$
+            //=> use sig_action and pass Shell* sh as void pointedr$
             //! => So initSigHandlers has to be called in constructor i.e. in "new_Shell()"
 
             // killing foreground job of sh
@@ -388,9 +429,16 @@ void manage_signals(Shell* sh, int sig) {
             // something here
             break;
 
-        case SIGCHLD:
+        case SIGCHLD: {
             // something here
-            write(STDERR_FILENO, "child\n", 7);
+            int child_status;
+            write(STDERR_FILENO, "sigchild\n", 10);
+            if (waitpid_s(info->si_pid, &child_status) < 0); {
+                //TODO: write strerr(errno) to stderr without fprintf
+            }
+
+            //printExitCode(child_status, -1); cant use printf
+        }
             break;
 
         default:
@@ -403,12 +451,14 @@ void manage_signals(Shell* sh, int sig) {
 
 
 
-void manage_signals_wrapper(int signum, siginfo_t info, void* mydata) {
+void manage_signals_wrapper(int signum, siginfo_t *info, void* mydata) {
     // Casting Shell pointer to data because it is the only "complex"
     // argument required by the manage_signal function.
     // i.e. mydata should be of type Shell* and --nothing else--
-    Shell* sh = (Shell*) mydata;
-    manage_signals(sh, signum);
+    // => is not shell how would it be passed?.
+    ucontext_t* cntxt = (ucontext_t*) mydata;
+    
+    manage_signals(signum, info);
     //return NULL;
     // we have to return something to match the required signature
 }
@@ -423,7 +473,7 @@ int initSigHandlers(Shell* sh) {
     //sa.sa_sigaction = manage_signals;
     sa.sa_sigaction = manage_signals_wrapper;
 
-    sa.sa_flags = 0;
+    sa.sa_flags = SA_RESTART | SA_SIGINFO;
 
     sigemptyset(&sa.sa_mask);
     for (int i = 0; i < SIG_NB; i++)
@@ -444,7 +494,7 @@ int initSigHandlers(Shell* sh) {
     //
     struct sigaction sa_ign; //use same sa make everything bug
     sa_ign.sa_handler = SIG_IGN;
-    sa_ign.sa_flags = 0;
+    sa_ign.sa_flags = SA_RESTART;
     for (int i = 0; i < IGNORE_NB; i++) {
         if (sigaction(SIG_TO_IGNORE[i], &sa_ign, NULL) == -1) {
             const char msg[20];

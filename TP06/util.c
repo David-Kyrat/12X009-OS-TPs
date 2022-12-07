@@ -280,6 +280,28 @@ int wait_s(int* exitStatus) {
         } else {
             const char msg[] = "no child \n";
             write(2, msg, strlen(msg)+1);
+            return EXIT_SUCCESS; // goal is to avoid zombies => if there is no child => no zombies => i.e. success
+        }
+
+    }
+    return EXIT_SUCCESS;
+}
+
+int waitpid_s(pid_t pid, int* exitStatus) {
+    if (waitpid(pid, exitStatus, 0) == -1) {
+        int savedErr = errno;
+        if (savedErr != EINTR && savedErr != ECHILD) {
+            fprintf(stderr, "%s: cannot kill child.\n", strerror(savedErr));
+            return -1;
+        }
+        else if (savedErr == EINTR) {
+            const char msg[] = "interrupted retrying\n";
+            write(2, msg, strlen(msg)+1);
+            wait_s(exitStatus);
+        } else {
+            const char msg[] = "no child \n";
+            write(2, msg, strlen(msg)+1);
+            return EXIT_SUCCESS; // goal is to avoid zombies => if there is no child => no zombies => i.e. success
         }
 
     }
