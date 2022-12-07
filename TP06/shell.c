@@ -388,19 +388,23 @@ const int SIG_NB = 5, IGNORE_NB = 2; // Number of signal to handle
 //TODO: DIRE AUX ASSITANTS QU'IL YA UNE FAUTE DANS L'ENONCE SIGQUIT EST ENVOYÉ PAR CTRL+D
 //TODO: IL NE DOIT DONC PAS ETRE IGNORE
 
-void hdl_sigint(Shell* sh) {
-            kill(sh->foreground_job, SIGTERM);
+//TODO: find a way to access to the pid of the foreground job without the need to access
+//TODO: global variables or a 'Shell*' variable
+void hdl_sigint() {
+    terminate_all_children_global(0); //change this to terminate only foreground_job
+            /*kill(sh->foreground_job, SIGTERM);
             int exit_status;
             wait_s(&exit_status);
 //            sh->child_number -= 1;
             decrease_childNb(sh);
-            printExitCode(exit_status, 1);
+            printExitCode(exit_status, 1);*/
 }
 
 void manage_signals(int sig, siginfo_t* info) {
     switch (sig) {  
         case SIGTERM: 
             terminate_all_children_global(0);
+            exit(0);
             //fprintf(stderr, "term: chld_nb: %d \n", child(sh));
             // cleanup before exiting => avoiding zombies and orphans
 
@@ -412,8 +416,8 @@ void manage_signals(int sig, siginfo_t* info) {
             // something here
             break;
 
-        case SIGINT: 
-            //hdl_sigint(sh);
+        case SIGINT:
+            hdl_sigint();
             /*const char* msg = "I will not be stopped, I will not go easy.\n";
             write(STDOUT_FILENO, msg, strlen(msg)+1);*/
 
@@ -546,5 +550,5 @@ void sh_prettyPrintPath(Shell* sh) {
     printf("%s", pwd(sh));
     printf("%s )\n", colors[1]);
     //printf("|_ %s$ ", colors[5]);
-    resetCol();
 }
+
