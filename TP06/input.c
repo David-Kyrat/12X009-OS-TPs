@@ -1,30 +1,30 @@
+#include <ctype.h>  // isBlank
 #include <errno.h>
 #include <limits.h>
+#include <readline/history.h>
+#include <readline/readline.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <ctype.h> // isBlank
-#include <readline/readline.h>
-#include <readline/history.h>
+
 #include "input.h"
 #include "util.h"
 
 const char EOL = '\n';
 const char* ARG_SEP = " ";  //Tab and space are the only argument separator
 // 0:default,  1:red, 2:Green,  3:Blue, 4:Purple, 5:yellow,  6:cyan,  7:grey
-const char* colors[] = {"\033[0m", "\033[0;31m", "\033[0;32m", "\033[0;34m", "\033[0;35m", "\033[0;33m", "\033[0;36m","\033[2m"};
+const char* colors[] = {"\033[0m", "\033[0;31m", "\033[0;32m", "\033[0;34m", "\033[0;35m", "\033[0;33m", "\033[0;36m", "\033[0;30m"};
 
 //* symbol present at start every "input line" in shell (like the '$' )
-const char* prompt = "\033[0;31m|_ \033[0;33m$ \033[0m "; 
+const char* prompt = "\033[0;31m|_ \033[0;33m$ \033[0m ";
 //snprintf(msg, 24, "%s|_ %s$ %s ", colors[1], colors[5], colors[0]);
-
 
 //!
 //! Below is the basic code of readInput() (function that returns what the user entered) which I preferred to replace by the GNU library "readline.h" by simplicity. The library just adds more feature (like going back and forward) when User has to enter text. Everything else is still made by us, it is just that specific small  part that was replaced for convenience.
-//! 
+//!
 //! The basic function below of course works, feel free to uncomment this one and comment to the other (and remove the <readline/*> includes) to test it
 //!
 //! If you get an error message saying, that the file was not found, you can install it with
@@ -56,8 +56,8 @@ const char* prompt = "\033[0;31m|_ \033[0;33m$ \033[0m ";
 
 const char* readInput() {
     const char* buff = readline(prompt);
-    if (buff == NULL || strlen(buff) <= 0) return  NULL;
-    return strip(buff);   
+    if (buff == NULL || strlen(buff) <= 0) return NULL;
+    return strip(buff);
 }
 
 /**
@@ -82,24 +82,27 @@ int isWhiteSpace(const char* str) {
  * @return string buffer (usually argv)  i.e. 'inp' split with respect to 'ARG_SEP'
  */
 const char** parseInput(const char* inp, int* argc, int* isForeground) {
-    uint isFg; size_t argcTmp = 0, inp_len;
+    uint isFg;
+    size_t argcTmp = 0, inp_len;
     // inp is already right stripped so if required job must be launched in background, the '&' has to be end at the last position of 'inp'
     char* tosplit = tryalc(malloc(1));
-    tosplit = inp; inp_len = strlen(inp);
+    tosplit = inp;
+    inp_len = strlen(inp);
 
     if (inp_len > 1 && inp[inp_len - 1] == '&') {
         isFg = 0;
-        tosplit[inp_len - 2] = '\0'; //if there is a '&' then there is a space at the end
+        tosplit[inp_len - 2] = '\0';  //if there is a '&' then there is a space at the end
         tosplit = stripr(tosplit);
-    } else isFg = 1;
-    
+    } else
+        isFg = 1;
+
     const char** argv = strsplit(tosplit, ARG_SEP, &argcTmp);
     free(tosplit);
 
-    *isForeground = isFg; *argc = (int) argcTmp;
+    *isForeground = isFg;
+    *argc = (int)argcTmp;
     return argv;
 }
-
 
 const char** readParseIn(int* argc, int* isForeground) {
     const char* tmp = readInput();
@@ -107,7 +110,6 @@ const char** readParseIn(int* argc, int* isForeground) {
     if (tmp == NULL) return NULL;
     return parseInput(tmp, argc, isForeground);
 }
-
 
 const char* getPrompt() {
     return prompt;

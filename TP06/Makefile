@@ -35,8 +35,8 @@ test: test.c $(OBJS)
 	$(CC) test.c out/shell.o out/input.o out/util.o $(CFLAGS) $(DBGFLAGS) -o test.out
 
 
-main: $(OBJS)
-	$(CC) $(OBJS) -o main -lreadline
+shell: $(OBJS)
+	$(CC) $(OBJS) -o shell -lreadline
 
 
 out/main.o: main.c $(HDRS)

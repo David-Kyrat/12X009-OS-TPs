@@ -211,20 +211,18 @@ void exit_shell(Shell* sh, const char* arg) {
     clean_exit(sh, exit_code);
 }
 
-
-//void because exit on error
+/**
+ * Redirect stdin to /dev/null
+ * void because exit on error 
+ */
 void redirectIO() {
     const char* redirection = "/dev/null";
     //close stdin, stdout
-    //- do not close stderr
-    for (int i = 0; i < 2; i++)
-        if (close(i) < 0) hdlCloseErr("stdin/out", 1);
-
-    //reopens 2times /dev/null, so that the 2 first file descriptors points to it.
-    // (2 first fd's are always std in/out)
-    for (int i = 0; i < 2; i++) {
-        if (open(redirection, (i == 0 ? O_RDONLY : O_RDWR) | O_EXCL) < 0) hdlOpenErr(redirection, 1);
-    }
+    //- do not close stderr/out
+    if (close(0) < 0) hdlCloseErr("stdin/out", 1);
+    //reopens /dev/null, so that the first file descriptor points to it.
+    // (3 first fd's are always std in/out/err)
+    if (open(redirection, O_RDONLY | O_EXCL) < 0) hdlOpenErr(redirection, 1);
 }
 
 
@@ -354,6 +352,7 @@ void manage_signals(int sig, siginfo_t* info, Shell* sh) {
 
         case SIGINT:
             // killing foreground job of 'sh'
+            write(1, "\n", 2); //to "remove" the "^C" that gets generated from current input "line"
             hdl_sigint(sh);
             display_prompt();
             break;
