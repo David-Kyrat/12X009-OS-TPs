@@ -37,12 +37,15 @@ const char* concat_path(const char* parent, const char* child) {
     int len_p = strlen(parent), len_c = strlen(child);
     int len_tot = len_p + len_c;
     char* newPath = tryalc(malloc(len_tot + 1));
-
     // computes the name of the subdirectory and checks if it is not too long
-    int written = snprintf(newPath, len_tot+1, "%s/%s", parent, child);
+    int written = snprintf(newPath, len_tot+2, "%s/%s", parent, child);
     if (written > PATH_MAX) {
         written = -1;
         errno = ENAMETOOLONG;
+    }
+    else if (written <= len_tot+1) {
+        int delta = (len_tot+1) - written;
+        printErr("concat_path: %s Missing %d Bytes: \"%s\" \n", delta, newPath);
     }
     if (written < 0) {
         printErr("%s: %s/%s\n", parent, child); 

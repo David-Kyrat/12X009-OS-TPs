@@ -159,6 +159,8 @@ void clean_exit(Shell* sh, int exitCode) {
     exit(exitCode);
 }
 
+//TODO: Sometimes cd eats last letter
+
 /**
  * Changes the current working directory to the one specified by the path argument
  * @param sh Shell*, ptr to instance of Shell
@@ -174,11 +176,12 @@ int cd(Shell* sh, const char* path) {
         if (isAbsolute)
             resolvedPath = absPath(path);
         else {
+            //! concat path eats last letter
             const char* tmp = concat_path(pwd(sh), path);
             resolvedPath = absPath(tmp);
             free(tmp);
         }
-        if (resolvedPath == NULL) printRErr("cd: %s : %s", path);
+        if (resolvedPath == NULL) printRErr("cd: %s : %s\n", path);
     }
 
     if (chdir(resolvedPath) < 0) {
@@ -386,11 +389,11 @@ void manage_signals(int sig, siginfo_t* info, Shell* sh) {
     }
 }
 
-//TODO: why does entering 'clear' in shell => triggers sigint ??
 
 void hdl_sigint(Shell* sh) {
-    if (sh_FJ(sh) != -2) {
-        if (kill(sh->foreground_job, SIGTERM) < 0) {
+    pid_t fj = sh_FJ(sh);
+    if (fj != -2 && fj != 0) {
+        if (kill(fj, SIGINT) < 0) {
             printErr("%s: cannot kill foreground job (pid: %d)\n", sh_FJ(sh));
             return;
         }
@@ -398,9 +401,14 @@ void hdl_sigint(Shell* sh) {
         code = wait_s(&exit_status);
         if (code == 2) {
             sh->child_number = 0;
-        } else if (code >= 0) decrease_childNb(sh);
+            set_FJ(sh, -2);
+        } else if (code >= 0) {
+            decrease_childNb(sh);
+            printExitCode(exit_status, 1);
+            set_FJ(sh, -2);
+        }
 
-        printExitCode(exit_status, 1);
+        
     }
 }
 

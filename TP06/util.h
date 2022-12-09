@@ -12,7 +12,7 @@
 * Usage: 'printErr("%s, %d: port number not valid\n", port)' first %s will be 'strerror(savedErr)' */
 #define printErr(mess, args...) \
     { int savedErr = errno;      \
-    fprintf(stderr, mess, strerror(savedErr == 0 ? EXIT_FAILURE : savedErr), args); }
+    fprintf(stderr, mess, savedErr == 0 ? "" : strerror(savedErr), args); }
     // if savedErr == 0 then strerror(savedError) will return "success" which wouldn't make any sense for an error message.
 
 //* Macro that Prints given (printf formatted) message to stderr and returns -1. See 'printErr' for more info
