@@ -43,7 +43,7 @@ const char* concat_path(const char* parent, const char* child) {
         written = -1;
         errno = ENAMETOOLONG;
     }
-    else if (written <= len_tot+1) {
+    else if (written < len_tot+1) {
         int delta = (len_tot+1) - written;
         printErr("concat_path: %s Missing %d Bytes: \"%s\" \n", delta, newPath);
     }

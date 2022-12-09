@@ -128,6 +128,8 @@ Shell* new_Shell() {
  */
 void terminate_all_children(Shell* sh) {
     // until shell process has children processes:
+    
+    if (child(sh) <= 0) printf("\nNo child to terminate.\n");
     while (child(sh) > 0) {
         int exitStatus;
         fprintf(stderr, " child_nb: %d\n", child(sh));
@@ -138,9 +140,8 @@ void terminate_all_children(Shell* sh) {
             return;
         }
         else if (code >= 0) {
-            printExitCode(exitStatus, -1);
             decrease_childNb(sh);
-            fprintf(stderr, "decresead child_number\n");    
+            printExitCode(exitStatus, -1);
         }
     }
 }
@@ -156,6 +157,7 @@ void terminate_all_children(Shell* sh) {
 void clean_exit(Shell* sh, int exitCode) {
     terminate_all_children(sh);
     sh_free(sh);
+    fprintf(stderr, "Exiting with exit code %d\n", exitCode);
     exit(exitCode);
 }
 
