@@ -278,9 +278,9 @@ int wait_s(int* exitStatus) {
             write(2, msg, strlen(msg)+1);
             wait_s(exitStatus);
         } else {
-            const char msg[] = "no child \n";
+            const char msg[] = "wait_s: no child \n";
             write(2, msg, strlen(msg)+1);
-            return EXIT_SUCCESS;
+            return 2;
         }
 
     }

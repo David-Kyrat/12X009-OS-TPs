@@ -276,7 +276,7 @@ const char* strip(char* str);
 /**
  * Wrapper around 'wait()' that handles error when necessary and retries when EINTR happened
  * @param exitStatus variable into which store the exit status of the child
- * @return 0 for success, -1 for errors
+ * @return 0 for success, -1 for errors or 2 if there was not child to wait for
  */
 int wait_s(int* exitStatus);
 

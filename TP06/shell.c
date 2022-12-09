@@ -17,7 +17,6 @@
 #include "util.h"
 
 
-
 /**
  * If 'isForground' is -1 prints "job exited with exit code 'exitcode'"
  * else if 'isForeground' is 0 prints "Background job exited with exit code 'exitcode'"
@@ -103,7 +102,9 @@ int increase_childNb(Shell* sh) {
 //Global variable referring to the current environment
 extern char** environ;
 void hdl_sigint(Shell* sh);
-void (*hdl_store)(int, siginfo_t* info, void* ucontext);
+void hdl_sigchild(Shell*, pid_t);
+void hdl_sigup(Shell* sh);
+
 
 Shell* new_Shell() {
     Shell* sh = tryalc(malloc(sizeof(Shell)));
@@ -126,24 +127,21 @@ Shell* new_Shell() {
  * Wait for all children to die, then terminates them with wait()
  */
 void terminate_all_children(Shell* sh) {
-    // until shell process has child:
-    /*            if (wait(&exit_status) < 0) {
-                printErr("%s: hdl_sigint, FG pid: \n", sh->foreground_job);
-            }*/
+    // until shell process has children processes:
     while (child(sh) > 0) {
         int exitStatus;
-        //wait_s(&exitStatus);
-
-        write(2, "waiting", 7);
         fprintf(stderr, " child_nb: %d\n", child(sh));
-        //wait_s(&exitStatus);
-        //TODO: fix this
-        /*int se = errno;
-        fprintf(stderr, "waiting tal: %s\n", strerror(se));
-        printExitCode(exitStatus, -1);*/
-        decrease_childNb(sh);
-
-        fprintf(stderr, "decresead child_number\n");
+        int code = wait_s(&exitStatus);
+        if (code == 2) {
+            // there were no child to wait for => sets number of child to 0 and returns
+            sh->child_number = 0;
+            return;
+        }
+        else if (code >= 0) {
+            printExitCode(exitStatus, -1);
+            decrease_childNb(sh);
+            fprintf(stderr, "decresead child_number\n");    
+        }
     }
 }
 
@@ -157,7 +155,7 @@ void terminate_all_children(Shell* sh) {
  */
 void clean_exit(Shell* sh, int exitCode) {
     terminate_all_children(sh);
-    //sh_free(sh);
+    sh_free(sh);
     exit(exitCode);
 }
 
@@ -220,21 +218,18 @@ void redirectIO() {
     const char* redirection = "/dev/null";
     //close stdin, stdout
     //- do not close stderr
-    close(STDOUT_FILENO);
+    /* close(STDOUT_FILENO);
     int fd = open(redirection, O_RDWR);
-    for (int i = 0; i < 2; i++) dup2(fd, i);
+    for (int i = 0; i < 2; i++) dup2(fd, i); */
 
-    /*for (int i = 0; i < 3; i++)
-        dup2()
+    for (int i = 0; i < 2; i++)
+        if (close(i) < 0) hdlCloseErr("stdin/out", 1);
 
-        if (close(i) < 0) hdlCloseErr("stdin/out/err", 1);*/
-
-    // reopens 3times /dev/null, so that the 3 first file descriptors points to it.
-    // (3rd first fd's are always std in/out/err)
-    /*for (int i = 0; i < 3; i++) {
-        if (open(redirection, (i == 0 ? O_RDONLY : O_RDWR) | O_EXCL))
-            hdlOpenErr(redirection, 1);
-    }*/
+    //reopens 2times /dev/null, so that the 2 first file descriptors points to it.
+    // (2 first fd's are always std in/out)
+    for (int i = 0; i < 2; i++) {
+        if (open(redirection, (i == 0 ? O_RDONLY : O_RDWR) | O_EXCL) < 0) hdlOpenErr(redirection, 1);
+    }
 }
 
 /**
@@ -323,7 +318,6 @@ int sh_getAndResolveCmd(Shell* sh) {
     const char** argv = readParseIn(&argc, &isForeground);
     if (argc <= 0 || argv == NULL) {
         printRErr("%s: Could not parse user input - read %d argument.\n", argc);  //returns -1
-        puts(" as");
     }
     const char* cmd_name = argv[0];
     switch (strswitch(cmd_name, CMDS, CMD_NB)) {
@@ -347,15 +341,9 @@ int sh_getAndResolveCmd(Shell* sh) {
 }
 
 void sh_free(Shell* sh) {
-    if (sh != NULL) {
-        if (sh->crt_path != NULL) {
-            free(sh->crt_path);
-            sh->crt_path = NULL;
-        }
-        free(sh);
-        sh = NULL;
+    free(sh->crt_path);
+    free(sh);
         // 'crt_path' and 'sh' were the only "malloc'ed" variables
-    }
 }
 
 
@@ -369,10 +357,43 @@ void sh_free(Shell* sh) {
 /** List of signal to handle.*/
 const int SIG_TO_HDL[] = {SIGQUIT, SIGINT, SIGHUP, SIGCHLD};
 const int SIG_TO_IGNORE[] = {SIGCHLD, SIGTERM};
-const int SIG_NB = 5, IGNORE_NB = 1;  // Number of signal to handle
+const int SIG_NB = 4, IGNORE_NB = 2;  // Number of signal to handle
 
 //TODO: DIRE AUX ASSITANTS QU'IL YA UNE FAUTE DANS L'ENONCE SIGQUIT EST ENVOYÉ PAR CTRL+D
 //TODO: IL NE DOIT DONC PAS ETRE IGNORE
+
+void manage_signals(int sig, siginfo_t* info, Shell* sh) {
+    switch (sig) {
+        case SIGQUIT:
+            // cleanup before exiting => avoiding zombies and orphans
+            exit(0);
+            clean_exit(sh, 0);
+            // Do nothing when ctrl+d is pressed for some reason, => CTRL+D is not SIGTERM ?
+            break;
+
+        case SIGINT:
+            hdl_sigint(sh);
+            // killing foreground job of sh
+            break;
+
+        case SIGHUP:
+            write(STDERR_FILENO, "hup\n", 5);
+            // something here
+            break;
+
+        case SIGCHLD: 
+            // something here
+            write(STDERR_FILENO, "sigchild\n", 10);
+            hdl_sigchild(sh, info->si_pid);             
+        break;
+
+        default:
+
+            write(STDERR_FILENO, "defa\n", 6);
+            break;
+    }
+}
+
 
 void hdl_sigint(Shell* sh) {
     if (sh_FJ(sh) != -2) {
@@ -380,16 +401,24 @@ void hdl_sigint(Shell* sh) {
             printErr("%s: cannot kill foreground job (pid: %d)\n", sh_FJ(sh));
             return;
         }
-        int exit_status;
-        /* if (wait_s(&exit_status) >= 0) {
-            decrease_childNb(sh);
-            printExitCode(exit_status, 1);
-        } */
+        int exit_status, code;
+        code = wait_s(&exit_status);
+        if (code == 2) {
+            sh->child_number = 0;
+        } else if (code >= 0) decrease_childNb(sh);
+
+        printExitCode(exit_status, 1);
     }
 }
 
+void hdl_sigup(Shell* sh) {
+    kill(sh_FJ(sh), SIGHUP);
+    kill(sh_BJ(sh), SIGHUP);
+    clean_exit(sh, 0);
+}
+
 void hdl_sigchild(Shell* sh, pid_t dying_child_pid) {
-    
+    fprintf(stderr, "sigchild\n");
     if (dying_child_pid == sh->background_job) {
         int exitStatus;
         if (waitpid(dying_child_pid, &exitStatus, 0) == -1) {
@@ -402,57 +431,16 @@ void hdl_sigchild(Shell* sh, pid_t dying_child_pid) {
                 write(2, msg, strlen(msg) + 1);
                 return;
             } else {
-                const char msg[] = "no child \n";
+                const char msg[] = "in sigchild, no child \n";
                 write(2, msg, strlen(msg) + 1);
             }
         }
         decrease_childNb(sh);
+        set_BJ(sh, -2);
         printExitCode(exitStatus, 0);
     }
     
 }
-
-void manage_signals(int sig, siginfo_t* info, Shell* sh) {
-    switch (sig) {
-        case SIGQUIT:
-            // cleanup before exiting => avoiding zombies and orphans
-            write(STDERR_FILENO, "quit\n", 6);
-            //clean_exit(sh, 0);
-            // Do nothing when ctrl+d is pressed for some reason, => CTRL+D is not SIGTERM ?
-            break;
-
-        case SIGINT:
-            //hdl_sigint(sh);
-            write(2, "sigint\n",7);
-            /*const char* msg = "I will not be stopped, I will not go easy.\n";
-            lseek(STDOUT_FILENO, 5, 0);
-            write(STDOUT_FILENO, msg, strlen(msg)+1);*/
-
-            //How to get the pid of the foreground job ???
-            //=> use sig_action and pass Shell* sh as void pointer$
-            //! => So initSigHandlers has to be called in constructor i.e. in "new_Shell()"
-
-            // killing foreground job of sh
-            break;
-
-        case SIGHUP:
-            write(STDERR_FILENO, "hup\n", 5);
-            // something here
-            break;
-
-        case SIGCHLD: {
-            // something here
-            hdl_sigchild(sh, info->si_pid); 
-            write(STDERR_FILENO, "child\n", 7);
-        } break;
-
-        default:
-
-            write(STDERR_FILENO, "defa\n", 6);
-            break;
-    }
-}
-
 
 //TODO: COMMENT THIS
 
@@ -461,25 +449,7 @@ int initSigHandlers(Shell* sh, void (*sig_hdler)(int, siginfo_t* info, void* uco
     sa.sa_flags = SA_SIGINFO | SA_RESTART;
 
     printf("Pid: %d\n", getpid());
-
-    //sa.sa_sigaction = manage_signals;
-
-    // wrapper for manage signals that has access to a shell instance in context  (we can't pass it as argument
-    // so this is the only way of accessing an instance of 'Shell' which is not a global variable)
-    //void manage_signals_wrapper(int signum, siginfo_t* info, void* ucontext) {
-    //        manage_signals(signum, info, sh);
-    //}
-    /* void** test = malloc(sizeof(void*));
-    *test = manage_signals_wrapper; */
-    //hdl_store = manage_signals_wrapper;
     sa.sa_sigaction = sig_hdler; 
-
-    sa.sa_sigaction(1, NULL, NULL); // calling here hdl_store seems to work
-    //? note: hdl_store == *test, and (*hdl_store) gives {void (int, siginfo_t *, void *)} 0x7fffffffd9b8 where 0x7f... is the same addr as *test and hdl_store
-    // using void* ptr to store manage does not work
-    
-
-    if (2 == 1) printf("2\n");
 
     sigemptyset(&sa.sa_mask);
     for (int i = 0; i < SIG_NB; i++)
@@ -499,6 +469,11 @@ int initSigHandlers(Shell* sh, void (*sig_hdler)(int, siginfo_t* info, void* uco
     //* Ignore Signals to ignore
     //
     struct sigaction sa_ign;  //use same sa make everything bug
+    
+    sigemptyset(&sa_ign.sa_mask);
+    for (int i = 0; i < SIG_NB; i++) sigaddset(&sa_ign.sa_mask, SIG_TO_IGNORE[i]);
+
+    
     sa_ign.sa_handler = SIG_IGN;
     sa_ign.sa_flags = SA_RESTART;
     for (int i = 0; i < IGNORE_NB; i++) {
@@ -511,6 +486,8 @@ int initSigHandlers(Shell* sh, void (*sig_hdler)(int, siginfo_t* info, void* uco
 
     return EXIT_SUCCESS;
 }
+
+
 
 // ------------------- END SIGNALS -----------------
 
