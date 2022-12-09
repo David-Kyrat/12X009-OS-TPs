@@ -263,23 +263,7 @@ int executeJob(Shell* sh, const char* cmd_name, char* const argv[], int isForegr
 
         if (isForeground) {
             set_FJ(sh, t_pid);
-            printf("FG: %d\n", sh->foreground_job);
-            printf("BG: %d\n", sh->background_job);
-
             //- Only wait for foreground jobs
-            /* int wait_out = wait(&child_exitcode);
-            if (wait_out < 0) {
-                int err = errno;
-                if (err == ECHILD){ 
-                    fprintf(stderr, "no child\n");
-                    decrease_childNb(sh);
-                }
-                else fprintf(stderr, "%s - pid:%d\n", strerror(err), t_pid);
-            }
-            else {
-                printExitCode(child_exitcode, 1);
-                decrease_childNb(sh);
-            } */
             int code = wait_s(&child_exitcode);
             if (sh_FJ(sh) == -2) return EXIT_SUCCESS; // if foreground job was killed by a signal just return
 
@@ -294,9 +278,6 @@ int executeJob(Shell* sh, const char* cmd_name, char* const argv[], int isForegr
 
         } else {
             set_BJ(sh, t_pid);
-            printf("FG: %d\n", sh->foreground_job);
-            printf("BG: %d\n", sh->background_job);
-
             printf("[1] \t[%d] - %s\n", sh_BJ(sh), cmd_name);
             return EXIT_SUCCESS;
         }
@@ -313,7 +294,8 @@ int executeJob(Shell* sh, const char* cmd_name, char* const argv[], int isForegr
 
 
 int sh_getAndResolveCmd(Shell* sh) {
-    //TODO: Check for & => and make background job
+    sh_prettyPrintPath(sh);
+
     int argc = 0, isForeground = 1;
     const char** argv = readParseIn(&argc, &isForeground);
     if (argc <= 0 || argv == NULL) {
@@ -409,20 +391,6 @@ void hdl_sigup(Shell* sh) {
 void hdl_sigchild(Shell* sh, pid_t dying_child_pid) {
     if (dying_child_pid == sh->background_job) {
         int exitStatus, code;
-        /* if (waitpid(dying_child_pid, &exitStatus, 0) == -1) {
-            int savedErr = errno;
-            if (savedErr != EINTR && savedErr != ECHILD) {
-                fprintf(stderr, "%s: cannot kill child.\n", strerror(savedErr));
-                return;
-            } else if (savedErr == EINTR) {
-                const char msg[] = "interrupted retrying\n";
-                write(2, msg, strlen(msg) + 1);
-                return;
-            } else {
-                const char msg[] = "in sigchild, no child \n";
-                write(2, msg, strlen(msg) + 1);
-            }
-        } */
         code = waitpid_s(dying_child_pid, &exitStatus);
         if (code == 2) {
             sh->child_number = 0;
@@ -461,7 +429,7 @@ int initSigHandlers(Shell* sh, void (*sig_hdler)(int, siginfo_t* info, void* uco
     //
     //* Ignore Signals to ignore
     //
-    struct sigaction sa_ign;  //use same sa make everything bug
+    struct sigaction sa_ign;  //use same sa struct does not work
     
     sigemptyset(&sa_ign.sa_mask);
     for (int i = 0; i < SIG_NB; i++) sigaddset(&sa_ign.sa_mask, SIG_TO_IGNORE[i]);
@@ -479,10 +447,9 @@ int initSigHandlers(Shell* sh, void (*sig_hdler)(int, siginfo_t* info, void* uco
 
     return EXIT_SUCCESS;
 }
-
-
-
 // ------------------- END SIGNALS -----------------
+
+
 
 /**
  * ========================================================

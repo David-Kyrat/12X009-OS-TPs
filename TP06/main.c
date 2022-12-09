@@ -18,17 +18,13 @@ int main(int argc, char* argv[]) {
         exit(EXIT_FAILURE);
 
     for (;;) {
-
-
-        sh_prettyPrintPath(shell);
-        
         int tmp = sh_getAndResolveCmd(shell);
         if (tmp < 0 ) {
             err = EXIT_FAILURE;
             fprintf(stderr, "Command could not be resolved. Please try again.\n\n");
         }
-        // Sometimes errors stays stuck on stderr which prevents programm from displaying
-        // what should be in stdout correctly
+        // Sometimes some errors&output stays stuck on stderr/stdout which prevents programm from displaying
+        // of further message / user input correctly (since all 3 (in/out/err) are displayed at the same place)
         fflush(stderr);
         fflush(stdout);
     }
