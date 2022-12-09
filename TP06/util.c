@@ -280,6 +280,7 @@ int wait_s(int* exitStatus) {
         } else {
             const char msg[] = "no child \n";
             write(2, msg, strlen(msg)+1);
+            return EXIT_SUCCESS;
         }
 
     }

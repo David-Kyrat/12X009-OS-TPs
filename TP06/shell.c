@@ -351,10 +351,11 @@ const int SIG_NB = 5, IGNORE_NB = 2; // Number of signal to handle
 void hdl_sigint(Shell* sh) {
             kill(sh->foreground_job, SIGTERM);
             int exit_status;
-            wait_s(&exit_status);
-//            sh->child_number -= 1;
-            decrease_childNb(sh);
-            printExitCode(exit_status, 1);
+            if (wait_s(&exit_status) >= 0) {
+                decrease_childNb(sh);
+                printExitCode(exit_status, 1);
+            }
+                
 }
 
 void manage_signals(int sig, siginfo_t info, Shell* sh) {
