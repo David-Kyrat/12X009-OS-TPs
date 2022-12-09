@@ -28,12 +28,6 @@
 
 const int CMD_NB = 2;
 const char* CMDS[] = {CMD_CD, CMD_EXIT};
-/** 
- * global variable to be able to see it when doing signal handling => won't be modified there though, because the handler mustn't modify global variables
- * sums up the amount of child process for all instances of the struct Shell.
- */
-int tot_child_nb;
-//TODO: find a way to keep it up to date even after signal managment that may terminate child without modifying this
 
 struct Shell {
     /** Contains the cwd (of Size PATH_MAX).
@@ -44,7 +38,7 @@ struct Shell {
     pid_t foreground_job;
     // Pid of current process launched as background job
     pid_t background_job;
-    // Actual number of current non-waited/terminated child process createad by this specific instance of 'Shell'
+    // Number of current non-waited/terminated child
     int child_number;
 };
 
@@ -53,8 +47,8 @@ pid_t sh_BJ(Shell* sh) { return sh->background_job; }
 
 const char* pwd(Shell* sh) { return sh->crt_path; }
 /** Getter for 'child_number' field
- * @return Number of current non-waited/terminated child process created by the given instance of 'Shell'*/
-int child(Shell* sh) {  return sh->child_number; }
+ * @return Number of current non-waited/terminated child */
+int child(Shell* sh) { return sh->child_number; }
 
 /**
  * "Private" setter for 'crt_path' field
@@ -78,8 +72,7 @@ void set_BJ(Shell* sh, pid_t background_job) { sh->background_job = background_j
  * @param sh Shell instance
  * @param foreground_job  pid of foreground job
  */
-void set_FJ(Shell* sh, pid_t foreground_job) { sh->foreground_job = foreground_job;}
-
+void set_FJ(Shell* sh, pid_t foreground_job) { sh->foreground_job = foreground_job; }
 
 /**
  * If the number of child processes of the shell is > 0 => decrease it by -1
@@ -87,14 +80,10 @@ void set_FJ(Shell* sh, pid_t foreground_job) { sh->foreground_job = foreground_j
  * @return exit code 1 if it had > 0 children -1 otherwise
  */
 int decrease_childNb(Shell* sh) {
-    //int chld_nb = *(sh->child_number);
-    if (sh->child_number  > 0) {
-        tot_child_nb -= 1;
+    if (sh->child_number > 0) {
         sh->child_number -= 1;
-        fprintf(stderr, "decreasead child_number, now at %d\n", tot_child_nb);
         return EXIT_SUCCESS;
     }
-    fprintf(stderr, "child_number already at 0, now at %d\n", tot_child_nb);
     return -1;
 }
 
@@ -106,10 +95,8 @@ int decrease_childNb(Shell* sh) {
  */
 int increase_childNb(Shell* sh) {
     sh->child_number += 1;
-    //int chld_nb = *(sh->child_number);
-    //fprintf(stderr, "increased child_number, now at %d\n", chld_nb);
+    return sh->child_number <= 2 ? EXIT_SUCCESS : -1;
 }
-
 
 //Global variable referring to the current environment
 extern char** environ;
@@ -135,15 +122,13 @@ Shell* new_Shell() {
 }
 
 /**
- * Terminates for all children processes (created by the given instance of 'Shell') with wait()
+ * Wait for all children to die, then terminates them with wait()
  */
 void terminate_all_children(Shell* sh) {
     // until shell process has child:
     /*            if (wait(&exit_status) < 0) {
                 printErr("%s: hdl_sigint, FG pid: \n", sh->foreground_job);
             }*/
-    
-
     while (child(sh) > 0) {
         int exitStatus;
         //wait_s(&exitStatus);
@@ -161,22 +146,6 @@ void terminate_all_children(Shell* sh) {
 }
 
 /**
- * Terminates all children processes created by any instance of 'Shell' (of the process that called this function) with wait()
- * @param modify - whether to modify the actual global variable or not. 
- */
-void terminate_all_children_global(int modify) {
-    int child_nb_cp = tot_child_nb;
-    int exitStatus;
-    while (child_nb_cp > 0) {
-        wait_s(&exitStatus);
-        printExitCode(exitStatus, -1);
-        child_nb_cp -= 1;
-    }
-    if (modify) tot_child_nb = child_nb_cp;
-
-}
-
-/**
  * Perform different cleanup actions before exiting.
  * E.g. kill/wait for all childs still alive / zombified to avoid orphans,
  * free fields 'sh'... Then exits
@@ -189,8 +158,6 @@ void clean_exit(Shell* sh, int exitCode) {
     //sh_free(sh);
     exit(exitCode);
 }
-
-
 
 /**
  * Changes the current working directory to the one specified by the path argument
@@ -305,11 +272,12 @@ int executeJob(Shell* sh, const char* cmd_name, char* const argv[], int isForegr
     //* In parent
     if (t_pid > 0) {
         increase_childNb(sh);
-        //printf("Child_nb: %d\n", child(sh));
+
         if (isForeground) {
             set_FJ(sh, t_pid);
             printf("FG: %d\n", sh->foreground_job);
             printf("BG: %d\n", sh->background_job);
+
             //- Only wait for foreground jobs
             if (wait(&child_exitcode) < 0) {
                 int err = errno;
@@ -334,8 +302,6 @@ int executeJob(Shell* sh, const char* cmd_name, char* const argv[], int isForegr
             printf("[1] \t[%d] - %s\n", sh_BJ(sh), cmd_name);
             return EXIT_SUCCESS;
         }
-
-        return EXIT_SUCCESS;
     }
     if (t_pid == 0) {
         //* In child
@@ -423,7 +389,7 @@ void manage_signals(int sig, siginfo_t* info, Shell* sh) {
     switch (sig) {
         case SIGTERM:
             // cleanup before exiting => avoiding zombies and orphans
-
+            clean_exit(sh, 0);
             // Do nothing when ctrl+d is pressed for some reason, => CTRL+D is not SIGTERM ?
             break;
 
@@ -435,10 +401,11 @@ void manage_signals(int sig, siginfo_t* info, Shell* sh) {
         case SIGINT:
             hdl_sigint(sh);
             /*const char* msg = "I will not be stopped, I will not go easy.\n";
+            lseek(STDOUT_FILENO, 5, 0);
             write(STDOUT_FILENO, msg, strlen(msg)+1);*/
 
             //How to get the pid of the foreground job ???
-            //=> use sig_action and pass Shell* sh as void pointedr$
+            //=> use sig_action and pass Shell* sh as void pointer$
             //! => So initSigHandlers has to be called in constructor i.e. in "new_Shell()"
 
             // killing foreground job of sh
@@ -574,5 +541,5 @@ void sh_prettyPrintPath(Shell* sh) {
     printf("%s", pwd(sh));
     printf("%s )\n", colors[1]);
     //printf("|_ %s$ ", colors[5]);
+    resetCol();
 }
-

@@ -6,8 +6,7 @@
 
 #ifndef UTIL_H
 #define UTIL_H
-#include <sys/types.h> //pid_t
-#include <sys/wait.h> // idem
+
 
 /** Macro that Prints given message to stderr. Message should be printf formatted and the first arg is always strerror(savedErr) where savedErr is the saved value of errno.
 * Usage: 'printErr("%s, %d: port number not valid\n", port)' first %s will be 'strerror(savedErr)' */
@@ -280,14 +279,6 @@ const char* strip(char* str);
  * @return 0 for success, -1 for errors
  */
 int wait_s(int* exitStatus);
-
-/**
- * Wrapper around 'waitpid()' that handles error when necessary and retries when EINTR happened
- * @param pid pid of child to wait for
- * @param exitStatus variable into which store the exit status of the child
- * @return 0 for success, -1 for errors
- */
-int waitpid_s(pid_t pid, int* exitStatus);
 
 #endif /* UTIL_H */
  
