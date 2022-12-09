@@ -280,5 +280,15 @@ const char* strip(char* str);
  */
 int wait_s(int* exitStatus);
 
+
+/**
+ * Wrapper around 'waitpid()' that handles error when necessary and retries when EINTR happened
+ * @param pid pid of child to wait
+ * @param exitStatus variable into which store the exit status of the child
+ * @return 0 for success, -1 for errors or 2 if there was not child to wait for
+ */
+int waitpid_s(pid_t pid, int* exitStatus);
+
+
 #endif /* UTIL_H */
  

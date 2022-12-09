@@ -276,7 +276,7 @@ int executeJob(Shell* sh, const char* cmd_name, char* const argv[], int isForegr
             printf("BG: %d\n", sh->background_job);
 
             //- Only wait for foreground jobs
-            int wait_out = wait(&child_exitcode);
+            /* int wait_out = wait(&child_exitcode);
             if (wait_out < 0) {
                 int err = errno;
                 if (err == ECHILD){ 
@@ -288,10 +288,16 @@ int executeJob(Shell* sh, const char* cmd_name, char* const argv[], int isForegr
             else {
                 printExitCode(child_exitcode, 1);
                 decrease_childNb(sh);
-            } 
-            //printExitCode(child_exitcode, isForeground);
-            return EXIT_SUCCESS;
-            //} else return -1;
+            } */
+            int code = wait_s(&child_exitcode);
+            if (code == 2) sh->child_number = 0;
+            if (code >= 0) {
+                decrease_childNb(sh);
+                set_FJ(sh, -2);
+                printExitCode(child_exitcode, 1);
+                
+                return EXIT_SUCCESS;
+            } else return -1;
 
         } else {
             set_BJ(sh, t_pid);
@@ -311,6 +317,7 @@ int executeJob(Shell* sh, const char* cmd_name, char* const argv[], int isForegr
     return -1;
     //- If we're in parent we've returned with the return above and if we're child we've exited
 }
+
 
 int sh_getAndResolveCmd(Shell* sh) {
     //TODO: Check for & => and make background job
@@ -415,10 +422,9 @@ void hdl_sigup(Shell* sh) {
 }
 
 void hdl_sigchild(Shell* sh, pid_t dying_child_pid) {
-    fprintf(stderr, "sigchild\n");
     if (dying_child_pid == sh->background_job) {
-        int exitStatus;
-        if (waitpid(dying_child_pid, &exitStatus, 0) == -1) {
+        int exitStatus, code;
+        /* if (waitpid(dying_child_pid, &exitStatus, 0) == -1) {
             int savedErr = errno;
             if (savedErr != EINTR && savedErr != ECHILD) {
                 fprintf(stderr, "%s: cannot kill child.\n", strerror(savedErr));
@@ -431,10 +437,15 @@ void hdl_sigchild(Shell* sh, pid_t dying_child_pid) {
                 const char msg[] = "in sigchild, no child \n";
                 write(2, msg, strlen(msg) + 1);
             }
+        } */
+        code = waitpid_s(dying_child_pid, &exitStatus);
+        if (code == 2) {
+            sh->child_number = 0;
+        } else if (code >= 0) {
+            decrease_childNb(sh);
+            printExitCode(exitStatus, 1);
         }
-        decrease_childNb(sh);
         set_BJ(sh, -2);
-        printExitCode(exitStatus, 0);
     }
     
 }
@@ -509,13 +520,9 @@ extern char* colors[];
 /**
  * 0:default,  1:red, 2:Green,  3:Blue, 4:Purple, 5:yellow,  6:cyan
  */
-void setOutColor(int color) {
-    printf("%s", colors[color]);
-}
+void setOutColor(int color) { printf("%s", colors[color]); }
 
-void resetCol() {
-    setOutColor(0);
-}
+void resetCol() { setOutColor(0); }
 
 void sh_prettyPrintPath(Shell* sh) {
     printf("%s( %s", colors[1], colors[6]);
