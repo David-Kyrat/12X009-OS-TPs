@@ -208,20 +208,12 @@ void exit_shell(Shell* sh, const char* arg) {
     clean_exit(sh, exit_code);
 }
 
-/** Utility function if we ever need to do something to environ (e.g. pretreat it...) before returing it*/
-char** getEnvp() {
-    return environ;
-}
 
 //void because exit on error
 void redirectIO() {
     const char* redirection = "/dev/null";
     //close stdin, stdout
     //- do not close stderr
-    /* close(STDOUT_FILENO);
-    int fd = open(redirection, O_RDWR);
-    for (int i = 0; i < 2; i++) dup2(fd, i); */
-
     for (int i = 0; i < 2; i++)
         if (close(i) < 0) hdlCloseErr("stdin/out", 1);
 
@@ -231,6 +223,7 @@ void redirectIO() {
         if (open(redirection, (i == 0 ? O_RDONLY : O_RDWR) | O_EXCL) < 0) hdlOpenErr(redirection, 1);
     }
 }
+
 
 /**
  * Call execvpe, handle errors and print "Foreground job exited with exit code <errorcode extracted when handling error>"
@@ -258,13 +251,8 @@ int executeJob(Shell* sh, const char* cmd_name, char* const argv[], int isForegr
     pid_t t_pid = fork();
     int child_exitcode = EXIT_FAILURE;
 
-    if (t_pid < 0) {
-        printErr("executeJob: %s, %s - Cannot Fork.\n", argv[0]);
-        //printf("Foreground job exited\n\n");
-        //printExitCode(child_exitcode, isForeground);
-        //- No job exited because no job were created in the first place
-        return -1;
-    }
+    if (t_pid < 0)
+        printRErr("executeJob: %s, %s - Cannot Fork.\n", argv[0]); //returns -1
 
     //* In parent
     if (t_pid > 0) {
@@ -398,6 +386,7 @@ void manage_signals(int sig, siginfo_t* info, Shell* sh) {
     }
 }
 
+//TODO: why does entering 'clear' in shell => triggers sigint ??
 
 void hdl_sigint(Shell* sh) {
     if (sh_FJ(sh) != -2) {
@@ -446,8 +435,7 @@ void hdl_sigchild(Shell* sh, pid_t dying_child_pid) {
             printExitCode(exitStatus, 1);
         }
         set_BJ(sh, -2);
-    }
-    
+    }   
 }
 
 //TODO: COMMENT THIS
@@ -505,13 +493,9 @@ int initSigHandlers(Shell* sh, void (*sig_hdler)(int, siginfo_t* info, void* uco
  * ========================================================
  */
 
-/* void printPid(int in) {
-    char* msg = in ? "PID=%d> " : "[PID=%d] ";
-        printf(msg, getpid());
-} */
 
 void listEnv() {
-    for (char** current = getEnvp(); *current; current++) puts(*current);
+    for (char** current = environ; *current; current++) puts(*current);
 }
 
 //! 0:default,  1:red, 2:Green,  3:Blue, 4:Purple, 5:yellow,  6:cyan,  7:grey
