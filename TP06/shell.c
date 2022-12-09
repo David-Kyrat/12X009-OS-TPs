@@ -157,11 +157,10 @@ void terminate_all_children(Shell* sh) {
 void clean_exit(Shell* sh, int exitCode) {
     terminate_all_children(sh);
     sh_free(sh);
-    fprintf(stderr, "Exiting with exit code %d\n", exitCode);
+    fprintf(stderr, "Exiting with exit code %d.\n", exitCode);
     exit(exitCode);
 }
 
-//TODO: Sometimes cd eats last letter
 
 /**
  * Changes the current working directory to the one specified by the path argument
@@ -178,7 +177,6 @@ int cd(Shell* sh, const char* path) {
         if (isAbsolute)
             resolvedPath = absPath(path);
         else {
-            //! concat path eats last letter
             const char* tmp = concat_path(pwd(sh), path);
             resolvedPath = absPath(tmp);
             free(tmp);
@@ -283,6 +281,8 @@ int executeJob(Shell* sh, const char* cmd_name, char* const argv[], int isForegr
                 decrease_childNb(sh);
             } */
             int code = wait_s(&child_exitcode);
+            if (sh_FJ(sh) == -2) return EXIT_SUCCESS; // if foreground job was killed by a signal just return
+
             if (code == 2) sh->child_number = 0;
             if (code >= 0) {
                 decrease_childNb(sh);
@@ -366,7 +366,6 @@ void manage_signals(int sig, siginfo_t* info, Shell* sh) {
     switch (sig) {
         case SIGQUIT:
             // cleanup before exiting => avoiding zombies and orphans
-            exit(0);
             clean_exit(sh, 0);
             // Do nothing when ctrl+d is pressed for some reason, => CTRL+D is not SIGQUIT ?
             break;
@@ -378,11 +377,9 @@ void manage_signals(int sig, siginfo_t* info, Shell* sh) {
 
         case SIGHUP:
             hdl_sigup(sh);
-            // something here
             break;
 
         case SIGCHLD: 
-            // something here
             hdl_sigchild(sh, info->si_pid);             
         break;
 
@@ -394,23 +391,12 @@ void manage_signals(int sig, siginfo_t* info, Shell* sh) {
 
 void hdl_sigint(Shell* sh) {
     pid_t fj = sh_FJ(sh);
+    fprintf(stderr, "pid of fj: %d\n", fj);
     if (fj != -2 && fj != 0) {
         if (kill(fj, SIGINT) < 0) {
             printErr("%s: cannot kill foreground job (pid: %d)\n", sh_FJ(sh));
             return;
         }
-        int exit_status, code;
-        code = wait_s(&exit_status);
-        if (code == 2) {
-            sh->child_number = 0;
-            set_FJ(sh, -2);
-        } else if (code >= 0) {
-            decrease_childNb(sh);
-            printExitCode(exit_status, 1);
-            set_FJ(sh, -2);
-        }
-
-        
     }
 }
 
