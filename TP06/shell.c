@@ -275,7 +275,7 @@ int executeJob(Shell* sh, const char* cmd_name, char* const argv[], int isForegr
 
         if (isForeground) {
             set_FJ(sh, t_pid);
-            printf("FG: %d\n", sh->foreground_job)
+            printf("FG: %d\n", sh->foreground_job);
             printf("BG: %d\n", sh->background_job);
 
             //- Only wait for foreground jobs
