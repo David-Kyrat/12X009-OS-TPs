@@ -356,8 +356,8 @@ void sh_free(Shell* sh) {
 
 /** List of signal to handle.*/
 const int SIG_TO_HDL[] = {SIGQUIT, SIGINT, SIGHUP, SIGCHLD};
-const int SIG_TO_IGNORE[] = {SIGCHLD, SIGTERM};
-const int SIG_NB = 4, IGNORE_NB = 2;  // Number of signal to handle
+const int SIG_TO_IGNORE[] = {SIGTERM};
+const int SIG_NB = 4, IGNORE_NB = 1;  // Number of signal to handle
 
 //TODO: DIRE AUX ASSITANTS QU'IL YA UNE FAUTE DANS L'ENONCE SIGQUIT EST ENVOYÉ PAR CTRL+D
 //TODO: IL NE DOIT DONC PAS ETRE IGNORE
@@ -368,7 +368,7 @@ void manage_signals(int sig, siginfo_t* info, Shell* sh) {
             // cleanup before exiting => avoiding zombies and orphans
             exit(0);
             clean_exit(sh, 0);
-            // Do nothing when ctrl+d is pressed for some reason, => CTRL+D is not SIGTERM ?
+            // Do nothing when ctrl+d is pressed for some reason, => CTRL+D is not SIGQUIT ?
             break;
 
         case SIGINT:
@@ -377,19 +377,16 @@ void manage_signals(int sig, siginfo_t* info, Shell* sh) {
             break;
 
         case SIGHUP:
-            write(STDERR_FILENO, "hup\n", 5);
+            hdl_sigup(sh);
             // something here
             break;
 
         case SIGCHLD: 
             // something here
-            write(STDERR_FILENO, "sigchild\n", 10);
             hdl_sigchild(sh, info->si_pid);             
         break;
 
         default:
-
-            write(STDERR_FILENO, "defa\n", 6);
             break;
     }
 }
