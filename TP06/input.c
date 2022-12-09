@@ -55,6 +55,7 @@ const char* readInput() {
     const char* buff = readline(msg);
     if (buff == NULL || strlen(buff) <= 0) return  NULL;
     return strip(buff);
+    
 }
 
 /**

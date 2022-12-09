@@ -8,7 +8,7 @@ int main(int argc, char* argv[]) {
     printf("\n");
     int err = EXIT_SUCCESS;
     Shell* shell = new_Shell();
-
+    initSigHandlers(shell);
     for (;;) {
 
 
@@ -18,10 +18,11 @@ int main(int argc, char* argv[]) {
             err = EXIT_FAILURE;
             fprintf(stderr, "Command could not be resolved. Please try again.\n\n");
         }
+        //sleep(0.3);
         // Sometimes errors stays stuck on stderr which prevents programm from displaying
         // what should be in stdout correctly
-        /*fflush(stderr);
-        fflush(stdout);*/
+        fflush(stderr);
+        fflush(stdout);
     }
 
     return err;
