@@ -65,4 +65,6 @@ pid_t sh_FJ(Shell* sh);
 void sh_prettyPrintPath(Shell* sh);
 
 
+int initSigHandlers(Shell* sh);
+
 #endif /* SHELL_H */
