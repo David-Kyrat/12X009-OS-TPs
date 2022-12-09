@@ -73,4 +73,9 @@ int initSigHandlers(Shell* sh, void (*sig_hdler)(int, siginfo_t* info, void* uco
  */
 void sh_prettyPrintPath(Shell* sh);
 
+/**
+ * print '|_ $ ' (without using printf)
+ */
+void display_prompt();
+
 #endif /* SHELL_H */

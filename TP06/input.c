@@ -17,6 +17,11 @@ const char* ARG_SEP = " ";  //Tab and space are the only argument separator
 // 0:default,  1:red, 2:Green,  3:Blue, 4:Purple, 5:yellow,  6:cyan,  7:grey
 const char* colors[] = {"\033[0m", "\033[0;31m", "\033[0;32m", "\033[0;34m", "\033[0;35m", "\033[0;33m", "\033[0;36m","\033[2m"};
 
+//* symbol present at start every "input line" in shell (like the '$' )
+const char* prompt = "\033[0;31m|_ \033[0;33m$ \033[0m "; 
+//snprintf(msg, 24, "%s|_ %s$ %s ", colors[1], colors[5], colors[0]);
+
+
 //!
 //! Below is the basic code of readInput() (function that returns what the user entered) which I preferred to replace by the GNU library "readline.h" by simplicity. The library just adds more feature (like going back and forward) when User has to enter text. Everything else is still made by us, it is just that specific small  part that was replaced for convenience.
 //! 
@@ -50,9 +55,7 @@ const char* colors[] = {"\033[0m", "\033[0;31m", "\033[0;32m", "\033[0;34m", "\0
 }*/
 
 const char* readInput() {
-    char msg[25];
-    snprintf(msg, 24, "%s|_ %s$ %s ", colors[1], colors[5], colors[0]);
-    const char* buff = readline(msg);
+    const char* buff = readline(prompt);
     if (buff == NULL || strlen(buff) <= 0) return  NULL;
     return strip(buff);   
 }
@@ -103,4 +106,9 @@ const char** readParseIn(int* argc, int* isForeground) {
     //printf("%s", colors[0]); //reset colors because it seems to stay stuck in red.
     if (tmp == NULL) return NULL;
     return parseInput(tmp, argc, isForeground);
+}
+
+
+const char* getPrompt() {
+    return prompt;
 }

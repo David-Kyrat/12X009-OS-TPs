@@ -21,7 +21,10 @@ const char* readInput();
  */
 const char** readParseIn(int* argc, int* isForeground);
 
-
+/**
+ * @return prompt global variable
+ */
+const char* getPrompt();
 
 
 #endif /* INPUT_H */

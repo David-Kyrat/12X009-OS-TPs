@@ -371,8 +371,9 @@ void manage_signals(int sig, siginfo_t* info, Shell* sh) {
             break;
 
         case SIGINT:
+            // killing foreground job of 'sh'
             hdl_sigint(sh);
-            // killing foreground job of sh
+            display_prompt();
             break;
 
         case SIGHUP:
@@ -380,7 +381,7 @@ void manage_signals(int sig, siginfo_t* info, Shell* sh) {
             break;
 
         case SIGCHLD: 
-            hdl_sigchild(sh, info->si_pid);             
+            hdl_sigchild(sh, info->si_pid);
         break;
 
         default:
@@ -391,10 +392,9 @@ void manage_signals(int sig, siginfo_t* info, Shell* sh) {
 
 void hdl_sigint(Shell* sh) {
     pid_t fj = sh_FJ(sh);
-    fprintf(stderr, "pid of fj: %d\n", fj);
     if (fj != -2 && fj != 0) {
         if (kill(fj, SIGINT) < 0) {
-            printErr("%s: cannot kill foreground job (pid: %d)\n", sh_FJ(sh));
+            printErr("%s: cannot kill foreground job (pid: %d)\n", fj);
             return;
         }
     }
@@ -428,9 +428,10 @@ void hdl_sigchild(Shell* sh, pid_t dying_child_pid) {
             sh->child_number = 0;
         } else if (code >= 0) {
             decrease_childNb(sh);
-            printExitCode(exitStatus, 1);
+            printExitCode(exitStatus, 0);
         }
         set_BJ(sh, -2);
+        display_prompt();
     }   
 }
 
@@ -510,4 +511,11 @@ void sh_prettyPrintPath(Shell* sh) {
     printf("%s )\n", colors[1]);
     //printf("|_ %s$ ", colors[5]);
     resetCol();
+}
+
+void display_prompt() {
+    //sh_prettyPrintPath(sh);
+    const char* tmp = getPrompt();
+    int len = strlen(tmp);
+    write(1, tmp, len+1);
 }
