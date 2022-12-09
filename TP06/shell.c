@@ -357,7 +357,7 @@ void hdl_sigint(Shell* sh) {
             printExitCode(exit_status, 1);
 }
 
-void manage_signals(Shell* sh, int sig) {
+void manage_signals(int sig, siginfo_t info, Shell* sh) {
     switch (sig) {  
         case SIGTERM: 
             // cleanup before exiting => avoiding zombies and orphans
@@ -402,18 +402,6 @@ void manage_signals(Shell* sh, int sig) {
 }
 
 
-
-void manage_signals_wrapper(int signum, siginfo_t info, void* mydata) {
-    // Casting Shell pointer to data because it is the only "complex"
-    // argument required by the manage_signal function.
-    // i.e. mydata should be of type Shell* and --nothing else--
-    Shell* sh = (Shell*) mydata;
-    manage_signals(sh, signum);
-    //return NULL;
-    // we have to return something to match the required signature
-}
-
-
 //TODO: COMMENT THIS
 
 int initSigHandlers(Shell* sh) {
@@ -421,6 +409,11 @@ int initSigHandlers(Shell* sh) {
     printf("Pid: %d\n", getpid());
 
     //sa.sa_sigaction = manage_signals;
+
+    // wrapper for manage signals that has access to a shell instance in context  (we can't pass it as argument 
+    // so this is the only way of accessing an instance of 'Shell' which is not a global variable)
+    void manage_signals_wrapper(int signum, siginfo_t info, void* ucontext) { manage_signals(signum, info, sh); }
+
     sa.sa_sigaction = manage_signals_wrapper;
 
     sa.sa_flags = 0;
