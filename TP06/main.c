@@ -8,7 +8,7 @@ int main(int argc, char* argv[]) {
     printf("\n");
     int err = EXIT_SUCCESS;
     Shell* shell = new_Shell();
-    //initSigHandlers(shell);
+    initSigHandlers(shell);
     for (;;) {
 
 

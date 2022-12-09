@@ -53,7 +53,6 @@ const char* readInput() {
     char msg[25];
     snprintf(msg, 24, "%s|_ %s$ %s ", colors[1], colors[5], colors[0]);
     const char* buff = readline(msg);
-    strlen(buff);
     if (buff == NULL || strlen(buff) <= 0) return  NULL;
     return strip(buff);
     

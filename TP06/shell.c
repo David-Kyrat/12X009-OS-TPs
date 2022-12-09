@@ -10,6 +10,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include "shell.h"
 #include "files.h"
 #include "input.h"
 #include "shell.h"
@@ -41,9 +42,10 @@ struct Shell {
     int child_number;
 };
 
-const char* pwd(Shell* sh) { return sh->crt_path; }
+pid_t sh_FJ(Shell* sh) { return sh->foreground_job;}
 pid_t sh_BJ(Shell* sh) { return sh->background_job; }
-pid_t sh_FJ(Shell* sh) { return sh->foreground_job; }
+
+const char* pwd(Shell* sh) { return sh->crt_path; }
 /** Getter for 'child_number' field
  * @return Number of current non-waited/terminated child */
 int child(Shell* sh) { return sh->child_number; }
@@ -72,6 +74,11 @@ void set_BJ(Shell* sh, pid_t background_job) { sh->background_job = background_j
  */
 void set_FJ(Shell* sh, pid_t foreground_job) { sh->foreground_job = foreground_job; }
 
+/**
+ * If the number of child processes of the shell is > 0 => decrease it by -1
+ * @param sh the shell
+ * @return exit code 1 if it had > 0 children -1 otherwise
+ */
 int decrease_childNb(Shell* sh) {
     if (sh->child_number > 0) {
         sh->child_number -= 1;
@@ -80,6 +87,12 @@ int decrease_childNb(Shell* sh) {
     return -1;
 }
 
+/**
+ * Increases the number of child processes by one, and returns an error if the number of child
+ * processes is greater than two
+ * @param sh the shell
+ * @return exit code 1 if it had less than 2 children -1 otherwise
+ */
 int increase_childNb(Shell* sh) {
     sh->child_number += 1;
     return sh->child_number <= 2 ? EXIT_SUCCESS : -1;
@@ -89,7 +102,7 @@ int increase_childNb(Shell* sh) {
 extern char** environ;
 void hdl_sigint(Shell* sh);
 void manage_signals(int sig, siginfo_t* info, Shell* sh);
-
+void (*hdl_store)(int, siginfo_t* info, void* ucontext);
 
 Shell* new_Shell() {
     Shell* sh = tryalc(malloc(sizeof(Shell)));
@@ -99,8 +112,8 @@ Shell* new_Shell() {
         printErr("%s - cannot initialize cwd (%s)\n", sh->crt_path);
         return NULL;
     }
-    sh->background_job = -1;
-    sh->foreground_job = -1;
+    sh->background_job = -2;
+    sh->foreground_job = -2;
     sh->child_number = 0;
 
     //initSigHandlers(sh);
@@ -230,11 +243,10 @@ int exec(Shell* sh, const char* filename, char* const argv[], int isForeground) 
     int exitcode = 0;
 
     if (execvp(filename, argv) < 0) {
-        // sets
         if (isForeground)
-            sh->foreground_job = -1;
+            sh->foreground_job = -2;
         else
-            sh->background_job = -1;
+            sh->background_job = -2;
         exitcode = errno;
         fprintf(stderr, "%s: \"%s\" \n", exitcode == ENOENT ? "command not found" : strerror(exitcode), filename);
     }
@@ -248,8 +260,6 @@ int executeJob(Shell* sh, const char* cmd_name, char* const argv[], int isForegr
     if (cmd_name == NULL || strlen(cmd_name) <= 0) return -1;
     pid_t t_pid = fork();
     int child_exitcode = EXIT_FAILURE;
-    printf("FG: %d\n", sh->foreground_job);
-    printf("BG: %d\n", sh->background_job);
 
     if (t_pid < 0) {
         printErr("executeJob: %s, %s - Cannot Fork.\n", argv[0]);
@@ -265,9 +275,14 @@ int executeJob(Shell* sh, const char* cmd_name, char* const argv[], int isForegr
 
         if (isForeground) {
             set_FJ(sh, t_pid);
+            printf("FG: %d\n", sh->foreground_job)
+            printf("BG: %d\n", sh->background_job);
+
             //- Only wait for foreground jobs
             if (wait(&child_exitcode) < 0) {
-                printErr("%s - pid:%d\n", t_pid);
+                int err = errno;
+                if (err == ECHILD) decrease_childNb(sh);
+                else fprintf(stderr, "%s - pid:%d\n", strerror(err), t_pid);
             }
             else {
                 printExitCode(child_exitcode, 1);
@@ -281,6 +296,9 @@ int executeJob(Shell* sh, const char* cmd_name, char* const argv[], int isForegr
 
         } else {
             set_BJ(sh, t_pid);
+            printf("FG: %d\n", sh->foreground_job);
+            printf("BG: %d\n", sh->background_job);
+
             printf("[1] \t[%d] - %s\n", sh_BJ(sh), cmd_name);
             return EXIT_SUCCESS;
         }
@@ -336,6 +354,8 @@ void sh_free(Shell* sh) {
     }
 }
 
+
+
 /*
  * =============================================================
  * -------------------  Signal handling ------------------------
@@ -344,18 +364,23 @@ void sh_free(Shell* sh) {
 
 /** List of signal to handle.*/
 const int SIG_TO_HDL[] = {SIGTERM, SIGQUIT, SIGINT, SIGHUP, SIGCHLD};
-const int SIG_TO_IGNORE[] = {SIGQUIT};
+const int SIG_TO_IGNORE[] = {SIGCHLD, SIGQUIT};
 const int SIG_NB = 5, IGNORE_NB = 2;  // Number of signal to handle
 
 //TODO: DIRE AUX ASSITANTS QU'IL YA UNE FAUTE DANS L'ENONCE SIGQUIT EST ENVOYÉ PAR CTRL+D
 //TODO: IL NE DOIT DONC PAS ETRE IGNORE
 
 void hdl_sigint(Shell* sh) {
-    kill(sh->foreground_job, SIGTERM);
-    int exit_status;
-    if (wait_s(&exit_status) >= 0) {
-        decrease_childNb(sh);
-        printExitCode(exit_status, 1);
+    if (sh_FJ(sh) != -2) {
+        if (kill(sh->foreground_job, SIGTERM) < 0) {
+            printErr("%s: cannot kill foreground job (pid: %d)\n", sh_FJ(sh));
+            return;
+        }
+        int exit_status;
+        if (wait_s(&exit_status) >= 0) {
+            decrease_childNb(sh);
+            printExitCode(exit_status, 1);
+        }
     }
 }
 
@@ -420,6 +445,7 @@ void manage_signals(int sig, siginfo_t* info, Shell* sh) {
     }
 }
 
+
 //TODO: COMMENT THIS
 
 int initSigHandlers(Shell* sh) {
@@ -435,19 +461,17 @@ int initSigHandlers(Shell* sh) {
     void manage_signals_wrapper(int signum, siginfo_t* info, void* ucontext) {
         manage_signals(signum, info, sh);
     }
-    void** test = malloc(sizeof(void*));
-    *test = manage_signals_wrapper;
+    /* void** test = malloc(sizeof(void*));
+    *test = manage_signals_wrapper; */
 
-    void (*hdl_store)(int, siginfo_t* info, void* ucontext) = malloc(sizeof(void));
     hdl_store = &manage_signals_wrapper;
-    sa.sa_sigaction = hdl_store;
-    // store = test tion = store
-    // check if &(*test) == &manage
-    // tester tion = wrapper 
+    sa.sa_sigaction = hdl_store; 
+
+    //sa.sa_sigaction(1, NULL, NULL); // calling here hdl_store seems to work
+    //? note: hdl_store == *test, and (*hdl_store) gives {void (int, siginfo_t *, void *)} 0x7fffffffd9b8 where 0x7f... is the same addr as *test and hdl_store
+    // using void* ptr to store manage does not work
     
 
-    /* void** storesHandler = (void**) malloc( sizeof(void*) );
-    *storesHandler = &manage_signals_wrapper; */
     if (2 == 1) printf("2\n");
 
     sigemptyset(&sa.sa_mask);
@@ -455,7 +479,7 @@ int initSigHandlers(Shell* sh) {
         sigaddset(&sa.sa_mask, SIG_TO_HDL[i]);
 
     //
-    //! Handle Signals to handle
+    //* Handle Signals to handle
     //
     for (int i = 0; i < SIG_NB; i++) {
         if (sigaction(SIG_TO_HDL[i], &sa, NULL) == -1) {
@@ -465,7 +489,7 @@ int initSigHandlers(Shell* sh) {
         }
     }
     //
-    //! Ignore Signals to ignore
+    //* Ignore Signals to ignore
     //
     struct sigaction sa_ign;  //use same sa make everything bug
     sa_ign.sa_handler = SIG_IGN;
