@@ -59,12 +59,18 @@ pid_t sh_BJ(Shell* sh);
  */
 pid_t sh_FJ(Shell* sh);
 
+/** TODO:Comment
+ * asd
+ */
+void manage_signals(int sig, siginfo_t* info, Shell* sh);
+
+/** TODO:Comment */
+int initSigHandlers(Shell* sh, void (*sig_hdler)(int, siginfo_t* info, void* ucontext));
+
+
 /**
  * Print the current working directory to console output
  */
 void sh_prettyPrintPath(Shell* sh);
-
-
-int initSigHandlers(Shell* sh);
 
 #endif /* SHELL_H */
