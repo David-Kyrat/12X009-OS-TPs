@@ -402,8 +402,14 @@ void hdl_sigchild(Shell* sh, pid_t dying_child_pid) {
     }   
 }
 
-//TODO: COMMENT THIS
 
+/**
+ * @brief Initialize signal handlers.
+ * 
+ * @param sh Shell
+ * @param sig_hdler Signal handler to use (see 'manage_signals' for example)
+ * @return int -1 if an error occured, 0 otherwise.
+ */
 int initSigHandlers(Shell* sh, void (*sig_hdler)(int, siginfo_t* info, void* ucontext)) {
     struct sigaction sa;
     sa.sa_flags = SA_SIGINFO | SA_RESTART;
