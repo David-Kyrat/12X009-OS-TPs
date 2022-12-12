@@ -34,7 +34,7 @@ $(EXEC): $(OBJS)
 test: test.c $(OBJS)
 	$(CC) test.c out/shell.o out/input.o out/util.o $(CFLAGS) $(DBGFLAGS) -o test.out
 
-
+# same as $(EXEC) but executable has a different name
 shell: $(OBJS)
 	$(CC) $(OBJS) -o shell -lreadline
 
