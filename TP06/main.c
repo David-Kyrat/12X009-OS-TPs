@@ -20,7 +20,7 @@ int main(int argc, char* argv[]) {
         int crtCode = sh_getAndResolveCmd(shell);
         if (crtCode < 0 ) {
             err = EXIT_FAILURE;
-            fprintf(stderr, "Command could not be resolved. Please try again.\n\n");
+            fprintf(stderr, "An error happened, while processing the command. Please try again.\n\n");
         }
         // Sometimes some errors&output stays stuck on stderr/stdout which prevents programm from displaying
         // of further message / user input correctly (since all 3 (in/out/err) are displayed at the same place)

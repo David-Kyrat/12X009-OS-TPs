@@ -1,3 +1,4 @@
+#include <asm-generic/errno-base.h>
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -249,7 +250,15 @@ int exec(Shell* sh, const char* filename, char* const argv[], int isForeground) 
 
 int executeJob(Shell* sh, const char* cmd_name, char* const argv[], int isForeground) {
     if (cmd_name == NULL || strlen(cmd_name) <= 0) return -1;
+    
+    if (!isForeground && sh_BJ(sh) != -2) {
+        // If there is currently already a background_job running
+        errno = EBUSY;
+        printRErr("executeJob: %s, background job (%d) is still running. Please wait for its completion or launch it as foreground job.\n", sh_BJ(sh));
+    } 
+
     pid_t t_pid = fork();
+    
     int child_exitcode = EXIT_FAILURE;
 
     if (t_pid < 0)
@@ -280,6 +289,7 @@ int executeJob(Shell* sh, const char* cmd_name, char* const argv[], int isForegr
             return EXIT_SUCCESS;
         }
     }
+
     if (t_pid == 0) {
         //* In child
         if (!isForeground) redirectIO();
@@ -343,7 +353,7 @@ const int SIG_NB = 4, IGNORE_NB = 2;  // Number of signal to handle
 void manage_signals(int sig, siginfo_t* info, Shell* sh) {
     switch (sig) {
         case SIGUSR1:
-            // CTRL+D received
+            // CTRL+D received => does not kill foreground job because it doesnt in a real shell
             // cleanup before exiting => avoiding zombies and orphans
             clean_exit(sh, 0);
             break;
@@ -372,11 +382,10 @@ void manage_signals(int sig, siginfo_t* info, Shell* sh) {
 
 void hdl_sigint(Shell* sh) {
     pid_t fj = sh_FJ(sh);
-    if (fj != -2 && fj != 0) {
-        if (kill(fj, SIGINT) < 0) {
-            printErr("%s: cannot kill foreground job (pid: %d)\n", fj);
-            return;
-        }
+    if (fj == -2 || fj == 0) return; //if no foreground job do nothing
+    if (kill(fj, SIGINT) < 0) {
+        printErr("%s: cannot kill foreground job (pid: %d)\n", fj);
+        return;
     }
 }
 
@@ -403,10 +412,10 @@ void hdl_sigchild(Shell* sh, pid_t dying_child_pid) {
 
 
 /**
- * @brief Initialize signal handlers.
+ * Initialize signal handlers.
  * 
  * @param sh Shell
- * @param sig_hdler Signal handler to use (see 'manage_signals' for example)
+ * @param sig_hdler Signal handler (which do not take a Shell instance as argument) to use (see 'manage_signals' for example)
  * @return int -1 if an error occured, 0 otherwise.
  */
 int initSigHandlers(Shell* sh, void (*sig_hdler)(int, siginfo_t* info, void* ucontext)) {
