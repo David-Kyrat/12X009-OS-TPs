@@ -2,6 +2,7 @@
 #define SHELL_H
 
 #include <unistd.h>
+#include <signal.h>
 
 /**
  * Represents a Shell with a crt_path (pwd) a foreground job and 
@@ -58,6 +59,28 @@ pid_t sh_BJ(Shell* sh);
  * @return foreground_job field for 'sh'
  */
 pid_t sh_FJ(Shell* sh);
+
+/**
+ * Getter for old foreground job
+ * @param sh Shell instance
+ * 
+ * @return Argv of last foreground job
+ */
+char** sh_oldFJ(Shell* sh);
+
+/**
+ * Getter for old background job
+ * @param sh Shell instance
+ * 
+ * @return Argv of last background job
+ */
+char** sh_oldBJ(Shell* sh);
+
+/** Getter for argc of last background_job */
+int sh_oldBJ_argc(Shell* sh);
+
+/** Getter for argc of last foreground_job */
+int sh_oldFJ_argc(Shell* sh);
 
 /** TODO:Comment
  * asd
