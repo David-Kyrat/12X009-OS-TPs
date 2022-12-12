@@ -197,7 +197,7 @@ void terminate_all_children(Shell* sh) {
  */
 void clean_exit(Shell* sh, int exitCode, int forceExit) {
     write(2, "\n", 2);
-    int signal = SIGKILL;
+    int signal = SIGTERM;
     if (forceExit - 2 >= 0) {
         // 2 or 3
         if (sh_BJ(sh) != -2) {
@@ -287,7 +287,7 @@ void redirectIO() {
 
 
 /**
- * Call execvpe, handle errors and print "Foreground job exited with exit code <errorcode extracted when handling error>"
+ * Call execvp, handle errors and print "Foreground job exited with exit code <errorcode extracted when handling error>"
  */
 int exec(Shell* sh, const char* filename, char* const argv[], int isForeground) {
     errno = 0;
@@ -305,8 +305,19 @@ int exec(Shell* sh, const char* filename, char* const argv[], int isForeground) 
     // if exec command returns then there have been an error somewhere
 }
 
-//TODO: document this
 
+/**
+ * Handle forks and updatet the corresponding attributes of 'sh', and whether we already have a background job or not
+ * Forks a child process, if the child process is successfully created, it executes the command in
+ * the child process, if the command is a foreground command, it waits for the child process to finish,
+ * 
+ * @param sh shell instaance
+ * @param cmd_name name of the command to execute
+ * @param argv arguments of the command
+ * @param isForeground if the job is a foreground job or not
+ * 
+ * @return 0 on success -1 for error
+ */
 int executeJob(Shell* sh, const char* cmd_name, char* const argv[], int isForeground) {
     if (cmd_name == NULL || strlen(cmd_name) <= 0) return -1;
     
@@ -362,6 +373,14 @@ int executeJob(Shell* sh, const char* cmd_name, char* const argv[], int isForegr
 }
 
 
+//TODO: modify this comment
+/**
+ * Reads the user input, parses it, and executes the command
+ * 
+ * @param sh the shell instance
+ * 
+ * @return The return value is the exit code of the last command executed.
+ */
 int sh_getAndResolveCmd(Shell* sh) {
     sh_prettyPrintPath(sh);
 
@@ -414,6 +433,13 @@ const int SIG_TO_HDL[] = {SIGUSR1, SIGINT, SIGHUP, SIGCHLD};
 const int SIG_TO_IGNORE[] = {SIGQUIT, SIGTERM};
 const int SIG_NB = 4, IGNORE_NB = 2;  // Number of signal to handle
 
+/**
+ * Signal Handler => Call the signal handling function corresponding to the given signal.
+ * 
+ * @param sig signal number
+ * @param info pointer to a siginfo_t structure
+ * @param sh pointer shell instance
+ */
 void manage_signals(int sig, siginfo_t* info, Shell* sh) {
     switch (sig) {
         case SIGUSR1:
@@ -444,6 +470,12 @@ void manage_signals(int sig, siginfo_t* info, Shell* sh) {
 }
 
 
+/**
+ * SIGINT signal handler.
+ * If there is a foreground job, send it a SIGINT signal
+ * 
+ * @param sh pointer to shell shell instance
+ */
 void hdl_sigint(Shell* sh) {
     pid_t fj = sh_FJ(sh);
     if (fj == -2 || fj == 0) return; //if no foreground job do nothing
@@ -453,6 +485,12 @@ void hdl_sigint(Shell* sh) {
     }
 }
 
+/**
+ * SIGHUP signal handler.
+ * Sends SIGHUP signal to all children processes
+ * 
+ * @param sh pointer to shell shell instance
+ */
 void hdl_sigup(Shell* sh) {
     kill(sh_FJ(sh), SIGHUP);
     kill(sh_BJ(sh), SIGHUP);
@@ -461,6 +499,14 @@ void hdl_sigup(Shell* sh) {
     clean_exit(sh, 0, 3);
 }
 
+/**
+ * Handles the SIGCHLD signal, which is sent to the parent process when a child process dies.
+ * If the given pid match the background job of 'sh' => terminates it with wait.
+ * if the background job was interrupted by a signal => restart it
+ * 
+ * @param sh pointer to shell shell instance
+ * @param dying_child_pid the pid of the child that just died
+ */
 void hdl_sigchild(Shell* sh, pid_t dying_child_pid) {
     int s = errno;
 
@@ -549,9 +595,6 @@ int initSigHandlers(Shell* sh, void (*sig_hdler)(int, siginfo_t* info, void* uco
  */
 
 
-void listEnv() {
-    for (char** current = environ; *current; current++) puts(*current);
-}
 
 //! 0:default,  1:red, 2:Green,  3:Blue, 4:Purple, 5:yellow,  6:cyan,  7:grey
 extern char* colors[];
