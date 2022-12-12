@@ -277,8 +277,8 @@ int __wait_s(pid_t pid, int* exitStatus, int isWaitPid) {
     if (waitCode == -1) {
         int savedErr = errno;
         if (savedErr == ECHILD) {
-            const char msg[] = "wait_s: No child to terminate.\n";
-            write(2, msg, strlen(msg) + 1);
+            /* const char msg[] = "wait_s: No child to terminate.\n";
+            write(2, msg, strlen(msg) + 1); */
             return 2;
 
         } else if (savedErr == EINTR) {
