@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
+#include <signal.h>
 #include <unistd.h>
 
 #include "input.h"
@@ -56,8 +57,21 @@ const char* prompt = "\033[0;31m|_ \033[0;33m$ \033[0m ";
 
 const char* readInput() {
     const char* buff = readline(prompt);
-    if (buff == NULL || strlen(buff) <= 0) return NULL;
+    /*
+     * " readline  returns  the  text of the line read.  A blank line returns the empty string.  If EOF is encountered
+     *   while reading a line, and the line is empty, NULL is returned.  If an EOF is read with a non-empty line, it is
+     *   treated as a newline. "
+     */
+    if (buff == NULL) {
+        //EOF was encountered
+        // => send SIGUSR1 that will be "caught" in Shell.c to terminate its child processes and exit cleanly
+        if (kill(0, SIGUSR1) < 0) 
+            printErr("readInput: cannot inform shell.c : %s (EOF received) %s\n", buff);
+        return NULL;
+    }
+    if (strlen(buff) <= 0) return NULL;
     return strip(buff);
+
 }
 
 /**

@@ -335,25 +335,24 @@ void sh_free(Shell* sh) {
  */
 
 /** List of signal to handle.*/
-const int SIG_TO_HDL[] = {SIGQUIT, SIGINT, SIGHUP, SIGCHLD};
-const int SIG_TO_IGNORE[] = {SIGTERM};
-const int SIG_NB = 4, IGNORE_NB = 1;  // Number of signal to handle
-
-//TODO: DIRE AUX ASSITANTS QU'IL YA UNE FAUTE DANS L'ENONCE SIGQUIT EST ENVOYÉ PAR CTRL+D
-//TODO: IL NE DOIT DONC PAS ETRE IGNORE
+const int SIG_TO_HDL[] = {SIGUSR1, SIGINT, SIGHUP, SIGCHLD}; 
+//* When usr press CTRL+D => EOF is sent on stdin, once that happen, we send an SIGUSR1 to ourselves
+const int SIG_TO_IGNORE[] = {SIGQUIT, SIGTERM};
+const int SIG_NB = 4, IGNORE_NB = 2;  // Number of signal to handle
 
 void manage_signals(int sig, siginfo_t* info, Shell* sh) {
     switch (sig) {
-        case SIGQUIT:
+        case SIGUSR1:
+            // CTRL+D received
             // cleanup before exiting => avoiding zombies and orphans
             clean_exit(sh, 0);
-            // Do nothing when ctrl+d is pressed for some reason, => CTRL+D is not SIGQUIT ?
             break;
 
         case SIGINT:
+            write(1, "\n", 2); //Write newline on stdout to "remove" the "^C" that gets generated from current input "line"
             // killing foreground job of 'sh'
-            write(1, "\n", 2); //to "remove" the "^C" that gets generated from current input "line"
             hdl_sigint(sh);
+            // cleaning prompt
             display_prompt();
             break;
 
