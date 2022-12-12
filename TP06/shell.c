@@ -172,7 +172,7 @@ void terminate_all_children(Shell* sh) {
     if (child(sh) <= 0) printf("\nNo child to terminate.\n");
     while (child(sh) > 0) {
         int exitStatus;
-        fprintf(stderr, " child_nb: %d\n", child(sh));
+        fprintf(stderr, "Nb of child waiting to be terminated: %d\n", child(sh));
         int code = wait_s(&exitStatus);
         if (code == 2) {
             // there were no child to wait for => sets number of child to 0 and returns
@@ -196,18 +196,21 @@ void terminate_all_children(Shell* sh) {
  * @param forceExit 0 to wait for each job, 1 to kill foreground job, 2 to kill background job, 3 to kill both
  */
 void clean_exit(Shell* sh, int exitCode, int forceExit) {
+    write(2, "\n", 2);
+    int signal = SIGKILL;
     if (forceExit - 2 >= 0) {
         // 2 or 3
         if (sh_BJ(sh) != -2) {
-            kill(sh_BJ(sh), SIGTERM);
+            fprintf(stderr, "Force killing background job.\n");
+            kill(sh_BJ(sh), signal);
             set_BJ(sh, -2);
-        }
-            
+        }            
     } 
     if (forceExit % 2 == 1) {
         // 1 or 3
         if (sh_FJ(sh) != -2){
-            kill(sh_FJ(sh), SIGTERM);
+            fprintf(stderr, "Force killing foreground job.\n");
+            kill(sh_FJ(sh), signal);
             set_FJ(sh, -2);
         }
     } // child process will be terminated by the function below
@@ -342,11 +345,7 @@ int executeJob(Shell* sh, const char* cmd_name, char* const argv[], int isForegr
         } else {
             errno = 0; // useful to check actual error when managing signals
             set_BJ(sh, t_pid);
-            printf("[1] \t[%d] - %s\n", sh_BJ(sh), cmd_name);
-            /*printf("last back job:\n");
-            for (int i = 0; i < sh_old_argc(sh, isForeground); i++) {
-                printf("old_argv[%d] = \"%s\"\n", i, sh_oldJob(sh, isForeground)[i]);
-            }*/
+            printf("[1] \t[%d] - %s\n\n", sh_BJ(sh), cmd_name); 
             return EXIT_SUCCESS;
         }
     } 
@@ -418,9 +417,9 @@ const int SIG_NB = 4, IGNORE_NB = 2;  // Number of signal to handle
 void manage_signals(int sig, siginfo_t* info, Shell* sh) {
     switch (sig) {
         case SIGUSR1:
-            // CTRL+D received => does not kill background job because it doesnt in a real shell
+            // CTRL+D received
             // cleanup before exiting => avoiding zombies and orphans
-            clean_exit(sh, 0, 1); //force exiting background and foreground job 
+            clean_exit(sh, 0, 3); //force exiting background and foreground job 
             break;
 
         case SIGINT:
