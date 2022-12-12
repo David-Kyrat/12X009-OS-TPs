@@ -54,9 +54,13 @@ char** sh_oldFJ(Shell* sh) {return *(sh->old_fj);}
 
 char** sh_oldBJ(Shell* sh) {return *(sh->old_bj);}
 
+char** sh_oldJob(Shell* sh, int isForeground) { return isForeground ? sh_oldFJ(sh) : sh_oldBJ(sh); }
+
 int sh_oldBJ_argc(Shell* sh) {return sh->old_bj_argc;}
 
 int sh_oldFJ_argc(Shell* sh) {return sh->old_fj_argc;}
+
+int sh_old_argc(Shell* sh, int isForeground) { return isForeground ? sh_oldFJ_argc(sh) : sh_oldBJ_argc(sh);}
 
 
 const char* pwd(Shell* sh) { return sh->crt_path; }
@@ -149,6 +153,8 @@ Shell* new_Shell() {
     sh->child_number = 0;
     sh->old_bj = malloc(sizeof(char**));
     sh->old_fj = malloc(sizeof(char**));
+    sh->old_bj_argc = 0;
+    sh->old_fj_argc = 0;
 
     return sh;
 }
@@ -316,6 +322,7 @@ int executeJob(Shell* sh, const char* cmd_name, char* const argv[], int isForegr
             errno=0;
             set_BJ(sh, t_pid);
             printf("[1] \t[%d] - %s\n", sh_BJ(sh), cmd_name);
+            for (int i = 0; i < sh_)
             printf("last back job: \"%s\"\n", sh_oldBJ(sh));
             return EXIT_SUCCESS;
         }
@@ -355,7 +362,7 @@ int sh_getAndResolveCmd(Shell* sh) {
         default: {
             //TODO: handle background jobs
             int errcode = executeJob(sh, cmd_name, argv, isForeground);
-            update_old_job(sh, isForeground, &argv);
+            update_old_job(sh, isForeground, &argv, argc);
             if (errcode < 0) return -1;
         }
 
