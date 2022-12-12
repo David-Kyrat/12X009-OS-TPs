@@ -1,4 +1,3 @@
-#include <asm-generic/errno-base.h>
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -14,7 +13,6 @@
 #include "shell.h"
 #include "files.h"
 #include "input.h"
-#include "shell.h"
 #include "util.h"
 
 
@@ -42,10 +40,24 @@ struct Shell {
     pid_t background_job;
     // Number of current non-waited/terminated child
     int child_number;
+
+    int old_fj_argc;
+    char*** old_fj; //pointer to argv of last foreground job
+    int old_bj_argc;
+    char*** old_bj; //pointer to argv of last background job
 };
 
 pid_t sh_FJ(Shell* sh) { return sh->foreground_job;}
 pid_t sh_BJ(Shell* sh) { return sh->background_job; }
+
+char** sh_oldFJ(Shell* sh) {return *(sh->old_fj);}
+
+char** sh_oldBJ(Shell* sh) {return *(sh->old_bj);}
+
+int sh_oldBJ_argc(Shell* sh) {return sh->old_bj_argc;}
+
+int sh_oldFJ_argc(Shell* sh) {return sh->old_fj_argc;}
+
 
 const char* pwd(Shell* sh) { return sh->crt_path; }
 /** Getter for 'child_number' field
@@ -100,6 +112,23 @@ int increase_childNb(Shell* sh) {
     return sh->child_number <= 2 ? EXIT_SUCCESS : -1;
 }
 
+void update_old_job(Shell* sh, int isForeground, char*** new_oldArgv, int old_argc) {
+    if (isForeground) {
+        free(sh_oldFJ(sh)); // free memory containing the argument of second to last job
+                            // Does not free the pointer free the char** pointed to by sh->old_fj
+        *(sh->old_fj) = *new_oldArgv;
+        sh->old_fj_argc = old_argc;
+    } else {
+        free(sh_oldBJ(sh));
+        *(sh->old_bj) = *new_oldArgv;
+        sh->old_bj_argc = old_argc;
+    }
+}
+
+void update_old_fj(Shell* sh, char*** new_oldArgv, int old_fj_argc) { update_old_job(sh, 1, new_oldArgv, old_fj_argc);  }
+
+void update_old_bj(Shell* sh, char*** new_oldArgv, int old_bj_argc) { update_old_job(sh, 0, new_oldArgv, old_bj_argc);  }
+
 //Global variable referring to the current environment
 extern char** environ;
 void hdl_sigint(Shell* sh);
@@ -118,8 +147,8 @@ Shell* new_Shell() {
     sh->background_job = -2;
     sh->foreground_job = -2;
     sh->child_number = 0;
-
-    //initSigHandlers(sh);
+    sh->old_bj = malloc(sizeof(char**));
+    sh->old_fj = malloc(sizeof(char**));
 
     return sh;
 }
@@ -284,8 +313,10 @@ int executeJob(Shell* sh, const char* cmd_name, char* const argv[], int isForegr
             } else return -1;
 
         } else {
+            errno=0;
             set_BJ(sh, t_pid);
             printf("[1] \t[%d] - %s\n", sh_BJ(sh), cmd_name);
+            printf("last back job: \"%s\"\n", sh_oldBJ(sh));
             return EXIT_SUCCESS;
         }
     }
@@ -323,8 +354,11 @@ int sh_getAndResolveCmd(Shell* sh) {
 
         default: {
             //TODO: handle background jobs
-            if (executeJob(sh, cmd_name, argv, isForeground) < 0) return -1;
+            int errcode = executeJob(sh, cmd_name, argv, isForeground);
+            update_old_job(sh, isForeground, &argv);
+            if (errcode < 0) return -1;
         }
+
     }
 
     return EXIT_SUCCESS;
@@ -396,6 +430,8 @@ void hdl_sigup(Shell* sh) {
 }
 
 void hdl_sigchild(Shell* sh, pid_t dying_child_pid) {
+    int s = errno;
+    fprintf(stderr, "hdl_sigchild, errno: %s\n", strerror(s));
     if (dying_child_pid == sh->background_job) {
         int exitStatus, code;
         code = waitpid_s(dying_child_pid, &exitStatus);
