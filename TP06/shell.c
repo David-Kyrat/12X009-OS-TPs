@@ -1,3 +1,4 @@
+#include <asm-generic/errno-base.h>
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -116,6 +117,7 @@ int increase_childNb(Shell* sh) {
     return sh->child_number <= 2 ? EXIT_SUCCESS : -1;
 }
 
+
 void update_old_job(Shell* sh, int isForeground, char*** new_oldArgv, int old_argc) {
     if (isForeground) {
         free(sh_oldFJ(sh)); // free memory containing the argument of second to last job
@@ -132,6 +134,7 @@ void update_old_job(Shell* sh, int isForeground, char*** new_oldArgv, int old_ar
 void update_old_fj(Shell* sh, char*** new_oldArgv, int old_fj_argc) { update_old_job(sh, 1, new_oldArgv, old_fj_argc);  }
 
 void update_old_bj(Shell* sh, char*** new_oldArgv, int old_bj_argc) { update_old_job(sh, 0, new_oldArgv, old_bj_argc);  }
+
 
 //Global variable referring to the current environment
 extern char** environ;
@@ -158,6 +161,7 @@ Shell* new_Shell() {
 
     return sh;
 }
+
 
 /**
  * Wait for all children to die, then terminates them with wait()
@@ -189,8 +193,25 @@ void terminate_all_children(Shell* sh) {
  *
  * @param sh ptr to Shell instance
  * @param exitCode exit code to exit with
+ * @param forceExit 0 to wait for each job, 1 to kill foreground job, 2 to kill background job, 3 to kill both
  */
-void clean_exit(Shell* sh, int exitCode) {
+void clean_exit(Shell* sh, int exitCode, int forceExit) {
+    if (forceExit - 2 >= 0) {
+        // 2 or 3
+        if (sh_BJ(sh) != -2) {
+            kill(sh_BJ(sh), SIGTERM);
+            set_BJ(sh, -2);
+        }
+            
+    } 
+    if (forceExit % 2 == 1) {
+        // 1 or 3
+        if (sh_FJ(sh) != -2){
+            kill(sh_FJ(sh), SIGTERM);
+            set_FJ(sh, -2);
+        }
+    } // child process will be terminated by the function below
+
     terminate_all_children(sh);
     sh_free(sh);
     fprintf(stderr, "Exiting with exit code %d.\n", exitCode);
@@ -244,7 +265,7 @@ void exit_shell(Shell* sh, const char* arg) {
     }
     printf("Exit with exit code %d\n\n", exit_code);
 
-    clean_exit(sh, exit_code);
+    clean_exit(sh, exit_code, 3);
 }
 
 /**
@@ -290,7 +311,7 @@ int executeJob(Shell* sh, const char* cmd_name, char* const argv[], int isForegr
         // If there is currently already a background_job running
         errno = EBUSY;
         printRErr("executeJob: %s, background job (%d) is still running. Please wait for its completion or launch it as foreground job.\n", sh_BJ(sh));
-    } 
+    } //returns -1
 
     pid_t t_pid = fork();
     
@@ -299,8 +320,8 @@ int executeJob(Shell* sh, const char* cmd_name, char* const argv[], int isForegr
     if (t_pid < 0)
         printRErr("executeJob: %s, %s - Cannot Fork.\n", argv[0]); //returns -1
 
-    //* In parent
     if (t_pid > 0) {
+        //* In parent
         increase_childNb(sh);
 
         if (isForeground) {
@@ -319,17 +340,20 @@ int executeJob(Shell* sh, const char* cmd_name, char* const argv[], int isForegr
             } else return -1;
 
         } else {
-            errno=0;
+            errno = 0; // useful to check actual error when managing signals
             set_BJ(sh, t_pid);
             printf("[1] \t[%d] - %s\n", sh_BJ(sh), cmd_name);
-            for (int i = 0; i < sh_)
-            printf("last back job: \"%s\"\n", sh_oldBJ(sh));
+            /*printf("last back job:\n");
+            for (int i = 0; i < sh_old_argc(sh, isForeground); i++) {
+                printf("old_argv[%d] = \"%s\"\n", i, sh_oldJob(sh, isForeground)[i]);
+            }*/
             return EXIT_SUCCESS;
         }
-    }
+    } 
 
     if (t_pid == 0) {
         //* In child
+        errno = 0;
         if (!isForeground) redirectIO();
         if (exec(sh, cmd_name, argv, isForeground) < 0)
             exit(EXIT_FAILURE);
@@ -394,9 +418,9 @@ const int SIG_NB = 4, IGNORE_NB = 2;  // Number of signal to handle
 void manage_signals(int sig, siginfo_t* info, Shell* sh) {
     switch (sig) {
         case SIGUSR1:
-            // CTRL+D received => does not kill foreground job because it doesnt in a real shell
+            // CTRL+D received => does not kill background job because it doesnt in a real shell
             // cleanup before exiting => avoiding zombies and orphans
-            clean_exit(sh, 0);
+            clean_exit(sh, 0, 1); //force exiting background and foreground job 
             break;
 
         case SIGINT:
@@ -433,13 +457,16 @@ void hdl_sigint(Shell* sh) {
 void hdl_sigup(Shell* sh) {
     kill(sh_FJ(sh), SIGHUP);
     kill(sh_BJ(sh), SIGHUP);
-    clean_exit(sh, 0);
+    set_BJ(sh, -2);
+    set_FJ(sh, -2);
+    clean_exit(sh, 0, 3);
 }
 
 void hdl_sigchild(Shell* sh, pid_t dying_child_pid) {
     int s = errno;
-    fprintf(stderr, "hdl_sigchild, errno: %s\n", strerror(s));
+
     if (dying_child_pid == sh->background_job) {
+        //if (s != 0) fprintf(stderr, "hdl_sigchild, errno: %s\n", strerror(s));
         int exitStatus, code;
         code = waitpid_s(dying_child_pid, &exitStatus);
         if (code == 2) {
@@ -449,6 +476,15 @@ void hdl_sigchild(Shell* sh, pid_t dying_child_pid) {
             printExitCode(exitStatus, 0);
         }
         set_BJ(sh, -2);
+
+        if (s == EINTR) {
+            // if previous job was stopped by a signal => relaunch it
+            const char** argv = sh_oldBJ(sh);
+            //set_BJ(sh, -2); // setting bj pid to -2 so that the relaunching of bj doesnt get denied (we can only have 1 background_job)
+            const char* msg = "\ninterrupted by signal, restarting background job...\n";
+            write(2, msg, strlen(msg)+1);
+            executeJob(sh, argv[0], argv, 0);
+        }
         display_prompt();
     }   
 }
