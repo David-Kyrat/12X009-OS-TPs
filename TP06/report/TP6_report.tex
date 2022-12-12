@@ -117,9 +117,24 @@ Pour lancer un job en background, il suffit de mettre un \code{\&} à la fin de 
 \begin{itemize}
     % \item \code{Ctrl + D} : permet de quitter le shell.
     \item \code{Ctrl + C} : permet d'annuler la commande en cours.
-    \item \code{Ctrl + Z} : permet de mettre en pause la commande en cours.
+    \item \code{Ctrl + D} : permet de fermer le shell.
 \end{itemize}
 
+\subsection*{Autres}
+\begin{itemize}
+    \item On a utilisé la librairie \code{readline.h} pour la lecture des commandes, qu'on a eu le droit d'utiliser.
+    
+    Une fonction implementé par nous-même appelée \code{readInput()} est similaire, mais \code{readline} le fait mieux que nous puisqu'elle contient plus de fonctionnalités (par exemple: avancer et reculer dans la commande, etc.)
+
+    Pour tester le shell sans la librairie \code{readline.h}, il suffit de commenter les \code{\#include} concernant la librairie \code{readline} et de décommenter le code de \code{readInput()} dans \code{input.c}.\\
+
+    Readline peut être installé avec les 2 commandes ensemble:\\
+    \code{sudo apt-get install lib32readline8 lib32readline-dev}\\
+    \code{sudo apt-get install libreadline-dev}
+    \\
+    \item \code{Ctrl + D} ne marchera pas si on a un foreground job.
+
+\end{itemize}
 
 
 
