@@ -1,0 +1,23 @@
+{
+   "configurations": [
+      {
+         "name": "Linux",
+         "includePath": [
+            "${workspaceFolder}/**",
+            "/usr/include/linux/**",
+            "/usr/include/**",
+            //"/usr/include/x86_64-linux-gnu/**",
+            "/usr/lib/gcc/x86_64-linux-gnu/11/include/**",
+            "/usr/lib/gcc/x86_64-linux-gnu/12/include/**"
+         ],
+         "defines": [],
+         "configurationProvider": "ms-vscode.makefile-tools",
+         "compilerPath": "/usr/bin/gcc",
+         "compilerArgs": [
+            "-D_BSD_SOURCE"
+         ],
+         "mergeConfigurations": true
+      }
+   ],
+   "version": 4
+}
