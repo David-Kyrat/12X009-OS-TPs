@@ -7,55 +7,48 @@
 #include <stdio.h>
 #include "shm.h"
 
+#define MAX_PIZZAS 10
 
-int main(int argc, char* argv[])
-{
+// CODE FROM COURSE
+
+int main (int argc, char* argv[]) {
+
     int fd, i;
     sharedMemory *shm;
 
-    //Vérifier les entrées
-    if(argc != 2)
-    {
-        printf("Usage: shm-create /sharedMemoryName\n\n");
-        exit(0);
-    }
+    // Create a read/write shared memory
+    if((fd = shm_open(argv[1], O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR)) == -1)
+        fprintf(stderr, "shm_open");
 
-    //Créer une mémoire  partagée en lecture / écriture
-    if( (fd = shm_open(argv[1], O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR)) == -1)
-        OnError("shm_open");
+    // Size of memory = indicator + number
+    if(ftruncate(fd, sizeof(sharedMemory)) == -1)
+        fprintf(stderr, "ftruncate");
 
-    //Taille de la mémoire = indicator + number
-    if( ftruncate(fd, sizeof(sharedMemory)) == -1)
-        OnError("ftruncate");
-
-    //File mapping (Les parametres doivent correspondres au mode d'ouverture de l'objet POSIX)
+    // File mapping (The parameters must correspond to the opening mode of the POSIX object)
     shm = mmap(NULL, sizeof(sharedMemory), PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     if(shm == MAP_FAILED)
-        OnError("mmap");
-    printf("Adr memoire partagée:%p\n", shm);
+        fprintf(stderr, "mmap");
 
-    //Initialization memoire a zero
+    // Initialization memory to zero
     shm->number = 0;
 
-    //On attend l'autre processus pour travailler
-    shm->isReady = !READY;
-    printf("Ok j'attends un processus qui peut m'aider...\n");
-    while(!(shm->isReady == READY));
+    // We wait for the other process to work
+    while(shm->isReady != READY)
+        sleep(1);
 
-    //On peut desassocier l'objet (retirer l'inode) car l'objet ne sera supprimé que lors du munmap
+    // Unlink the shared memory
     shm_unlink(argv[1]);
 
-    //Ok on travail
-    for(i=0;i<NUM_INCREMENTS;i++)
+    // Start counting pizzas
+    for(i = 0;i < NUM_INCREMENTS; i++)
         shm->number = shm->number + 1;
 
-    //Afficher le résultat
-    printf("Pour moi %d, le total est %ld\n", getpid(), shm->number);
-
-    //Unmap
+    // Unmap
     if(munmap(shm, sizeof(sharedMemory)) == -1)
-        OnError("munmap");
+        fprintf(stderr, "munmap");
 
     return 0;
+
 }
+
 

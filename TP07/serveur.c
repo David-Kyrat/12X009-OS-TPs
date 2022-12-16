@@ -7,8 +7,12 @@
 #include <stdio.h>
 #include "shm.h"
 
-int main(int argc, char* argv[])
-{
+
+// CODE FROM COURSE
+
+
+int main(int argc, char* argv[]) {
+
     int fd, i;
     sharedMemory *shm;
 
@@ -35,9 +39,6 @@ int main(int argc, char* argv[])
     //Ok on travail
     for(i=0;i<NUM_INCREMENTS;i++)
         shm->number = shm->number + 1;
-
-    //Afficher le résultat
-    printf("Pour moi %d, le total est %ld\n", getpid(), shm->number);
 
     //Unmap
     if(munmap(shm, sizeof(sharedMemory)) == -1)
