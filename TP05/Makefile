@@ -18,7 +18,7 @@ CLIENT_EXEC = client
 
 EXEC = $(SERV_EXEC) $(CLIENT_EXEC)
 
-SHARED_OBJS = out/functions.o out/files.o out/optprsr.o out/util.o
+SHARED_OBJS = out/functions.o out/util.o
 
 CLIENT_OBJS = out/client.o $(SHARED_OBJS)
 SERV_OBJS = out/server.o $(SHARED_OBJS)
@@ -30,26 +30,22 @@ OBJS = out/client.o $(SERV_OBJS)
 all: $(EXEC)
 
 
-server: server.c util.o
-	$(CC) server.c util.o $(CFLAGS) $(DBGFLAGS) -o server
+$(SERV_EXEC): $(SERV_OBJS)
+	$(CC) $(SERV_OBJS) -o $(SERV_EXEC)
 
-client: client.c util.o
-	$(CC) client.c util.o $(CFLAGS) $(DBGFLAGS) -o client
+$(CLIENT_EXEC): $(CLIENT_OBJS)
+	$(CC) $(CLIENT_OBJS) -o $(CLIENT_EXEC)
 
-out/server.o: server.c functions.h optprsr.h util.h
+
+out/client.o: client.c functions.h util.h
+	$(CC) -c client.c $(CFLAGS) $(DBGFLAGS) -o out/client.o
+
+out/server.o: server.c functions.h util.h
 	$(CC) -c server.c $(CFLAGS) $(DBGFLAGS) -o out/server.o
 
 
 out/functions.o: functions.c functions.h util.h
 	$(CC) -c functions.c $(CFLAGS) $(DBGFLAGS) -o out/functions.o
-
-
-out/files.o: files.c files.h util.h
-	$(CC) -c files.c $(CFLAGS) $(DBGFLAGS) -o out/files.o
-
-
-out/optprsr.o: optprsr.c optprsr.h util.h
-	$(CC) -c optprsr.c $(CFLAGS) $(DBGFLAGS) -o out/optprsr.o
 
 
 out/util.o: util.c util.h

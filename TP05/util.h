@@ -1,11 +1,7 @@
-#ifndef __UTIL__
-#define __UTIL__
+#ifndef UTIL
+#define UTIL
 
 #include <errno.h>
-#define AF (AF_INET)
-#define SOCK_TYPE SOCK_STREAM
-#define PROTOCOL 0
-typedef struct sockaddr_in sockaddr_in;
 
 /**
  * @file util.h
@@ -197,5 +193,5 @@ char* strsub(char* src, int stop_idx);
 
 void error(const char* msg);
 
-#endif /* __UTIL__ */
+#endif /*UTIL*/
 

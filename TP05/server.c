@@ -8,23 +8,28 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "functions.h"
+#ifndef UTIL
 #include "util.h"
+#define UTIL
+#endif
 
 int main(int argc, char *argv[]) {
-    int sockfd, newsockfd, portno;
-    socklen_t clilen;
-   
+    if (argc < 2) {
+        errno = EINVAL;
+        printErr("%s.\nUsage: %s <port-number>\n", argv[0]);
+        return EXIT_FAILURE;
+    }
+
+    int bind_sockfd, con_sockfd, portno = atoi(argv[1]);
+    //socklen_t clilen;
     char buffer[256];
     struct sockaddr_in serv_addr, cli_addr;
    
     int n;
-    if (argc < 2) {
-        fprintf(stderr, "ERROR, no port provided\n");
-        exit(1);
-    }
-
-    sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd < 0) error("ERROR opening socket");
+    /*sockfd = new_socket();
+    //sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    //if (sockfd < 0) error("ERROR opening socket");
 
     memzero((char *)&serv_addr, sizeof(serv_addr));
     
@@ -40,20 +45,22 @@ int main(int argc, char *argv[]) {
     clilen = sizeof(cli_addr);
 
     printf("Awaiting connection at port: %d\n", portno);
-    newsockfd = accept(sockfd, (struct sockaddr *)&cli_addr, &clilen);
-    if (newsockfd < 0)
-        error("ERROR on accept");
+    con_sockfd = accept(sockfd, (struct sockaddr *)&cli_addr, &clilen);
+    if (con_sockfd < 0)
+        error("ERROR on accept");*/
+    if ( init_serv_and_wait_con(portno, 5, &bind_sockfd, &con_sockfd, &serv_addr, &cli_addr) < 0 ) 
+        return EXIT_FAILURE;
 
     memzero(buffer, 256);
-    n = read(newsockfd, buffer, 255);
+    n = read(con_sockfd, buffer, 255);
     if (n < 0) error("ERROR reading from socket");
     
     printf("Here is the message: %s\n", buffer);
    
-    n = write(newsockfd, "I got your message", 18);
+    n = write(con_sockfd, "I got your message", 18);
     if (n < 0) error("ERROR writing to socket");
    
-    close(newsockfd);
-    close(sockfd);
+    close(con_sockfd);
+    close(bind_sockfd);
     return 0;
 }

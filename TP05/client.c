@@ -9,6 +9,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "functions.h"
 #include "util.h"
 
 
@@ -76,7 +77,8 @@ int read_from_sock(int sockfd, char* buffer) {
 int main(int argc, char *argv[]) {
     if (argc < 3) {
         errno = EINVAL;
-        printRErr("%s.\nUsage: %s <hostname> <port-number>\n", argv[0]);
+        printErr("%s.\nUsage: %s <hostname> <port-number>\n", argv[0]);
+        return EXIT_FAILURE;
     }
     const char* ip_addr = argv[1]; int port = atoi(argv[2]), sockfd;
     //if ((sockfd = new_socket()) < 0) return EXIT_FAILURE;

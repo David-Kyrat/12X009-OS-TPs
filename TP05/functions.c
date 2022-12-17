@@ -1,85 +1,70 @@
-
-
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "optprsr.h"
-#include "util.h"
+#include <netdb.h> // gethostbyname
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include "functions.h"
+#include "util.h"
 
-// Max Length in character of an IP address "xxx.xxx.xxx.xxx\0" => 13chars.
-const socklen_t MAX_IPADDR_LEN = 13;
 
-int isPortValid(int port) {
-    if (port < 1024 || port > 65535) {
-        errno = EINVAL;
-        printErr("%s, %d: Invalid port. Expected number in [1024, 65535]\n", port);
-        return 0;
-    }
-    return 1;
+int new_socket() {
+    int sockfd = socket(AF, SOCK_TYPE, PROTOCOL); 
+    if (sockfd < 0) printRErr("%s, Cannot open given socket\n", " ");
+     return sockfd;
+}
+
+//used only by client
+struct hostent* resolve_hostname(const char* ip_addr) {
+    struct hostent* server = gethostbyname(ip_addr);
+    if (server == NULL)
+        printErr("resolve_hostname: %s, ip: %s\n", ip_addr); 
+    return server;
 }
 
 
-/**
- * Return the conversion of an IP address' string representation to binary.
- * @param addr_repr (Can Be Null) string representation of the IP address (or 'NULL' to default to 'INADDR_ANY', Usefull when create socket address for a server)
- * 
- * @return Initialized struct in_addr on success or nothing (exits with exit code EXIT_FAILURE) if an error happened.
- */
-struct in_addr* new_in_addr(const char* addr_repr) {
-    struct in_addr* inaddr = tryalc(malloc(sizeof(struct in_addr)));
-    memset(inaddr, 0, sizeof(*inaddr));
-    if (addr_repr == NULL) inaddr->s_addr = htonl(INADDR_ANY);
-
-    else if (inet_pton(AF, addr_repr, inaddr) <= 0) {
-        printErr("%s, %d: Cannot convert address to binary form.\n", addr_repr);
-        exit(EXIT_FAILURE);
-    }
-    return inaddr;
-}
-
-
-const char *inet_tostr(struct in_addr* in_addr) {
-    socklen_t size = MAX_IPADDR_LEN;
-    char* dst = tryalc(calloc(size, sizeof(char)));
-    inet_ntop(AF, in_addr, dst, size);
-    return dst;
-}
-
-
-sockaddr_in new_sockaddr(int port, const char* addr_repr) {
-    // Create the address
-    sockaddr_in address;
-
-    //initialize it at 0
-    memset(&address, 0, sizeof(address));
-    
-    struct in_addr* in_addr = new_in_addr(addr_repr);
-    address.sin_addr = *in_addr;
-    
+sockaddr_in new_sockaddr(int port, struct hostent* server) {
+    struct sockaddr_in address;
+    memset((char *)&address, 0, sizeof(address)); 
     address.sin_family = AF;
-    address.sin_port = htons(port);
 
-    free(in_addr);
+    memcpy((char *) &address.sin_addr.s_addr, (char *) server->h_addr,  server->h_length);
+
+    address.sin_port = htons(port);
 
     return address;
 }
 
-int new_socket() {
-    int sock = socket(AF, SOCK_TYPE, PROTOCOL);
-    if (sock < 0) printRErr("%s, Cannot open given socket\n", "");
-    return sock;
+int init_serv_and_wait_con(int port, int max_pending_con_nb, int* bind_sockfd_toFill, int* con_sockfd_toFill, sockaddr_in* serv_addr_toFill, sockaddr_in* client_addr_toFill)  {
+    int sockfd = -2, con_sockfd = -2;
+    if ((sockfd = new_socket()) < 0) return -1;
+
+    serv_addr_toFill->sin_family = AF;
+    serv_addr_toFill->sin_addr.s_addr = INADDR_ANY;
+    serv_addr_toFill->sin_port = htons(port);
+
+    if (bind(sockfd, (struct sockaddr *)serv_addr_toFill, sizeof(*serv_addr_toFill)) < 0)
+        printRErr("In bind of init_serv: %s, port: %d\n", port); 
+
+    if (listen(sockfd, max_pending_con_nb) < 0) 
+        printRErr("In listen of init_serv: %s, port: %d, sock_fd:%d\n", port, sockfd); //TODO: close socket and other cleanup before exiting
+
+    printf("Awaiting connection at port: %d\n", port);
+   
+    socklen_t clilen = sizeof(*client_addr_toFill);
+    con_sockfd = accept(sockfd, (struct sockaddr *)client_addr_toFill, &clilen);
+    if (con_sockfd < 0)
+        printRErr("In accept of init_serv: %s, port: %d, sock_fd:%d\n", port, sockfd); //TODO: same here 
+
+    *bind_sockfd_toFill = sockfd;
+    *con_sockfd_toFill = con_sockfd;
+
+    return EXIT_SUCCESS;
 }
 
-/**
- * This function handles the error that occurs when a client cannot connect to a server.
- * 
- * @param port The port number that the client is trying to connect to.
- * @param ip_addr The IP address of the server.
- */
-int hdlClientConnectErr(int port, const char* ip_addr) {
-    printRErr("%s, Cannot connect to server at address %s and port %d.\n", ip_addr, port);
-}
+
