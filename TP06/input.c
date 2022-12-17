@@ -20,7 +20,7 @@ const char* ARG_SEP = " ";  //Tab and space are the only argument separator
 const char* colors[] = {"\033[0m", "\033[0;31m", "\033[0;32m", "\033[0;34m", "\033[0;35m", "\033[0;33m", "\033[0;36m", "\033[0;30m"};
 
 //* symbol present at start every "input line" in shell (like the '$' )
-const char* prompt = "\033[0;31m|_ \033[0;33m$ \033[0m ";
+const char* prompt = "\033[0;31m|_ \033[0;33m$\033[0m ";
 //snprintf(msg, 24, "%s|_ %s$ %s ", colors[1], colors[5], colors[0]);
 
 //!
@@ -96,12 +96,9 @@ int isWhiteSpace(const char* str) {
  * @return string buffer (usually argv)  i.e. 'inp' split with respect to 'ARG_SEP'
  */
 const char** parseInput(const char* inp, int* argc, int* isForeground) {
-    uint isFg;
-    size_t argcTmp = 0, inp_len;
+    int isFg; size_t argcTmp = 0, inp_len = strlen(inp);
     // inp is already right stripped so if required job must be launched in background, the '&' has to be end at the last position of 'inp'
-    char* tosplit = tryalc(malloc(1));
-    tosplit = inp;
-    inp_len = strlen(inp);
+    char* tosplit = strndup(inp, inp_len); // no +1 because strndup will add a '\0' at the end whether there is already one or not, + it might be good in some case to do a "safe" copy of the arg to avoid "effet de bords" //tryalc(malloc(1));
 
     if (inp_len > 1 && inp[inp_len - 1] == '&') {
         isFg = 0;
@@ -122,7 +119,10 @@ const char** readParseIn(int* argc, int* isForeground) {
     const char* tmp = readInput();
     //printf("%s", colors[0]); //reset colors because it seems to stay stuck in red.
     if (tmp == NULL) return NULL;
-    return parseInput(tmp, argc, isForeground);
+    add_history(tmp);
+    const char** parsedInput = parseInput(tmp, argc, isForeground);
+    free(tmp); // add_history seems to make a copy of tmp
+    return parsedInput;
 }
 
 const char* getPrompt() {
