@@ -31,6 +31,9 @@ void* tryalc(void* allocReturn) {
     return allocReturn;
 }
 
+void memzero(void * data, unsigned long n) { 
+    memset(data, 0, n); 
+}
 
 int hdlBasicErr() {
     int savedErr = errno;

@@ -41,6 +41,13 @@ void hdlOOM();
  */
 void* tryalc(void* allocReturn);
 
+
+/**
+ * Perform a memset 0 on 'n' bytes of 'data'
+ */
+void memzero(void * data, unsigned long n);
+
+
 /**
  * Utility function for basic error handling
  * 
