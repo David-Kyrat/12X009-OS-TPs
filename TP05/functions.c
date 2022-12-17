@@ -41,7 +41,8 @@ sockaddr_in new_sockaddr(int port, struct hostent* server) {
 }
 
 
-int init_serv_and_wait_con(int port, int max_pending_con_nb, int* bind_sockfd_toFill, int* con_sockfd_toFill, sockaddr_in* serv_addr_toFill, sockaddr_in* client_addr_toFill)  {
+int init_serv(int port, int max_pending_con_nb, int* bind_sockfd_toFill, int* con_sockfd_toFill, sockaddr_in* serv_addr_toFill)  {
+
     int sockfd = -2, con_sockfd = -2;
     if ((sockfd = new_socket()) < 0) return -1;
 
@@ -54,20 +55,53 @@ int init_serv_and_wait_con(int port, int max_pending_con_nb, int* bind_sockfd_to
 
     if (listen(sockfd, max_pending_con_nb) < 0) 
         printRErr("In listen of init_serv: %s, port: %d, sock_fd:%d\n", port, sockfd); //TODO: close socket and other cleanup before exiting
-
-    printf("Awaiting connection at port: %d\n", port);
    
-    socklen_t clilen = sizeof(*client_addr_toFill);
-    con_sockfd = accept(sockfd, (struct sockaddr *)client_addr_toFill, &clilen);
-    if (con_sockfd < 0)
-        printRErr("In accept of init_serv: %s, port: %d, sock_fd:%d\n", port, sockfd); //TODO: same here 
-
     *bind_sockfd_toFill = sockfd;
     *con_sockfd_toFill = con_sockfd;
 
     return EXIT_SUCCESS;
+
 }
 
+int init_serv_and_wait_con(int port, int max_pending_con_nb, int* bind_sockfd_toFill, int* con_sockfd_toFill, sockaddr_in* serv_addr_toFill, sockaddr_in* client_addr_toFill)  {
+    /*int sockfd = -2, con_sockfd = -2;
+    if ((sockfd = new_socket()) < 0) return -1;
+
+    serv_addr_toFill->sin_family = AF;
+    serv_addr_toFill->sin_addr.s_addr = INADDR_ANY;
+    serv_addr_toFill->sin_port = htons(port);
+
+    if (bind(sockfd, (struct sockaddr *)serv_addr_toFill, sizeof(*serv_addr_toFill)) < 0)
+        printRErr("In bind of init_serv: %s, port: %d\n", port); 
+
+    if (listen(sockfd, max_pending_con_nb) < 0) 
+        printRErr("In listen of init_serv: %s, port: %d, sock_fd:%d\n", port, sockfd); //TODO: close socket and other cleanup before exiting*/
+
+    init_serv(port, max_pending_con_nb, bind_sockfd_toFill, con_sockfd_toFill, serv_addr_toFill);
+    printf("Awaiting connection at port: %d\n", port);
+   
+    socklen_t clilen = sizeof(*client_addr_toFill);
+    *con_sockfd_toFill = accept(*bind_sockfd_toFill, (struct sockaddr *)client_addr_toFill, &clilen);
+    if (*con_sockfd_toFill < 0)
+        printRErr("In accept of init_serv: %s, port: %d, bind_sock_fd:%d\n", port, *bind_sockfd_toFill); //TODO: same here 
+
+    /**bind_sockfd_toFill = sockfd;
+    *con_sockfd_toFill = con_sockfd;*/
+
+    return EXIT_SUCCESS;
+}
+
+int serv_wait_con(int port, int bind_sockfd, int* con_sockfd_toFill, sockaddr_in* client_addr_toFill) {
+
+    printf("Awaiting connection at port: %d\n", port);
+   
+    socklen_t clilen = sizeof(*client_addr_toFill);
+    *con_sockfd_toFill = accept(bind_sockfd, (struct sockaddr *)client_addr_toFill, &clilen);
+    if (*con_sockfd_toFill < 0)
+        printRErr("In accept of init_serv: %s, port: %d, bind_sock_fd:%d\n", port, bind_sockfd); //TODO: same here 
+
+    return EXIT_SUCCESS;
+}
 
 int init_client_and_connect(const char* ip_addr, int port, int* sockfd) {
     int _sockfd;
