@@ -12,7 +12,7 @@
 #include "functions.h"
 #include "util.h"
 
-
+/*
 int new_socket() {
     int sockfd = socket(AF, SOCK_TYPE, PROTOCOL); 
     if (sockfd < 0) printRErr("%s, Cannot open given socket\n", " ");
@@ -38,7 +38,7 @@ sockaddr_in new_sockaddr(int port, struct hostent* server) {
     address.sin_port = htons(port);
 
     return address;
-}
+}*/
 
 int init_and_connect(const char* ip_addr, int port, int* sockfd) {
     int _sockfd;
