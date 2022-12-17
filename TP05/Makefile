@@ -13,8 +13,8 @@ CFLAGS = -lm -Wall -Wuninitialized -Wfloat-equal -Wshadow -Wbad-function-cast -W
 #
 DBGFLAGS = -g -DDEBUG
 
-SERV_EXEC = server.out
-CLIENT_EXEC = client.out
+SERV_EXEC = server
+CLIENT_EXEC = client
 
 EXEC = $(SERV_EXEC) $(CLIENT_EXEC)
 
