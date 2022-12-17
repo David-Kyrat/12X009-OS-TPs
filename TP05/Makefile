@@ -63,7 +63,7 @@ out:
 	mkdir out
 
 clean:
-	- rm *.out out/*.o out/*.out
+	- rm client server *.out out/*.o out/*.out
 
 
 #debugs: $(SERV_OBJS)
