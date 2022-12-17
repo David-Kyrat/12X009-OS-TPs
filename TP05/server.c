@@ -9,10 +9,7 @@
 #include <unistd.h>
 
 #include "functions.h"
-#ifndef UTIL
 #include "util.h"
-#define UTIL
-#endif
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {

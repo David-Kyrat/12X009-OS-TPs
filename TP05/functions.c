@@ -40,6 +40,7 @@ sockaddr_in new_sockaddr(int port, struct hostent* server) {
     return address;
 }
 
+
 int init_serv_and_wait_con(int port, int max_pending_con_nb, int* bind_sockfd_toFill, int* con_sockfd_toFill, sockaddr_in* serv_addr_toFill, sockaddr_in* client_addr_toFill)  {
     int sockfd = -2, con_sockfd = -2;
     if ((sockfd = new_socket()) < 0) return -1;
@@ -63,6 +64,22 @@ int init_serv_and_wait_con(int port, int max_pending_con_nb, int* bind_sockfd_to
 
     *bind_sockfd_toFill = sockfd;
     *con_sockfd_toFill = con_sockfd;
+
+    return EXIT_SUCCESS;
+}
+
+
+int init_client_and_connect(const char* ip_addr, int port, int* sockfd) {
+    int _sockfd;
+    struct hostent* server = resolve_hostname(ip_addr); 
+    if ((_sockfd = new_socket()) < 0) return EXIT_FAILURE;
+    
+    struct sockaddr_in address = new_sockaddr(port, server);
+    printf("trying to connect to host: %s, port: %d\n", ip_addr, port);
+    if (connect(_sockfd, (struct sockaddr *)&address, sizeof(address)) < 0)
+      printRErr("connect: %s, host: %s, port: %d\n", ip_addr, port);  
+
+    *sockfd = _sockfd;
 
     return EXIT_SUCCESS;
 }

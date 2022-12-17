@@ -16,5 +16,8 @@ sockaddr_in new_sockaddr(int port, struct hostent* server);
 
 int init_serv_and_wait_con(int port, int max_pending_con_nb, int* bind_sockfd_toFill, int* con_sockfd_toFill, sockaddr_in* serv_addr_toFill, sockaddr_in* client_addr_toFill);
 
+
+int init_client_and_connect(const char* ip_addr, int port, int* sockfd);
+
 #endif // __FUNCTIONS__
 

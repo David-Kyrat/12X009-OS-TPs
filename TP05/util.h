@@ -1,5 +1,5 @@
-#ifndef UTIL
-#define UTIL
+#ifndef __UTIL__
+#define __UTIL__
 
 #include <errno.h>
 
@@ -193,5 +193,5 @@ char* strsub(char* src, int stop_idx);
 
 void error(const char* msg);
 
-#endif /*UTIL*/
+#endif /*__UTIL__*/
 
