@@ -130,16 +130,21 @@ char* read_all_data_from_socket(int sockfd, int buf_size) {
 
     printf("min: %d\n", MIN(init_buf_size, (buf_size - total_bytes_read)));
     printf("buf_size: %d, total_bytes_read:%d, init_buf_size:%d\n", buf_size, total_bytes_read, init_buf_size);
-    while ((bytes_read = read(sockfd, buffer + total_bytes_read, MIN(init_buf_size, (buf_size - total_bytes_read)))) > 0) {
+    int toread = MIN(init_buf_size, (buf_size - total_bytes_read));
+
+    while ((bytes_read = read(sockfd, buffer + total_bytes_read, toread)) > 0) {
         total_bytes_read += bytes_read;
         printf("bytes_read: %d\n", bytes_read);
-        printf("buf_size: %d, total_bytes_read:%d, init_buf_size:%d\n\n", buf_size, total_bytes_read, init_buf_size);
+        printf("buf_size: %d, total_bytes_read:%d, init_buf_size:%d\n", buf_size, total_bytes_read, init_buf_size);
 
         while (total_bytes_read >= buf_size - 1) {
             // buffer is full, read the next chunk
             buf_size *= 2;
             buffer = realloc(buffer, buf_size);
         }
+        toread = MIN(init_buf_size, (buf_size - total_bytes_read));
+        printf("toread: %d\n\n", toread);
+
     }
     printf("bytes_read: %d, total_bytes_read: %d\n", bytes_read, total_bytes_read);
     if (bytes_read < 0) {
