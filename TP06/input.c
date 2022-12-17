@@ -80,10 +80,11 @@ int isWhiteSpace(const char* str) {
  * @return string buffer (usually argv)  i.e. 'inp' split with respect to 'ARG_SEP'
  */
 const char** parseInput(const char* inp, int* argc, int* isForeground) {
-    uint isFg; size_t argcTmp = 0, inp_len;
+    uint isFg; size_t argcTmp = 0, inp_len = strlen(inp);
     // inp is already right stripped so if required job must be launched in background, the '&' has to be end at the last position of 'inp'
-    char* tosplit = tryalc(malloc(1));
-    tosplit = inp; inp_len = strlen(inp);
+    char* tosplit = strndup(inp, inp_len); // no+1 because will add a '\0' at the end if doesnt exist + "safe" copy to avoid "effets de bords"
+       // tryalc(malloc(1)); // just a pointer that points to inp
+    //tosplit = inp; 
 
     if (inp_len > 1 && inp[inp_len - 1] == '&') {
         isFg = 0;

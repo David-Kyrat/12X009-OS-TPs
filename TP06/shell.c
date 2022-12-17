@@ -275,8 +275,6 @@ int executeJob(Shell* sh, const char* cmd_name, char* const argv[], int isForegr
 
         if (isForeground) {
             set_FJ(sh, t_pid);
-            printf("FG: %d\n", sh->foreground_job);
-            printf("BG: %d\n", sh->background_job);
 
             //- Only wait for foreground jobs
             if (wait(&child_exitcode) < 0) {
@@ -296,8 +294,6 @@ int executeJob(Shell* sh, const char* cmd_name, char* const argv[], int isForegr
 
         } else {
             set_BJ(sh, t_pid);
-            printf("FG: %d\n", sh->foreground_job);
-            printf("BG: %d\n", sh->background_job);
 
             printf("[1] \t[%d] - %s\n", sh_BJ(sh), cmd_name);
             return EXIT_SUCCESS;
