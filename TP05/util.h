@@ -1,19 +1,32 @@
+#ifndef __UTIL__
+#define __UTIL__
+
+#include <errno.h>
+#define AF (AF_INET)
+#define SOCK_TYPE SOCK_STREAM
+#define PROTOCOL 0
+typedef struct sockaddr_in sockaddr_in;
 
 /**
  * @file util.h
  * @brief Utility functions mostly used for error handling
  * 
  */
-
+// 0:default,  1:red, 2:Green,  3:Blue, 4:Purple, 5:yellow,  6:cyan,  7:grey
+const char* colors[] = {"\033[0m", "\033[0;31m", "\033[0;32m", "\033[0;34m", "\033[0;35m", "\033[0;33m", "\033[0;36m", "\033[0;30m"};
 /** Macro that Prints given message to stderr. Message should be printf formatted and the first arg is always strerror(savedErr) where savedErr is the saved value of errno.
 * Usage: 'printErr("%s, %d: port number not valid\n", port)' first %s will be 'strerror(savedErr)' */
-#define printErr(mess, args...) fprintf(stderr, mess, strerror(errno), args)
+#define printErr(mess, args...) \
+    {int savedErr = errno;  \
+    fprintf(stderr, "%s\t", colors[1]);\
+    fprintf(stderr, mess, strerror(savedErr == 0 ? EXIT_FAILURE : savedErr), args);\
+    fprintf(stderr, "%s", colors[0]);}
+    // if savedErr == 0 then strerror(savedError) will return "success" which wouldn't make any sense for an error message.
 
 //* Macro that Prints given (printf formatted) message to stderr and returns -1. See 'printErr' for more info
-#define printRErr(mess, args...) printErr(mess, args)
+#define printRErr(mess, args...) \
+    { printErr(mess, args); return -1; }
 
-//* Set errno to given value and return -1;
-#define setRErrno(errnoVal) errno = errnoVal
 
 /** 
  * Macro that stores errno into the variable 'savedErr' then checks whether the given error 'condition' is true, 
@@ -25,11 +38,26 @@
     else return 0; */
 
 /**
- * Checks if alloc (malloc, calloc ...) returned Null, if it did prints error message error message to stderr and exit with error ENOMEM
+ * Utility function called to check if an *alloc() call returned null. => print "Cannot allocated Memory" to stderr and exit with exit code ENOMEM. 
+ * return ("nothing" i.e. make program exit with code ENOMEM)
+ */
+void hdlOOM();
+
+/**
+ * If *alloc (malloc, calloc ...) returned null exits (i.e. hdlOOM()) if it didn't return the alloc return.
+ * mostly useful to be able do things like ' smth = tryalc( *alloc(...) ) ' (i.e. directly doing and the malloc and the test)
+ * 
  * @param allocReturn The return value of alloc.
  * @return allocReturn if it's not null, exit otherwise
  */
 void* tryalc(void* allocReturn);
+
+
+/**
+ * Perform a memset 0 on 'n' bytes of 'data'
+ */
+void memzero(void * data, unsigned long n);
+
 
 /**
  * Utility function for basic error handling
@@ -148,6 +176,16 @@ struct stat stat_s(const char* path);
 int dateCmpr(struct timespec ts2, struct timespec ts1);
 
 /**
+ * Manuel advise of using strtol instead of atoi when converting (strtol can differentiate 0 value and an error).
+ * => Converts to int and resolve errors if necessary.
+ * @param str string to convert
+ * @param base base in which to convert
+ * @param result pointer to int in which to store the result
+ * @return 0 on success, -1 on error.
+ */
+int strToInt(const char* str, int base, int* result);
+
+/**
  * Extract substring of 'src' from 0 to substring_length . Memory for substring was allocated with strdup.
  * 
  * @param src The string to extract the substring from.
@@ -156,3 +194,8 @@ int dateCmpr(struct timespec ts2, struct timespec ts1);
  * @return src[0 : stop_idx] i.e. substring of length 'stop_idx'
  */
 char* strsub(char* src, int stop_idx);
+
+void error(const char* msg);
+
+#endif /* __UTIL__ */
+

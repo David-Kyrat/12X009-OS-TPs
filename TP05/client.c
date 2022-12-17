@@ -1,93 +1,103 @@
-// Standard libraries
+/* TCP client */
+
+#include <netdb.h>
+#include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
-// memset
 #include <string.h>
-// basic string manip
-#include <strings.h>
-// Error
-#include <errno.h>
-// Types
-#include <sys/types.h>
-// Sockets, inet addresses
-#include <arpa/inet.h>
 #include <sys/socket.h>
-//open
-#include <fcntl.h>
-//close
+#include <sys/types.h>
 #include <unistd.h>
 
-#include "functions.h"
-#include "optprsr.h"
 #include "util.h"
 
-const char* USAGE_MSG_CLIENT = "Usage: %s <ip-address> (in decimal)  <portNumber> (2Bytes integer in [1024, 65535]) \n";
 
-int main(int argc, char* argv[]) {
-    
-    /* int port = argv[2];ip
-    const char* ip_addr = argv[1]; */
-    int port; const char* ip_addr;
-    parseArgvClient(argc, argv, &port, &ip_addr);
-
-    sockaddr_in address = new_sockaddr(port, ip_addr);
-
-    // Create a client socket
-    int client_socket = new_socket();
-    if (client_socket < 0) return -1;
-
-    // Attempt at establishing connection
-    if (connect(client_socket, (struct sockaddr *) &address, sizeof(address)) < 0)
-        return -1;
-
-    // Find out what the interval is
-    int min;
-    int max;
-
-    read(client_socket, &min, 4);
-    printf("Minimum: %d\n", min);
-
-    read(client_socket, &max, 4);
-    printf("Maximum: %d\n", max);
-
-    int received;
-
-    while (received != 0) {
-
-        // Each time a proposition is sent to the server
-        printf("Guess the number: ");
-        int proposition;
-        scanf("%d", &proposition);
-        write(client_socket, &proposition, 4);
-        printf("Proposition sent: %d\n", proposition);
-
-
-        // Each time an answer is received from the server
-        read(client_socket, &received, 4); 
-
-        // If the number was guessed correctly
-        if (received == 0) {
-            printf("Number guessed correctly, you win!\n");
-        }
-
-        // If the number we proposed was too low
-        else if (received == 1) {
-            printf("Number is higher\n");
-        }
-
-        // If the number we proposed was too high
-        else if (received == 2) {
-            printf("Number is lower\n");
-        }
-
-       if(received == 4) {
-            printf("Too many guesses, you lose!\n");
-            received = 0;
-            close(client_socket);
-            break;
-        }
-    }
-
-
-
+int new_socket() {
+    int sockfd = socket(AF, SOCK_TYPE, PROTOCOL); 
+    if (sockfd < 0) printRErr("%s, Cannot open given socket\n", " ");
+     return sockfd;
 }
+
+
+struct hostent* resolve_hostname(const char* ip_addr) {
+    struct hostent* server = gethostbyname(ip_addr);
+    if (server == NULL)
+        printErr("resolve_hostname: %s, ip: %s\n", ip_addr); 
+    return server;
+}
+
+
+sockaddr_in new_sockaddr(int port, struct hostent* server) {
+    struct sockaddr_in address;
+    memset((char *)&address, 0, sizeof(address)); 
+    address.sin_family = AF;
+
+    memcpy((char *) &address.sin_addr.s_addr, (char *) server->h_addr,  server->h_length);
+
+    address.sin_port = htons(port);
+
+    return address;
+}
+
+int init_and_connect(const char* ip_addr, int port, int* sockfd) {
+    int _sockfd;
+    struct hostent* server = resolve_hostname(ip_addr); 
+    if ((_sockfd = new_socket()) < 0) return EXIT_FAILURE;
+    
+    struct sockaddr_in address = new_sockaddr(port, server);
+    printf("trying to connect to host: %s, port: %d\n", ip_addr, port);
+    if (connect(_sockfd, (struct sockaddr *)&address, sizeof(address)) < 0)
+      printRErr("connect: %s, host: %s, port: %d\n", ip_addr, port);  
+
+    *sockfd = _sockfd;
+
+    return EXIT_SUCCESS;
+}
+
+
+int write_inp_to_sock(int sockfd, char* buffer) {
+    memzero(buffer, 256);
+    fgets(buffer, 255, stdin);
+
+    if (write(sockfd, buffer, strlen(buffer)) < 0) 
+      printRErr("write_inp_to_sock: %s, msg: %s, socket_fd:%d\n", buffer, sockfd);
+    return EXIT_SUCCESS;
+}
+
+
+int read_from_sock(int sockfd, char* buffer) {
+    memzero(buffer, 256);
+    if (read(sockfd, buffer, 255) < 0) 
+      printRErr("read_from_sock: %s, msg: %s, socket_fd:%d\n", buffer, sockfd);
+    return EXIT_SUCCESS;
+}
+
+
+int main(int argc, char *argv[]) {
+    if (argc < 3) {
+        errno = EINVAL;
+        printRErr("%s.\nUsage: %s <hostname> <port-number>\n", argv[0]);
+    }
+    const char* ip_addr = argv[1]; int port = atoi(argv[2]), sockfd;
+    //if ((sockfd = new_socket()) < 0) return EXIT_FAILURE;
+    init_and_connect(ip_addr, port, &sockfd);
+    
+    /*struct hostent* server = resolve_hostname(ip_addr); 
+    
+    struct sockaddr_in address = new_sockaddr(port, server);
+
+    printf("trying to connect to host: %s, port: %d\n", ip_addr, port);
+    if (connect(sockfd, (struct sockaddr *)&address, sizeof(address)) < 0)
+      printRErr("connect: %s, host: %s, port: %d\n", ip_addr, port);  
+*/
+    
+    char buffer[256];
+    printf("Please enter the message: ");
+    write_inp_to_sock(sockfd, buffer);
+    read_from_sock(sockfd, buffer);
+
+    printf("%s\n", buffer);
+    close(sockfd);
+    return 0;
+}
+
