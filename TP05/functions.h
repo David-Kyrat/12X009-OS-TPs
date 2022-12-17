@@ -19,5 +19,8 @@ int init_serv_and_wait_con(int port, int max_pending_con_nb, int* bind_sockfd_to
 
 int init_client_and_connect(const char* ip_addr, int port, int* sockfd);
 
+
+char* read_all_data_from_socket(int sockfd, int buf_size) ;
+
 #endif // __FUNCTIONS__
 
