@@ -10,6 +10,7 @@
 #include <sys/types.h>  //pid_t
 #include <sys/wait.h>
 #include <unistd.h>
+#include <time.h>
 
 #include "shell.h"
 #include "files.h"
@@ -594,6 +595,12 @@ int initSigHandlers(Shell* sh, void (*sig_hdler)(int, siginfo_t* info, void* uco
  * ========================================================
  */
 
+struct tm* getTime() {
+    time_t rawtime = time(NULL);
+    struct tm *ptm = localtime(&rawtime);
+    return ptm;
+}
+
 
 
 //! 0:default,  1:red, 2:Green,  3:Blue, 4:Purple, 5:yellow,  6:cyan,  7:grey
@@ -606,10 +613,20 @@ void setOutColor(int color) { printf("%s", colors[color]); }
 
 void resetCol() { setOutColor(0); }
 
+
+void printTime() {
+    struct tm* ptm = getTime();
+     printf("[%02d:%02d:%02d", ptm->tm_hour, ptm->tm_min, ptm->tm_sec);
+}
+
 void sh_prettyPrintPath(Shell* sh) {
     printf("%s( %s", colors[1], colors[6]);
     printf("%s", pwd(sh));
-    printf("%s )\n", colors[1]);
+    printf("%s )", colors[1]);
+    setOutColor(5);
+    printf("%-50s", "\t\t"); //! used to right align the time
+    printTime(); printf("]\n");
+
     //printf("|_ %s$ ", colors[5]);
     resetCol();
 }
