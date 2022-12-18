@@ -126,7 +126,7 @@ int sock_write(int sockfd, const char* msg) {
 
 
 //if buf_size is 0 => while read until EOT
-char* read_all_data_from_socket(int sockfd, int buf_size) {
+char* sock_read(int sockfd, int buf_size) {
     int total_bytes_read = 0, bytes_read = 0;
     buf_size = buf_size <= 1 ? 256 : buf_size;
     int init_buf_size = buf_size;

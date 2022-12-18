@@ -41,7 +41,7 @@ int sock_hasNext(const char* msg);
 int sock_write(int sockfd, const char* msg);
 
 
-char* read_all_data_from_socket(int sockfd, int buf_size) ;
+char* sock_read(int sockfd, int buf_size) ;
 
 #endif // __FUNCTIONS__
 

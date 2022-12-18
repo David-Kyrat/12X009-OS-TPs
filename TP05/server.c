@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
-    int bind_sockfd, con_sockfd, portno = atoi(argv[1]), n;
+    int bind_sockfd, con_sockfd, portno = atoi(argv[1]);
     //socklen_t clilen;
     char buffer[256];
     struct sockaddr_in serv_addr, cli_addr;
@@ -32,19 +32,16 @@ int main(int argc, char *argv[]) {
             fprintf(stderr, "\n");
             continue;
         }
-        n = read(con_sockfd, buffer, 255);
-        if (n < 0) printErr("%s ERROR reading from socket\n", " ");
-    
-        printf("Here is the message: %s\n", buffer);
+
+        char* buf = sock_read(con_sockfd, 0);
+        printf("Here is the message: %s\n", buf);
   
         char tmp[] = "I got your message";
         char* msg = strndup(tmp, strlen(tmp));
 
-        //n = write(con_sockfd, msg, 18);
-        n = sock_write(con_sockfd, msg); 
-        if (n < 0) printErr("%s ERROR reading from socket\n", " ");
-    
+        sock_write(con_sockfd, msg); 
     }
+
     close(con_sockfd);
     close(bind_sockfd);
     

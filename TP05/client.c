@@ -14,10 +14,11 @@
 
 
 int write_inp_to_sock(int sockfd, char* buffer) {
-    memzero(buffer, 256);
-    fgets(buffer, 255, stdin);
+    memzero(buffer, 4097);
+    fgets(buffer, 4096, stdin);
 
-    if (write(sockfd, buffer, strlen(buffer)) < 0)
+    if (sock_write(sockfd, buffer) < 0)
+    //if (write(sockfd, buffer, strlen(buffer)) < 0)
         printRErr("write_inp_to_sock: %s, msg: %s, socket_fd:%d\n", buffer, sockfd);
     return EXIT_SUCCESS;
 }
@@ -40,12 +41,16 @@ int main(int argc, char* argv[]) {
     if (init_client_and_connect(ip_addr, port, &sockfd) < 0) return EXIT_FAILURE;
 
 
-    char* buffer = tryalc(malloc(4096));
+    size_t buf_size = 4096;
+    char* buffer = tryalc(malloc(buf_size+1));
+    memzero(buffer, buf_size+1);
+    
     printf("Please enter the message: ");
-    if (write_inp_to_sock(sockfd, buffer) < 0) return EXIT_FAILURE;
- 
+    fgets(buffer, buf_size, stdin);
+    if (sock_write(sockfd, buffer) < 0) return EXIT_FAILURE;
 
-    buffer = read_all_data_from_socket(sockfd, 0);
+
+    buffer = sock_read(sockfd, 0);
     printf("%s\n", buffer);
     if (close(sockfd) < 0) 
         hdlCloseErr("socket", 1);
