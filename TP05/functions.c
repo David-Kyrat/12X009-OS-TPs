@@ -64,19 +64,6 @@ int init_serv(int port, int max_pending_con_nb, int* bind_sockfd_toFill, int* co
 }
 
 int init_serv_and_wait_con(int port, int max_pending_con_nb, int* bind_sockfd_toFill, int* con_sockfd_toFill, sockaddr_in* serv_addr_toFill, sockaddr_in* client_addr_toFill)  {
-    /*int sockfd = -2, con_sockfd = -2;
-    if ((sockfd = new_socket()) < 0) return -1;
-
-    serv_addr_toFill->sin_family = AF;
-    serv_addr_toFill->sin_addr.s_addr = INADDR_ANY;
-    serv_addr_toFill->sin_port = htons(port);
-
-    if (bind(sockfd, (struct sockaddr *)serv_addr_toFill, sizeof(*serv_addr_toFill)) < 0)
-        printRErr("In bind of init_serv: %s, port: %d\n", port); 
-
-    if (listen(sockfd, max_pending_con_nb) < 0) 
-        printRErr("In listen of init_serv: %s, port: %d, sock_fd:%d\n", port, sockfd); //TODO: close socket and other cleanup before exiting*/
-
     init_serv(port, max_pending_con_nb, bind_sockfd_toFill, con_sockfd_toFill, serv_addr_toFill);
     printf("Awaiting connection at port: %d\n", port);
    
@@ -85,11 +72,9 @@ int init_serv_and_wait_con(int port, int max_pending_con_nb, int* bind_sockfd_to
     if (*con_sockfd_toFill < 0)
         printRErr("In accept of init_serv: %s, port: %d, bind_sock_fd:%d\n", port, *bind_sockfd_toFill); //TODO: same here 
 
-    /**bind_sockfd_toFill = sockfd;
-    *con_sockfd_toFill = con_sockfd;*/
-
     return EXIT_SUCCESS;
 }
+
 
 int serv_wait_con(int port, int bind_sockfd, int* con_sockfd_toFill, sockaddr_in* client_addr_toFill) {
 
@@ -102,6 +87,7 @@ int serv_wait_con(int port, int bind_sockfd, int* con_sockfd_toFill, sockaddr_in
 
     return EXIT_SUCCESS;
 }
+
 
 int init_client_and_connect(const char* ip_addr, int port, int* sockfd) {
     int _sockfd;
@@ -118,6 +104,7 @@ int init_client_and_connect(const char* ip_addr, int port, int* sockfd) {
     return EXIT_SUCCESS;
 }
 
+
 //does not check is msg is at least EOTlen bytes
 int sock_hasNext(const char* msg) {
     return streq(msg, EOT);
@@ -129,7 +116,6 @@ int sock_write(int sockfd, const char* msg) {
     size_t totLen = msgLen + EOTlen;
     msg = tryalc(realloc(msg, totLen + 1));
     strncat(msg, EOT, EOTlen + 1); 
-    printf("msg: %s\n", msg);
     ssize_t written = write(sockfd, msg, totLen + 1);
     if (written < 0) { 
         hdlWriteErr("socket", 0, 0, sockfd);
@@ -147,33 +133,21 @@ char* read_all_data_from_socket(int sockfd, int buf_size) {
 
     char* buffer = tryalc(malloc(init_buf_size));
 
-    int toread = MIN(init_buf_size, (buf_size - total_bytes_read));
-
-    while ((bytes_read = read(sockfd, buffer + total_bytes_read, toread)) > 0) {
+    while ((bytes_read = read(sockfd, buffer + total_bytes_read, init_buf_size)) > 0) {
         total_bytes_read += bytes_read;
         
-        if (!sock_hasNext(buffer)) {
-            puts("EOT received");
-            return buffer;
-        } else {
-            puts("has next");
-        }
+        if (total_bytes_read >= EOTlen && !sock_hasNext(buffer)) break;
 
-        while (total_bytes_read + toread >= buf_size) {
-            // buffer is full, read the next chunk
+        while (total_bytes_read + init_buf_size >= buf_size) { // buffer is full, realloc to read the next chunk
             buf_size *= 2;
             buffer = realloc(buffer, buf_size);
         }
-        toread = MIN(init_buf_size, (buf_size - total_bytes_read));
-
     }
     if (bytes_read < 0) {
-        printErr("read_all_data_from_socket: %s, buf_size: %d, init_buf_size %d\n", buf_size, init_buf_size);
+        printErr("read_all_data_from_socket: %s, buf_size: %d, init_buf_size %d, read: \"%s\"\n", buf_size, init_buf_size, buffer);
         return buffer;
     }
-
+    buffer[total_bytes_read - EOTlen - 1] = '\0';  // remove the EOT from the final message
     return buffer;
 }
-
-
 
