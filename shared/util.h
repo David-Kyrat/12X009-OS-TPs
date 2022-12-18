@@ -155,6 +155,9 @@ int hdlCopyErr(const char* from, const char* to, int needsExit, int needsClose, 
  */
 int hdlCatErr(const char* current);
 
+int hdlSigHdlErr(const char* signame, int needsExit);
+
+
 /**
  * shortcut for lstat, also handles error
  * @return stat structure of path's inode. If an error happened => the 'st_size' attribute is set to -1
