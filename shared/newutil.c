@@ -15,10 +15,9 @@
 
 #include "util.h"
 
-
 void hdlOOM(void* allocReturn) {
     // here only hdl* function where we do the test for 2 reason.
-    // 1. the test and the reaction is always the same (if *alloc returned null => exit with enonmem) 
+    // 1. the test and the reaction is always the same (if *alloc returned null => exit with enonmem)
     // 2. The thing to do on error is just exiting the program so the caller won't be able to do anything afterwards anyway,
     if (allocReturn == NULL) {
         // malloc returned null => exiting with error message ENOMEM
@@ -27,33 +26,17 @@ void hdlOOM(void* allocReturn) {
     }
 }
 
-
 void* tryalc(void* allocReturn) {
     hdlOOM(allocReturn);
     // if we arrived here we did not exit, hence allocReturn is not null
     return allocReturn;
 }
 
-
-void* tryalloc(size_t size) {
-    void* tmp = malloc(size);
-    hdlOOM(tmp);
-    memzero(tmp, size);
-    return tmp;
-}
-
-
-void memzero(void * data, unsigned long n) { 
-    memset(data, 0, n); 
-}
-
-
 int hdlBasicErr() {
     int savedErr = errno;
     fprintf(stderr, "Unexpected error: %s\n", strerror(savedErr));
     return -1;
 }
-
 
 int hdlOpenErr(const char* filename, int needsExit) {
     int savedErr = errno;
@@ -62,7 +45,6 @@ int hdlOpenErr(const char* filename, int needsExit) {
     return -1;
 }
 
-
 int hdlCloseErr(const char* filename, int needsExit) {
     int savedErr = errno;
     fprintf(stderr, "Could not close file %s : %s\n", filename, strerror(savedErr));
@@ -70,11 +52,10 @@ int hdlCloseErr(const char* filename, int needsExit) {
     return -1;
 }
 
-
 int hdlReadErr(const char* filename, int needsExit, int needsClose, int fd) {
     int savedErr = errno;
-    int isbadf = savedErr == EBADF; //strerror for ebadf is very unclear
-    fprintf(stderr, "Could not read from file %s : %s %s\n", filename, strerror(savedErr), isbadf ? " or is not open for reading" : "");
+    int isbadf = savedErr == EBADF;  //strerror for ebadf is very unclear
+    fprintf(stderr, "Could not read from file %s : %s %s\n", filename, strerror(savedErr == 0 ? 1 : savedErr), isbadf ? " or is not open for reading" : "");
     if (needsClose) {
         if (close(fd)) hdlCloseErr(filename, needsExit);
     }
@@ -82,19 +63,17 @@ int hdlReadErr(const char* filename, int needsExit, int needsClose, int fd) {
     if (needsExit) exit(savedErr);
     return -1;
 }
-
 
 int hdlReadInErr(int needsExit) {
     int savedErr = errno;
-    fprintf(stderr, "Cannot read from standard input or input was empty: %s.\n", strerror(savedErr));
+    fprintf(stderr, "Cannot read from standard input or input was empty: %s.\n", strerror(savedErr == 0 ? 1 : savedErr));
     if (needsExit) exit(savedErr);
     return -1;
 }
 
-
 int hdlWriteErr(const char* filename, int needsExit, int needsClose, int fd) {
     int savedErr = errno;
-    fprintf(stderr, "Could not write to file %s : %s\n", filename, strerror(savedErr));
+    fprintf(stderr, "Could not write to file %s : %s\n", filename, strerror(savedErr == 0 ? 1 : savedErr));
     if (needsClose) {
         if (close(fd)) hdlCloseErr(filename, needsExit);
     }
@@ -102,10 +81,9 @@ int hdlWriteErr(const char* filename, int needsExit, int needsClose, int fd) {
     return -1;
 }
 
-
 int hdlCopyErr(const char* from, const char* to, int needsExit, int needsClose, int fd_from, int fd_to) {
     int savedErr = errno;
-    fprintf(stderr, "Could not copy %s to %s: %s\n", from, to, strerror(savedErr));
+    fprintf(stderr, "Could not copy %s to %s: %s\n", from, to, strerror(savedErr == 0 ? 1 : savedErr));
     if (needsClose) {
         if (close(fd_from)) hdlCloseErr(from, needsExit);
         if (close(fd_to)) hdlCloseErr(to, needsExit);
@@ -115,13 +93,11 @@ int hdlCopyErr(const char* from, const char* to, int needsExit, int needsClose, 
     return -1;
 }
 
-
 int hdlCatErr(const char* current) {
     int savedErr = errno;
-    fprintf(stderr, "Cannot build path containing %s: %s\n", current, strerror(savedErr));
+    fprintf(stderr, "Cannot build path containing %s: %s\n", current, strerror(savedErr == 0 ? 1 : savedErr));
     return -1;
 }
-
 
 int hdlSigHdlErr(const char* signame, int needsExit) {
     int savedErr = errno;
@@ -129,7 +105,6 @@ int hdlSigHdlErr(const char* signame, int needsExit) {
     if (needsExit) exit(savedErr);
     return -1;
 }
-
 
 struct stat lstat_s(const char* path) {
     struct stat infos;
@@ -158,28 +133,35 @@ int dateCmpr(struct timespec ts2, struct timespec ts1) {
     //? If elapsed < 0 then ts2 < ts1. Else (elapsed > 0) will return 1 Iif ts2 > ts0, and 0, if elapsed == 0. (because the only case left is elapsed == 0)
 }
 
-
 int strToInt(const char* str, int base, int* result) {
-    char* endptr = tryalc(malloc(strlen(str)+1));
+    if (str == NULL) {
+        errno = EINVAL;
+        return -1;
+    }
+    char* endptr = tryalc(malloc(strlen(str) + 1));
     errno = 0;
-    int res = (int) strtol(str, &endptr, base);
+    int res = (int)strtol(str, &endptr, base);
     // From the manual : "If there were no digits at all, strtol() stores the original value of nptr in *endptr (and returns 0)"
     //   -> in this situation we want to indicate that there has been an error. Because even though res == 0, it was not the digit that was read!
     int savedErr = errno;
     if ((savedErr == EINVAL || savedErr == ERANGE) || (res == 0 && (strcmp(str, endptr) == 0)))
-        printRErr("%s: Cannot convert %s to a base %d int.\n", str, base); //print message to stderr & return -1
-    
+        printRErr("%s: Cannot convert %s to a base %d int.\n", str, base);  //print message to stderr & return -1
+
     *result = res;
     return EXIT_SUCCESS;
-   
 }
 
 char* strsub(char* src, int stop_idx) {
+    if (src == NULL) {
+        errno = EINVAL;
+        return NULL;
+    }
     int sublen = stop_idx;
     char* sub = NULL;
     if (sublen < 0) errno = EINVAL;
     //will copy at most 'sublen' bytes and append a \0 if necesary at the end.
-    else sub = strndup(src, sublen);
+    else
+        sub = strndup(src, sublen);
     if (sub == NULL) {
         int savedErr = errno;
         fprintf(stderr, "Cannot extract substring from \"%s\": %s\n", src, strerror(savedErr));
@@ -190,7 +172,6 @@ char* strsub(char* src, int stop_idx) {
 
     return sub;
 }
-
 
 int strstartwith(const char* str, const char* prefix) {
     if (str == NULL || prefix == NULL) {
@@ -236,12 +217,10 @@ char** strsplit(char* string, const char* separator, size_t* size) {
     return out;
 }
 
-
 int streq(const char* s1, const char* s2) {
     if (s1 == NULL || s2 == NULL) return -2;
     return strcmp(s1, s2) == 0;
 }
-
 
 int strswitch(const char* pattern, const char* cases[], int caseNb) {
     if (pattern == NULL || cases == NULL) return -1;
@@ -251,14 +230,12 @@ int strswitch(const char* pattern, const char* cases[], int caseNb) {
     return -1;
 }
 
-
 void arrPrint(char** arr, int size) {
     printf("[");
     for (int i = 0; i < size - 1; i++)
         printf("\'%s\'#", arr[i]);
     printf("\'%s\']\n", arr[size - 1]);
 }
-
 
 /**
  * Remove all whitespace to the left of the given string. 
@@ -285,7 +262,6 @@ const char* stripr(char* str) {
 const char* strip(char* str) {
     return stripr(stripl(str));
 }
-
 
 /**
  * Common "private" function to avoid code repetition while handling error related to wait*() calls
@@ -326,4 +302,3 @@ int wait_s(int* exitStatus) {
 int waitpid_s(pid_t pid, int* exitStatus) {
     return __wait_s(pid, exitStatus, 1);
 }
-

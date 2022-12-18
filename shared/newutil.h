@@ -1,15 +1,12 @@
-
 /**
  * @file util.h
  * @brief Utility functions mostly used for error handling
  * 
  */
 
-
 #ifndef UTIL_H
 #define UTIL_H
 
-#include <sys/types.h>
 
 /** Macro that Prints given message to stderr. Message should be printf formatted and the first arg is always strerror(savedErr) where savedErr is the saved value of errno.
 * Usage: 'printErr("%s, %d: port number not valid\n", port)' first %s will be 'strerror(savedErr)' */
@@ -35,11 +32,11 @@
  * Utility function called to check if an *alloc() call returned null. => print "Cannot allocated Memory" to stderr and exit with exit code ENOMEM. 
  * return ("nothing" i.e. make program exit with code ENOMEM)
  */
-void hdlOOM(void* allocReturn);
+void hdlOOM();
 
 /**
  * If *alloc (malloc, calloc ...) returned null exits (i.e. hdlOOM()) if it didn't return the alloc return.
- * mostly useful to be able do things like ' smth = tryalc( *alloc(...) ) ' (i.e. directly doing and the malloc and the test)
+ * mostly useful to be able do things like ' smith = tryalc( *alloc(...) ) ' (i.e. directly doing and the malloc and the test)
  * 
  * @param allocReturn The return value of alloc.
  * @return allocReturn if it's not null, exit otherwise
@@ -47,25 +44,9 @@ void hdlOOM(void* allocReturn);
 void* tryalc(void* allocReturn);
 
 /**
- * Shorthand / Utility method to 
- *  1. malloc
- *  2. check if it returned NULL (if it did exis with erro ENOMEM, see tryalc() for more infos)
- *  3. Set memory at 0 (i.e. memset(<address>, 0, size))
- * 
- * @return Address to allocated, 0-initiliazed memory of 'size' bytes (or just exits if we're out of memory)
- */
-void* tryalloc(size_t size);
-
-/**
- * Perform a memset 0 on 'n' bytes of 'data'
- */
-void memzero(void * data, unsigned long n);
-
-
-/**
  * Utility function for basic error handling
  * 
- * Justs Prints an error message to stderr return -1
+ * Just Prints an error message to stderr return -1
  * @return -1
  */
 int hdlBasicErr();
@@ -79,7 +60,7 @@ int hdlBasicErr();
  * @param needsExit int, If non-zero, program will exit with the saved error code from errno. (otherwise do nothing)
  * @return -1 or, exits with saved errno, if needsExit was != 0.
  */
-int hdlOpenErr(const char* filename, int exit);
+int hdlOpenErr(const char* filename, int needsExit);
 
 
 /**
@@ -88,10 +69,10 @@ int hdlOpenErr(const char* filename, int exit);
  * Prints an error message to stderr and exits with the error code if needsExit is true, otherwise
  * ust returns -1
  * @param filename Name of the file that could not be closed.
- * @param needsExit int, If non-zero, program will exit with the saved error code from errno. (otherwise do nothing)
+ * @param needsExit int, If non-zero, program will needsExit with the saved error code from errno. (otherwise do nothing)
  * @return -1 or, exits with saved errno, if needsExit was != 0.
  */
-int hdlCloseErr(const char* filename, int exit);
+int hdlCloseErr(const char* filename, int needsExit);
 
 /**
  * Utility function for basic handling of error related to file reading.
@@ -155,6 +136,16 @@ int hdlCopyErr(const char* from, const char* to, int needsExit, int needsClose, 
  */
 int hdlCatErr(const char* current);
 
+
+/**
+ * Utility function for basic handling of error related to changing handlers of signals.
+ * (print an error message to standard error and return -1 or exit if necessary)
+ * @param signame name of signals e.g. SIGTERM
+ * @param needsExit If non-zero, the program will exit with the error code of the error that occured occurred.
+ * @return -1 or exit if necessary
+ */
+int hdlSigHdlErr(const char* signame, int needsExit);
+
 /**
  * shortcut for lstat, also handles error
  * @return stat structure of path's inode. If an error happened => the 'st_size' attribute is set to -1
@@ -197,6 +188,7 @@ int strToInt(const char* str, int base, int* result);
  * @return src[0 : stop_idx] i.e. substring of length 'stop_idx'
  */
 char* strsub(char* src, int stop_idx);
+
 
 /**
  * Return whether 'str' starts with given prefix.
