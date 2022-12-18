@@ -168,7 +168,7 @@ int dateCmpr(struct timespec ts2, struct timespec ts1);
  * Manuel advise of using strtol instead of atoi when converting (strtol can differentiate 0 value and an error).
  * => Converts to int and resolve errors if necessary.
  * @param str string to convert
- * @param base base in which to convert
+ * @param base base in which to convert (if 0, will default to base 10)
  * @param result pointer to int in which to store the result
  * @return 0 on success, -1 on error.
  */

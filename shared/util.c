@@ -132,6 +132,7 @@ int dateCmpr(struct timespec ts2, struct timespec ts1) {
 
 
 int strToInt(const char* str, int base, int* result) {
+    if (base == 0) base = 10;
     char* endptr = tryalc(malloc(strlen(str)+1));
     errno = 0;
     int res = (int) strtol(str, &endptr, base);
