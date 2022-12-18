@@ -24,6 +24,9 @@ static const char* colors[] = {"\033[0m", "\033[0;31m", "\033[0;32m", "\033[0;34
     { printErr(mess, args); return -1; }
 
 
+#define MIN(a, b) (a < b ? a : b)
+
+
 /** 
  * Macro that stores errno into the variable 'savedErr' then checks whether the given error 'condition' is true, 
  * then prints the error message and given args to stderr and returns -1 (error) or 0 (sucess) accordingly.
@@ -190,6 +193,17 @@ int strToInt(const char* str, int base, int* result);
  * @return src[0 : stop_idx] i.e. substring of length 'stop_idx'
  */
 char* strsub(char* src, int stop_idx);
+
+
+/**
+ * Check if 2 strings are equal 
+ * @param s1 First string to compare
+ * @param s2 Second to string to compare it with
+ *
+ * @return 1 if they do 0 otherwise
+ */
+int streq(const char* s1, const char* s2);
+
 
 void error(const char* msg);
 

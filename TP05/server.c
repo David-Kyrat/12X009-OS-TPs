@@ -36,8 +36,12 @@ int main(int argc, char *argv[]) {
         if (n < 0) printErr("%s ERROR reading from socket\n", " ");
     
         printf("Here is the message: %s\n", buffer);
-   
-        n = write(con_sockfd, "I got your message", 18);
+  
+        char tmp[] = "I got your message";
+        char* msg = strndup(tmp, strlen(tmp));
+
+        //n = write(con_sockfd, msg, 18);
+        n = sock_write(con_sockfd, msg); 
         if (n < 0) printErr("%s ERROR reading from socket\n", " ");
     
     }

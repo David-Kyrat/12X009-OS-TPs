@@ -150,6 +150,22 @@ int strToInt(const char* str, int base, int* result) {
    
 }
 
+
+int streq(const char* s1, const char* s2) {
+    if (s1 == NULL && s2 == NULL) return 1;
+    else if (s1 == NULL || s2 == NULL) return 0;
+
+    size_t len1 = strlen(s1), len2 = strlen(s2);
+    if (len1 != len2) return 0;
+    if (len1 == 0) return 1;
+    switch (len1) {
+        case 0: return 1;
+        case 1: return *s1 == *s2;
+        default: return strncmp(s1, s2, len1);
+    }
+}
+
+
 char* strsub(char* src, int stop_idx) {
     int sublen = stop_idx;
     char* sub = NULL;

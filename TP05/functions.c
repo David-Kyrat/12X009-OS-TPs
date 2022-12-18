@@ -118,9 +118,28 @@ int init_client_and_connect(const char* ip_addr, int port, int* sockfd) {
     return EXIT_SUCCESS;
 }
 
-#define MIN(a, b) (a < b ? a : b)
+//does not check is msg is at least EOTlen bytes
+int sock_hasNext(const char* msg) {
+    return streq(msg, EOT);
+}
 
-//if buf_size is 0 => while read until EOF
+
+int sock_write(int sockfd, const char* msg) {
+    size_t msgLen = strlen(msg);
+    size_t totLen = msgLen + EOTlen;
+    msg = tryalc(realloc(msg, totLen + 1));
+    strncat(msg, EOT, EOTlen + 1); 
+    printf("msg: %s\n", msg);
+    ssize_t written = write(sockfd, msg, totLen + 1);
+    if (written < 0) { 
+        hdlWriteErr("socket", 0, 0, sockfd);
+        return -1;
+    }
+    return written;
+}
+
+
+//if buf_size is 0 => while read until EOT
 char* read_all_data_from_socket(int sockfd, int buf_size) {
     int total_bytes_read = 0, bytes_read = 0;
     buf_size = buf_size <= 1 ? 256 : buf_size;
@@ -128,25 +147,26 @@ char* read_all_data_from_socket(int sockfd, int buf_size) {
 
     char* buffer = tryalc(malloc(init_buf_size));
 
-    printf("min: %d\n", MIN(init_buf_size, (buf_size - total_bytes_read)));
-    printf("buf_size: %d, total_bytes_read:%d, init_buf_size:%d\n", buf_size, total_bytes_read, init_buf_size);
     int toread = MIN(init_buf_size, (buf_size - total_bytes_read));
 
     while ((bytes_read = read(sockfd, buffer + total_bytes_read, toread)) > 0) {
         total_bytes_read += bytes_read;
-        printf("bytes_read: %d\n", bytes_read);
-        printf("buf_size: %d, total_bytes_read:%d, init_buf_size:%d\n", buf_size, total_bytes_read, init_buf_size);
+        
+        if (!sock_hasNext(buffer)) {
+            puts("EOT received");
+            return buffer;
+        } else {
+            puts("has next");
+        }
 
-        while (total_bytes_read >= buf_size - 1) {
+        while (total_bytes_read + toread >= buf_size) {
             // buffer is full, read the next chunk
             buf_size *= 2;
             buffer = realloc(buffer, buf_size);
         }
         toread = MIN(init_buf_size, (buf_size - total_bytes_read));
-        printf("toread: %d\n\n", toread);
 
     }
-    printf("bytes_read: %d, total_bytes_read: %d\n", bytes_read, total_bytes_read);
     if (bytes_read < 0) {
         printErr("read_all_data_from_socket: %s, buf_size: %d, init_buf_size %d\n", buf_size, init_buf_size);
         return buffer;
