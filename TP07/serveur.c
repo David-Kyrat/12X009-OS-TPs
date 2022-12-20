@@ -28,10 +28,10 @@ int main(int argc, char* argv[]) {
     //On signal que l'on est prêt
     shm->isReady = READY;
 
-    for(i=0;i<NUM_INCREMENTS;i++)
+    for(i = 0; i < MAX_PIZZAS; i++)
         shm->number = shm->number + 1;
 
-    //Unmap
+    // Unmap the memory
     if(munmap(shm, sizeof(sharedMemory)) == -1)
         OnError("munmap");
 

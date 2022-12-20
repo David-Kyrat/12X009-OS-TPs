@@ -18,7 +18,7 @@ SERVEUR_EXEC = serveur.out
 
 EXEC = $(SERVER_EXEC) $(CUISINIER_EXEC)
 
-SHARED_OBJS = out/cook.o -lrt
+SHARED_OBJS = out/cook.o
 
 CUISINIER_OBJS = out/cuisinier.o $(SHARED_OBJS)
 SERVEUR_OBJS = out/serveur.o $(SHARED_OBJS)
@@ -27,19 +27,19 @@ SERVEUR_OBJS = out/serveur.o $(SHARED_OBJS)
 all: $(EXEC)
 
 $(SERVEUR_EXEC): $(SERVEUR_OBJS)
-	$(CC) $(SERVEUR_OBJS) -o $(SERVEUR_EXEC)
+	$(CC) $(SERVEUR_OBJS) -o $(SERVEUR_EXEC)  -lrt
 
 $(CUISINIER_EXEC): $(CUISINIER_OBJS)
-	$(CC) $(CUISINIER_OBJS) -o $(CUISINIER_EXEC)
+	$(CC) $(CUISINIER_OBJS) -o $(CUISINIER_EXEC)  -lrt
 
 out/serveur.o: serveur.c serveur.h
-	$(CC) -c serveur.c $(CFLAGS) $(DBGFLAGS) -o out/serveur.o
+	$(CC) -c serveur.c $(CFLAGS) $(DBGFLAGS) -o out/serveur.o  -lrt
 
 out/cuisinier.o: cuisinier.c cuisinier.h
-	$(CC) -c cuisinier.c $(CFLAGS) $(DBGFLAGS) -o out/cuisinier.o
+	$(CC) -c cuisinier.c $(CFLAGS) $(DBGFLAGS) -o out/cuisinier.o  -lrt
 
 out/cook.o: cook.c cook.h
-	$(CC) -c cook.c $(CFLAGS) $(DBGFLAGS) -o out/cook.o
+	$(CC) -c cook.c $(CFLAGS) $(DBGFLAGS) -o out/cook.o  -lrt
 
 
 

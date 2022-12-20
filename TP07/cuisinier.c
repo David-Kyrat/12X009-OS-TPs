@@ -42,7 +42,7 @@ int main (int argc, char* argv[]) {
         shm->number = shm->number + 1;
         printf("Number of pizzas: %ld", shm->number);
 
-    // Unmap
+    // Unmap the memory
     if(munmap(shm, sizeof(sharedMemory)) == -1)
         fprintf(stderr, "munmap");
 
