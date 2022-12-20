@@ -13,7 +13,7 @@ typedef struct {
 } sharedMemory;
 
 #define READY 0
-#define NUM_INCREMENTS 10000000
+#define MAX_PIZZAS 10
 
 
 void OnError(const char *str)

@@ -7,8 +7,6 @@
 #include <stdio.h>
 #include "shm.h"
 
-#define MAX_PIZZAS 10
-
 // CODE FROM COURSE
 
 int main (int argc, char* argv[]) {
@@ -40,8 +38,9 @@ int main (int argc, char* argv[]) {
     shm_unlink(argv[1]);
 
     // Start counting pizzas
-    for(i = 0;i < NUM_INCREMENTS; i++)
+    for(i = 0; i < MAX_PIZZAS; i++)
         shm->number = shm->number + 1;
+        printf("Number of pizzas: %ld", shm->number);
 
     // Unmap
     if(munmap(shm, sizeof(sharedMemory)) == -1)
