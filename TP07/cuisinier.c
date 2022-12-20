@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include "shm.h"
 
-// CODE FROM COURSE
+
 
 int main (int argc, char* argv[]) {
 

@@ -18,14 +18,13 @@ SERVEUR_EXEC = serveur.out
 
 EXEC = $(SERVER_EXEC) $(CUISINIER_EXEC)
 
-SHARED_OBJS = out/cook.o
+SHARED_OBJS = out/cook.o -lrt
 
 CUISINIER_OBJS = out/cuisinier.o $(SHARED_OBJS)
 SERVEUR_OBJS = out/serveur.o $(SHARED_OBJS)
 
 
 all: $(EXEC)
-
 
 $(SERVEUR_EXEC): $(SERVEUR_OBJS)
 	$(CC) $(SERVEUR_OBJS) -o $(SERVEUR_EXEC)
