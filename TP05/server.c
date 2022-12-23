@@ -26,6 +26,22 @@ const int MAX_CLI = 5; // Max nb of client to have at the same time
 
 int crt_cli_nb = 0;
 
+//Takes an "rodata string" and return malloc'ed address pointing to initialized variable
+char* new_str(char* value) {
+    if (value == NULL) return NULL;
+    size_t len = strlen(value);
+    char* out = strndup(value, len); //let strndup add the "\0" at the end of out (regardless of whether it was present or not in 'value')
+    return out;
+}
+
+char* new_str2(char* value, size_t size) {
+    if (value == NULL || size <= 0) return NULL;
+    size_t len = strlen(value) ;
+    char* out = tryalc(malloc(size <= len ? len + 1 : size));
+    memzero(out, size);
+    strncat(out, value, len);
+    return out;
+}
 
 int main(int argc, char *argv[]) {
 
@@ -74,11 +90,9 @@ int main(int argc, char *argv[]) {
                 if (buf == NULL || strlen(buf) <= 0) continue; // if we read nothing just wait for next mesasage
 
                 printf("Here is the message: %s\n", buf);
-  
-                char tmp[] = "I got your message, it was: ";
-                char* msg = tryalc(malloc((sizeof tmp) + strlen(buf)));
-                char* tmp2= strndup(tmp, strlen(tmp));
-                strncat(msg, tmp2, strlen(tmp2));
+ 
+                char* msg = new_str("I got your message, it was: ");
+                msg = realloc(msg, strlen(msg) + strlen(buf) + 1);
                 strncat(msg, buf, strlen(buf));
             
                 sock_write(con_sockfd, msg); 
