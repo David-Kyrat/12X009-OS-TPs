@@ -1,5 +1,18 @@
-#ifndef D4B33A74_2EFB_4A72_8C72_E2029A17FDF2
-#define D4B33A74_2EFB_4A72_8C72_E2029A17FDF2
+#ifndef cook
+#define cook
+
+// Inform the server that it can start serving
+sem_t* sem_server;
+
+// Inform the chef that it can rest
+sem_t* sem_cook;
+
+// Mutual exclusion of the shelf
+sem_t* sem_shelf;
+
+void init_semaphores();
+
+void destroy_semaphores();
 
 
-#endif /* D4B33A74_2EFB_4A72_8C72_E2029A17FDF2 */
+#endif /* cook */

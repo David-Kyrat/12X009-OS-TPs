@@ -7,16 +7,17 @@
 
 CC = gcc
 CFLAGS = -lm -Wall -Wuninitialized -Wfloat-equal -Wshadow -Wbad-function-cast -Wcast-qual -Wcast-align -Wconversion -Wunreachable-code -Wformat=2 -Winit-self -Wno-conversion -Wno-discarded-qualifiers -Wno-format-y2k -Wno-format-nonliteral 
+LFLAGS = -lrt -lpthread
 
 
 # * Debug build settings
 
 DBGFLAGS = -g -DDEBUG
 
-CUISINIER_EXEC = cuisinier.out
-SERVEUR_EXEC = serveur.out
+CUISINIER_EXEC = cuisinier
+SERVEUR_EXEC = serveur
 
-EXEC = $(SERVER_EXEC) $(CUISINIER_EXEC)
+EXEC = $(SERVEUR_EXEC) $(CUISINIER_EXEC)
 
 SHARED_OBJS = out/cook.o
 
@@ -27,19 +28,19 @@ SERVEUR_OBJS = out/serveur.o $(SHARED_OBJS)
 all: $(EXEC)
 
 $(SERVEUR_EXEC): $(SERVEUR_OBJS)
-	$(CC) $(SERVEUR_OBJS) -o $(SERVEUR_EXEC)  -lrt
+	$(CC) $(SERVEUR_OBJS) -o $(SERVEUR_EXEC) $(LFLAGS)
 
 $(CUISINIER_EXEC): $(CUISINIER_OBJS)
-	$(CC) $(CUISINIER_OBJS) -o $(CUISINIER_EXEC)  -lrt
+	$(CC) $(CUISINIER_OBJS) -o $(CUISINIER_EXEC) $(LFLAGS)
 
-out/serveur.o: serveur.c serveur.h
-	$(CC) -c serveur.c $(CFLAGS) $(DBGFLAGS) -o out/serveur.o  -lrt
+out/serveur.o: serveur.c
+	$(CC) -c serveur.c $(CFLAGS) $(DBGFLAGS) -o out/serveur.o $(LFLAGS)
 
-out/cuisinier.o: cuisinier.c cuisinier.h
-	$(CC) -c cuisinier.c $(CFLAGS) $(DBGFLAGS) -o out/cuisinier.o  -lrt
+out/cuisinier.o: cuisinier.c
+	$(CC) -c cuisinier.c $(CFLAGS) $(DBGFLAGS) -o out/cuisinier.o $(LFLAGS)
 
 out/cook.o: cook.c cook.h
-	$(CC) -c cook.c $(CFLAGS) $(DBGFLAGS) -o out/cook.o  -lrt
+	$(CC) -c cook.c $(CFLAGS) $(DBGFLAGS) -o out/cook.o $(LFLAGS)
 
 
 

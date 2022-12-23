@@ -8,24 +8,16 @@
 #include <stdlib.h>
 #include <semaphore.h>
 #include "shm.h"
+#include "cook.h"
 
 
 // 3 semaphores
 
-// Inform the server that it can start serving
-sem_t* sem_server;
-
-// Inform the chef that it can rest
-sem_t* sem_cook;
-
-// Mutual exclusion of the shelf
-sem_t* sem_shelf;
-
 // Initialize the semaphores
 void init_semaphores() {
-    sem_server = sem_open("sem_server", O_CREAT, 0644, 0);
-    sem_cook = sem_open("sem_cook", O_CREAT, 0644, 0);
-    sem_shelf = sem_open("sem_shelf", O_CREAT, 0644, 1);
+    sem_server = sem_open("sem_server", O_CREAT, 0666, 0);
+    sem_cook = sem_open("sem_cook", O_CREAT, 0666, 0);
+    sem_shelf = sem_open("sem_shelf", O_CREAT, 0666, 1);
 }
 
 // Destroy the semaphores
