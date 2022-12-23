@@ -21,7 +21,6 @@ int write_inp_to_sock(int sockfd, char* buffer) {
     fgets(buffer, 4096, stdin);
 
     if (sock_write(sockfd, buffer) < 0)
-    //if (write(sockfd, buffer, strlen(buffer)) < 0)
         printRErr("write_inp_to_sock: %s, msg: %s, socket_fd:%d\n", buffer, sockfd);
     return EXIT_SUCCESS;
 }
@@ -61,8 +60,6 @@ int main(int argc, char* argv[]) {
 
     }*/
 
-    //printf("Please enter the message: ");
-    //fgets(buffer, buf_size, stdin);
     do {
         buffer = readline("Please enter the message:\n> ");
         add_history(buffer);
@@ -70,7 +67,7 @@ int main(int argc, char* argv[]) {
         if (sock_write(sockfd, buffer) < 0) return EXIT_FAILURE;
 
 
-        //buffer = sock_read(sockfd, 0);
+        buffer = sock_read(sockfd, 0);
         printf("%s\n", buffer);
         memzero(buffer, strlen(buffer)+1); 
     } while (buffer != NULL);

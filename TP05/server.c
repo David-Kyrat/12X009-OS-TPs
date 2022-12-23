@@ -17,11 +17,15 @@
 #include "functions.h"
 #include "util.h"
 
+#define errprint(mess, args...) fprintf(stderr, mess, args);
+void clean_exit();
+
 const int SPEAK_TIME = 5; //? amount of times each client is allowed to speak. i.e. number of read/write exchange before cutting connection with client
                           // each read/write back and forth will be called a 'round'
 const int MAX_CLI = 5; // Max nb of client to have at the same time
 
 int crt_cli_nb = 0;
+
 
 int main(int argc, char *argv[]) {
 
@@ -35,6 +39,16 @@ int main(int argc, char *argv[]) {
     //socklen_t clilen;
     char buffer[256];
     struct sockaddr_in serv_addr, cli_addr;
+
+    void clean_exit() {
+        //! Ideally store pid and con_sockfd of all client, / children and close each connection 
+        //! kill / wait each children here
+        close(con_sockfd);
+        close(bind_sockfd);
+    }
+    atexit(clean_exit);
+
+
     if ( init_serv(portno, 5, &bind_sockfd, &con_sockfd, &serv_addr) < 0 ) 
         return EXIT_FAILURE;
 
@@ -46,8 +60,8 @@ int main(int argc, char *argv[]) {
             continue;
         } 
         crt_cli_nb++;
-        
-        printf("Client connected at IP: %s\n\n", inet_ntoa(cli_addr.sin_addr));
+        const char* pretty_addr = inet_ntoa(cli_addr.sin_addr); 
+        printf("Client connected at IP: %s\n\n", pretty_addr);
         pid_t child_pid = fork();
         int child_exit_status;
         if (child_pid < 0) perror("accepting connection, cannot fork");
@@ -71,6 +85,7 @@ int main(int argc, char *argv[]) {
             } // at the end of the 'SPEAK_TIME' rounds => close connection
               // TOFIX: Parent still has a fd open to socket in table des canneaux because we only closed it in child
            
+            errprint("Client at adress %s, spoke for %d round. Closing connection...\n\n", pretty_addr, MAX_CLI);
             close(con_sockfd);
             exit(EXIT_SUCCESS); // Exit from child
 
