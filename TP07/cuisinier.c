@@ -21,7 +21,7 @@ void cook_pizza(sharedMemory *shm, int i){
         // Add the cooked pizza to the shelf
         sem_wait(sem_shelf);
         shm->number++;
-        printf("Cook added a pizza to the shelf. Pizzas on shelf: %ld\n", shm->number);
+        printf("Chef added a pizza to the shelf. Pizzas on shelf: %ld\n", shm->number);
         sem_post(sem_shelf);
 
         // Tell the server that there is a new pizza available
@@ -29,12 +29,12 @@ void cook_pizza(sharedMemory *shm, int i){
 
         // If there are 3 pizzas on the shelf, tell the chef to rest
         if (shm->number == 3) {
-            printf("Cook is taking a break.\n");
+            printf("Chef is taking a break.\n");
             sem_wait(sem_cook);
         }
 
         if (i == 9) {
-            printf("Cook is done cooking.\n");
+            printf("Chef is done cooking.\n");
             sem_post(sem_server);
         }   
 
