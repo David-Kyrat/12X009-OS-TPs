@@ -6,12 +6,25 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <unistd.h>
+#include <wait.h>
+#include <errno.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
 #include "functions.h"
 #include "util.h"
 
+const int SPEAK_TIME = 5; //? amount of times each client is allowed to speak. i.e. number of read/write exchange before cutting connection with client
+                          // each read/write back and forth will be called a 'round'
+const int MAX_CLI = 5; // Max nb of client to have at the same time
+
+int crt_cli_nb = 0;
+
 int main(int argc, char *argv[]) {
+
     if (argc < 2) {
         errno = EINVAL;
         printErr("%s.\nUsage: %s <port-number>\n", argv[0]);
@@ -31,19 +44,49 @@ int main(int argc, char *argv[]) {
         if (serv_wait_con(portno, bind_sockfd, &con_sockfd, &cli_addr) < 0) { 
             fprintf(stderr, "\n");
             continue;
-        }
-
-        char* buf = sock_read(con_sockfd, 0);
-        printf("Here is the message: %s\n", buf);
+        } 
+        crt_cli_nb++;
+        
+        printf("Client connected at IP: %s\n\n", inet_ntoa(cli_addr.sin_addr));
+        pid_t child_pid = fork();
+        int child_exit_status;
+        if (child_pid < 0) perror("accepting connection, cannot fork");
+        if (child_pid == 0) {
+            /* IN CHILD */
   
-        char tmp[] = "I got your message";
-        char* msg = strndup(tmp, strlen(tmp));
+            // while client has not reached 5 rounds
+            for (int round = 0; round < SPEAK_TIME; round++) { 
+                char* buf = sock_read(con_sockfd, 0);
+                if (buf == NULL || strlen(buf) <= 0) continue; // if we read nothing just wait for next mesasage
 
-        sock_write(con_sockfd, msg); 
+                printf("Here is the message: %s\n", buf);
+  
+                char tmp[] = "I got your message, it was: ";
+                char* msg = tryalc(malloc((sizeof tmp) + strlen(buf)));
+                char* tmp2= strndup(tmp, strlen(tmp));
+                strncat(msg, tmp2, strlen(tmp2));
+                strncat(msg, buf, strlen(buf));
+            
+                sock_write(con_sockfd, msg); 
+            } // at the end of the 'SPEAK_TIME' rounds => close connection
+              // TOFIX: Parent still has a fd open to socket in table des canneaux because we only closed it in child
+           
+            close(con_sockfd);
+            exit(EXIT_SUCCESS); // Exit from child
+
+        } else if (child_pid > 0) {
+
+            // If too much client are talking => wait for 1 to finish and terminate associated child process. ELse just wait for new connections
+            if (crt_cli_nb >= MAX_CLI) {
+                int err_code = wait_s(&child_exit_status);
+                crt_cli_nb = (err_code == 2) ? 0 : crt_cli_nb - 1;
+                if (err_code > 0) fprintf(stderr, "Child exited with exit code %d\n", child_exit_status);
+            }
+        } 
+
     }
 
-    close(con_sockfd);
     close(bind_sockfd);
     
-    return 0;
+    return EXIT_SUCCESS;
 }

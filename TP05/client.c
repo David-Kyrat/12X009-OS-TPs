@@ -8,6 +8,9 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <errno.h>
+#include <readline/readline.h>
+#include <readline/history.h>
 
 #include "functions.h"
 #include "util.h"
@@ -44,14 +47,34 @@ int main(int argc, char* argv[]) {
     size_t buf_size = 4096;
     char* buffer = tryalc(malloc(buf_size+1));
     memzero(buffer, buf_size+1);
-    
-    printf("Please enter the message: ");
-    fgets(buffer, buf_size, stdin);
-    if (sock_write(sockfd, buffer) < 0) return EXIT_FAILURE;
+   
+    /*pid_t rdrPid = fork();
+    if (rdrPid > 0) {
+        pid_t wrtrPid = fork();
+
+        if (wrtrPid == 0) {
+            //TODO: write
+        }
+        else if (wrtrPid > 0) {
+            wait();
+        }
+
+    }*/
+
+    //printf("Please enter the message: ");
+    //fgets(buffer, buf_size, stdin);
+    do {
+        buffer = readline("Please enter the message:\n> ");
+        add_history(buffer);
+
+        if (sock_write(sockfd, buffer) < 0) return EXIT_FAILURE;
 
 
-    buffer = sock_read(sockfd, 0);
-    printf("%s\n", buffer);
+        //buffer = sock_read(sockfd, 0);
+        printf("%s\n", buffer);
+        memzero(buffer, strlen(buffer)+1); 
+    } while (buffer != NULL);
+
     if (close(sockfd) < 0) 
         hdlCloseErr("socket", 1);
 

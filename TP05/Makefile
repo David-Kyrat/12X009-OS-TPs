@@ -31,10 +31,10 @@ all: $(EXEC)
 
 
 $(SERV_EXEC): $(SERV_OBJS)
-	$(CC) $(SERV_OBJS) -o $(SERV_EXEC)
+	$(CC) $(SERV_OBJS) -o $(SERV_EXEC) -lreadline
 
 $(CLIENT_EXEC): $(CLIENT_OBJS)
-	$(CC) $(CLIENT_OBJS) -o $(CLIENT_EXEC)
+	$(CC) $(CLIENT_OBJS) -o $(CLIENT_EXEC) -lreadline
 
 
 test: test.c $(SHARED_OBJS)
