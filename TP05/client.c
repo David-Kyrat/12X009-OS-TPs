@@ -68,7 +68,7 @@ int main(int argc, char* argv[]) {
 
 
         buffer = sock_read(sockfd, 0);
-        printf("%s\n", buffer);
+        printf("%s\n\n", buffer);
         memzero(buffer, strlen(buffer)+1); 
     } while (buffer != NULL);
 
