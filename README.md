@@ -18,6 +18,7 @@ Below you can find the links to the enonce & reports for each TP of the semester
 - [TP 04](TP04/TP4.pdf)
   - [Report](TP04/TP04-rapport.pdf)
 
-- [TP 05](TP05/TP5.pdf)
+- [TP 05](TP05/instructions/TP5.pdf)
 
-- [TP 06](TP06/TP6.pdf)
+- [TP 06](TP06/instructions/TP6.pdf)
+  - [Report](TP06/report/TP6_report.pdf)
