@@ -1,7 +1,9 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <openssl/evp.h>
 #include <errno.h>
+#include <fcntl.h> //read
 #include <unistd.h>
 
 EVP_MD_CTX* mdctx;
@@ -42,7 +44,8 @@ char* convert_f_to_s(char* filename) {
 
     // Error handling if unable to open source in read-only or the destination in write-only, create or excl (error if create but file already exists)
     if ((fd = open(filename, O_RDONLY)) < 0) {
-        hdlOpenErr(filename, 0);
+        int savedErr = errno;
+        fprintf(stderr, "convert_f_to_s: cannot open file %s : %s\n", filename, strerror(savedErr));
         return NULL;
     }
     
@@ -58,12 +61,14 @@ char* convert_f_to_s(char* filename) {
     }
     if (readNb < 0) {
         int savedErr = errno;
-        fprintf(stderr, "convert_f_to_s: cannot read file %s : %s\n", fileToRead, strerror(savedErr));
+        fprintf(stderr, "convert_f_to_s: cannot read file %s : %s\n", filename, strerror(savedErr));
         return NULL;
     }
 
     if (close(fd) < 0) {
-        hdlCloseErr(fileToRead, 0);
+        int savedErr = errno;
+        fprintf(stderr, "convert_f_to_s: cannot close file %s : %s\n", filename, strerror(savedErr));
+        exit(EXIT_FAILURE);
         return NULL;
     }
 
