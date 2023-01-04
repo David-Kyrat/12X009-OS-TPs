@@ -22,7 +22,8 @@ void hdlOOM(void* allocReturn) {
     // 2. The thing to do on error is just exiting the program so the caller won't be able to do anything afterwards anyway,
     if (allocReturn == NULL) {
         // malloc returned null => exiting with error message ENOMEM
-        fprintf(stderr, "%s, Cannot allocate Memory\n", strerror(errno));
+        int err = errno;
+        fprintf(stderr, "%s, Cannot allocate Memory\n", strerror(err));
         exit(ENOMEM);
     }
 }
