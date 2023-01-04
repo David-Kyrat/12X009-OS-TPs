@@ -24,14 +24,6 @@ out/main.o: main.c hash_calc.h OptionParser.h
 	$(CC) -c main.c $(CFLAGS) $(DBGFLAGS) -o out/main.o
 
 
-test.out: out/test.o $(OBJS)
-	$(CC) out/test.o $(OBJS) -o test.out -lssl -lcrypto
-
-
-out/test.o: test.c hash_calc.h OptionParser.h
-	$(CC) -c test.c $(CFLAGS) $(DBGFLAGS) -o out/test.o
-
-
 out/hash_calc.o: hash_calc.c hash_calc.h OptionParser.h
 	$(CC) -c hash_calc.c $(CFLAGS) $(DBGFLAGS) -o out/hash_calc.o
 
