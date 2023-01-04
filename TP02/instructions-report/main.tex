@@ -1,8 +1,7 @@
-\documentclass[draft, french]{article}
+\documentclass[french]{article}
 \usepackage[margin=1in,a4paper]{geometry}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-%\usepackage{hyperref}
 \usepackage[fleqn]{amsmath}
 \usepackage{enumitem,amssymb}
 \usepackage{graphicx}
@@ -26,11 +25,6 @@
 \setlength{\footskip}{45.81593pt}
 \setlength{\parindent}{0cm}
 %
-\hypersetup{colorlinks=true,
-    linkcolor=blue,
-    urlcolor=blue,
-}
-\urlstyle{same}
 %
 \newcommand{\unilogo}[1]{\includegraphics[scale=#1]{images/unige.png}}
 %
@@ -164,30 +158,31 @@ Le reste du projet contient :
 
 La commande \code{make all} permet de compiler tous les fichiers.\\
 
-Comme dit précédemment, le makefile donne aussi d'autres possibilités de compilation (i.e. compiler seulement les \code{.o} situé dans \code{out/}, les exemples dans \code{exemples/} \ldot) \\
+Comme dit précédemment, le makefile donne aussi d'autres possibilités de compilation (i.e. compiler seulement les \code{.o} situé dans \code{out/}, les exemples dans \code{exemples/} \ldots) \\
 
 On peut exécuter le programme de 4 manières différentes:
 
 
 \begin{enumerate}
     \item[\textbf{1-2)}] En spécifiant un ou plusieurs fichiers avec \code{-f}, en spécifiant (ou pas) la fonction de hashage \code{-t} :\\ 
-    \code{./digest -f file1 file2 \ldot [-t <hashMethod>]}.\\
+    \code{./digest -f file1 file2 \ldots [-t <hashMethod>]}.\\
     
     Ce qui retournera \textbf{1} hash \textbf{par} fichier. E.g.:\\
     \code{\$ ./digest -f res/test.txt res/string-tohash.txt -t md5}\\
     
     \code{Hashing Method: md5}
     
-    \code{Hashing file "res/string-tohash.txt"\ldot}\\
-    \code{120227d6118cfddbd21639644aa0884d File: res/string-tohash.txt}\\ (ou \code{ef81ae80ec507096f761cefa49f7b63e} sans \quo{final newline})
+    \code{Hashing file "res/string-tohash.txt"\ldots}\\
+    \code{120227d6118cfddbd21639644aa0884d File: res/string-tohash.txt}\\ 
+    (ou \code{ef81ae80ec507096f761cefa49f7b63e} sans retour à la ligne final)\\
     \code{------------------------}\\
     
-    \code{Hashing file "res/test.txt"\ldot}\\
+    \code{Hashing file "res/test.txt"\ldots}\\
     \code{4e1243bd22c66e76c2ba9eddc1f91394e57f9f83 File: res/test.txt}\\
     \code{------------------------}\\
     
     \item[\textbf{3-4})] En spécifiant une ou plusieures chaînes de caractères, en spécifiant (ou pas) la fonction de hashage \code{-t} :\\
-    \code{./digest string1 string2 \ldot [-t <hashMethod>]}.\\
+    \code{./digest string1 string2 \ldots [-t <hashMethod>]}.\\
     
      Ce qui retournera \textbf{1} hash \textbf{pour} la concaténation de \textbf{tous} les strings. E.g.:\\
     
