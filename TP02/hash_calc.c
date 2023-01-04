@@ -2,6 +2,7 @@
 #include <string.h>
 #include <openssl/evp.h>
 #include <errno.h>
+#include <unistd.h>
 
 EVP_MD_CTX* mdctx;
 const EVP_MD* md;
@@ -10,7 +11,7 @@ unsigned char md_value[EVP_MAX_MD_SIZE];
 unsigned int md_len, i;
 
 // ------------------------------------------------------------------------------------------------------------------------------------
-// Hashing function, which takes a string and a hash function as arguments, and will return a string, the hash digest
+
 unsigned char* hash(char* text, char* hash_f) {
 
     md = EVP_get_digestbyname(hash_f);
@@ -30,46 +31,42 @@ unsigned char* hash(char* text, char* hash_f) {
 
 
 // ------------------------------------------------------------------------------------------------------------------------------------
-// Function to convert a file's data into a string, which can be used as input for the hash function
-// a file is inputted and a string is returned
+
 char* convert_f_to_s(char* filename) {
+    int fd;
+    char buff[4096];  // size of a block
+    ssize_t readNb;   // number of bytes read
+    size_t readTotNb = 0;
+    char* bBuff; //big buffer which will contain all file and be realloc'd at each iteration
 
-    // Set up variables and pointers
-    FILE* fichier;
-    char* ligne;
-    char* converted_string;
-    size_t c_s_len = 1;
-    converted_string = (char*) malloc(sizeof(char*) * c_s_len);
-    size_t len = 0;
-    ssize_t nread;
 
-    // Check if filename was given
-    if (strcmp(filename, "") == 0) {
-        fprintf(stderr, "Filename was not entered\n");
-        errno = EINVAL;
-        return "";
+    // Error handling if unable to open source in read-only or the destination in write-only, create or excl (error if create but file already exists)
+    if ((fd = open(filename, O_RDONLY)) < 0) {
+        hdlOpenErr(filename, 0);
+        return NULL;
+    }
+    
+    //* While there are bytes left to be read, reads them 4096 by 4096 (4096 or current size of 'buff' if its not that)
+    //* nb: if readNb is < to what we expected we dont really care because the program will retry until having read everything
+    while ((readNb = read(fd, buff, sizeof buff)) > 0) {
+        char* crtToCopy = &buff[readTotNb];  // pointer to start of current 'portion of data' to copy
+        readTotNb += readNb;
+        //update allocated memory to the size of whats been read until now.
+        bBuff = realloc(bBuff, (readTotNb+1)*sizeof(char));
+        //copy at most readNb bytes fileToRead buff to bBuff i.e. append current content of the small buffer 'buff'.
+        strncat(bBuff, crtToCopy, readNb);
+    }
+    if (readNb < 0) {
+        int savedErr = errno;
+        fprintf(stderr, "convert_f_to_s: cannot read file %s : %s\n", fileToRead, strerror(savedErr));
+        return NULL;
     }
 
-    // Open file given
-    fichier = fopen(filename, "r");
-
-    // Check if the file is empty
-    if (fichier == NULL) {
-        fprintf(stderr, "File could not be opened\n");
-        errno = ENOENT;
-        return "";
+    if (close(fd) < 0) {
+        hdlCloseErr(fileToRead, 0);
+        return NULL;
     }
 
-    // Read each line, and concatenate it to the converted_string
-    while ((nread = getline(&ligne, &len, fichier)) != -1) {
-            converted_string = (char *) realloc(converted_string, c_s_len + len);
-            strcat(converted_string, ligne);
-           }
-
-
-    free(ligne);
-    fclose(fichier);
-
-    return converted_string;
+    return bBuff;
 }
 

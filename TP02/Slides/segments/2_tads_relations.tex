@@ -29,6 +29,12 @@ TP reste assez simple, seulement 2 modules ont été créés.\\ Le premier \code
     \end{itemize}
 }
 
+\bframes{
+    \code{hash\_calc}, quant à lui, contient une fonction \code{convert\_f\_to\_s()} qui extrait le contenu d'un fichier pour pouvoir passer le contenu
+    directement à la fonction \code{hash()}. L'implémentation de \code{convert\_f\_to\_s()} a été repris du tp sur ultra-cp qui est elle-même fortement inspirée
+    des slides du cours. i.e. implémentation manuelle \quo{bufferisé} de lecture de fichier avec \code{read()}.
+}
+
 %!! METTRE çA QQ PART POUR LAVOIR A LEXAMEN !!
 
 %/**
@@ -50,13 +56,7 @@ TP reste assez simple, seulement 2 modules ont été créés.\\ Le premier \code
 
 \subsection{Structures de données utilisées}
 \bframe{
-    Pareil qu'avant, l'implémentation de structure n'a pas été nécessaire.
-}%
-
-%
-\subsection{Décomposition fonctionnelle}
-\bframes{
-    
+    L'implémentation de structure n'a pas été nécessaire.
 }
 
 %
