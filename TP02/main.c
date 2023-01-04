@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
 
     if (filesToHash) { //* if the array of files is not null, i.e. program was called with -f option and has been correctly initialized
         unsigned char** fileHashs;
-        tryalc(fileHashs = (unsigned char**)calloc(fileAmnt,  sizeof(unsigned char*)), __LINE__);
+        tryalc(fileHashs = (unsigned char**)calloc(fileAmnt,  sizeof(unsigned char*)));
         //for (int i = 0; i < fileAmnt; i++) fileHashs[i] = "0x"; //? Debugging purposes - TOREMOVE
 
         for (int i = 0; i < fileAmnt; i++) {

@@ -18,11 +18,10 @@ char* catArr(char** arr, int arrSize, char* sep);
  * Receives the output of the "malloc attempt". If it's null, print an error message to stderr and exit
  * 
  * @param allocReturn The return value of malloc.
- * @param line The line number of the file where the error occurred.
  * 
  * @return allocReturn if it's not null, exit otherwise
  */
-void* tryalc(void* allocReturn, int line);
+void* tryalc(void* allocReturn);
 
 /**
  * Check if there is at least 1 argument, otherwise exits with code 22 (Invalid argument)

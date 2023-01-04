@@ -12,7 +12,7 @@ const char* OPT_STRING = "f:t:";
 const int HASH_METH_MAXLEN = 10;  //* maxium length of string describing hashing method
 
 char* hashMethod = NULL;
-int tflag = 0; //* 0 if prog was not called with "-t", 1 otherwise  
+int tflag = 0;  //* 0 if prog was not called with "-t", 1 otherwise
 // and index of -t argument otherwise
 
 char** filesToHash = NULL;
@@ -21,19 +21,13 @@ char* stringToHash = NULL;
 /** @return const char*, the different options that can be used */
 const char* getOptString() { return OPT_STRING; }
 
-/**
- * Receives the output of the "malloc attempt". If it's null, print an error message to stderr and exit
- * 
- * @param allocReturn The return value of malloc.
- * @param line The line number of the file where the error occurred.
- * 
- * @return allocReturn if it's not null, exit otherwise
- */
-void* tryalc(void* allocReturn, int line) {
-    if (allocReturn) return allocReturn;
 
-    //*malloc returned null => exiting with error message ENOMEM
-    fprintf(stderr, "line %d: Cannot allocate Memory\n", line);
+void* tryalc(void* allocReturn) {
+    if (allocReturn != NULL) return allocReturn;
+
+    int savedErr = errno;
+    // malloc returned null => exiting with error message ENOMEM
+    fprintf(stderr, "%s, Cannot allocate Memory\n", strerror(savedErr));
     exit(ENOMEM);
 }
 
@@ -52,7 +46,7 @@ char* catArr(char** arr, int arrSize, char* sep) {
     int sepLen = strlen(sep);
     size_t size = arrSize + 1 + (sep ? sepLen * arrSize : 0);
 
-    tryalc(out = (char*) malloc((size * sizeof(char*))), __LINE__);
+    out = tryalc((char*)malloc((size * sizeof(char*))));
 
     for (int i = 0; i < arrSize; i++) {
         char* crt = arr[i];
@@ -73,13 +67,13 @@ char* catArr(char** arr, int arrSize, char* sep) {
  * @return 
  */
 char* catArrRange(char** arr, char* sep, int start, int stop) {
-    int effSize = stop - start; // effective size
+    int effSize = stop - start;  // effective size
     if (effSize < 1) return NULL;
     char* out;
     int sepLen = strlen(sep);
-    size_t size = effSize + 1 + (sep ? sepLen * effSize: 0);
+    size_t size = effSize + 1 + (sep ? sepLen * effSize : 0);
 
-    tryalc(out = (char*) malloc((size * sizeof(char*))), __LINE__);
+    out = tryalc((char*)malloc((size * sizeof(char*))));
 
     for (int i = start; i < stop; i++) {
         char* crt = arr[i];
@@ -115,11 +109,11 @@ void checkEnoughArgs(int argc, char* fileName) {
 int parseArgsAsString(int argc, char* argv[]) {
     int strNb = argc - 1, errcode = 0;
     char** strArgs = &argv[1];  //creating a view on argv[1:]
-    
-    //argv[] got reversed somehow ?
-    
-    if (tflag == 0) stringToHash = catArr(strArgs, strNb, " "); //* if "-t" was not used
-    else if (optind <= 3) stringToHash = catArrRange(strArgs, " ", 2, strNb); //* if "-t" was used and was parsed correctly
+
+    if (tflag == 0)
+        stringToHash = catArr(strArgs, strNb, " ");  //* if "-t" was not used
+    else if (optind <= 3)
+        stringToHash = catArrRange(strArgs, " ", 2, strNb);  //* if "-t" was used and was parsed correctly
 
     if (!stringToHash || strlen(stringToHash) == 0) errcode = -1;
     return errcode;
@@ -136,17 +130,18 @@ int parseArgsAsString(int argc, char* argv[]) {
  * @return Copied array of file paths
  */
 char** extractFilesFromArgv(int argc, char* argv[], int startIdx, int* fileAmnt) {
-    int maxFileAmnt = argc - startIdx;  //? max Number of file given as argument 
-    char** filePaths; *fileAmnt = 0; 
+    int maxFileAmnt = argc - startIdx;  //? max Number of file given as argument
+    char** filePaths;
+    *fileAmnt = 0;
 
-    tryalc(filePaths = calloc(maxFileAmnt, sizeof(char*)), __LINE__);
+    filePaths = tryalc(calloc(maxFileAmnt, sizeof(char*)));
     int i = startIdx;
-    //* while there is arguments left and we did not hit another option (like -t) 
+    //* while there is arguments left and we did not hit another option (like -t)
     while (i < argc && argv[i][0] != '-') {
-        filePaths[i - startIdx] = argv[i]; i++;
+        filePaths[i - startIdx] = argv[i];
+        i++;
         *fileAmnt += 1;
     }
-    //for (int i = startIdx; i < argc; i++) *(filePaths + (i - startIdx)) = argv[i];
 
     return filePaths;
 }
@@ -164,24 +159,25 @@ char** extractFilesFromArgv(int argc, char* argv[], int startIdx, int* fileAmnt)
  * @return 0 if success else error code
  */
 int parseOptArgs(int argc, char* argv[], int* fileAmnt) {
-    int finit = 0, opt; *fileAmnt = 0;
+    int finit = 0, opt;
+    *fileAmnt = 0;
     //* if fileAmnt stays 0 at the end of the call, then 'f' option was not provided
 
     while ((opt = getopt(argc, argv, getOptString())) != -1) {
         switch (opt) {
             case 'f':
                 if (!finit) {
-                    filesToHash = extractFilesFromArgv(argc, argv, optind-1, fileAmnt); //? 2 because Number of file given as argument equals argcount - (<Number of available options> + 1) (e.g. 3 => ./prog.out -f file1 file2 file3)
-                    finit = 1;  //* Memory should not be allocated more than once.
+                    filesToHash = extractFilesFromArgv(argc, argv, optind - 1, fileAmnt);  //? 2 because Number of file given as argument equals argcount - (<Number of available options> + 1) (e.g. 3 => ./prog.out -f file1 file2 file3)
+                    finit = 1;                                                             //* Memory should not be allocated more than once.
                 }
                 break;
 
             case 't': {
                 if (!tflag) {
-                    tryalc(hashMethod = malloc(HASH_METH_MAXLEN * sizeof(char)), __LINE__);
+                    hashMethod = tryalc(malloc(HASH_METH_MAXLEN * sizeof(char)));
                     if (strlen(optarg) <= 1) return EINVAL;
                     hashMethod = strncpy(hashMethod, optarg, HASH_METH_MAXLEN);
-                    tflag = 1; 
+                    tflag = 1;
                 }
                 break;
             }
@@ -223,10 +219,12 @@ int parseArgs(int argc, char* argv[], char** givenFileToHash[], int* fileAmnt, c
             return errcode;
         }
         *givenStringToHash = stringToHash;
-    } else if (filesToHash) *givenFileToHash = filesToHash;
+    } else if (filesToHash)
+        *givenFileToHash = filesToHash;
     //* Make givenFileToHash point to the argument passed here (the option parser). i.e. "redirect" its content to filesToHash
 
-    else errcode = EXIT_FAILURE;
+    else
+        errcode = EXIT_FAILURE;
     return errcode;
 }
 

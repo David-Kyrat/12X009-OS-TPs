@@ -6,6 +6,8 @@
 #include <fcntl.h> //read
 #include <unistd.h>
 
+#include "OptionParser.h"
+
 EVP_MD_CTX* mdctx;
 const EVP_MD* md;
 
@@ -35,11 +37,11 @@ unsigned char* hash(char* text, char* hash_f) {
 // ------------------------------------------------------------------------------------------------------------------------------------
 
 char* convert_f_to_s(char* filename) {
-    int fd;
-    char buff[4096];  // size of a block
+    int fd, initSize = 4096;
+    char buff[initSize];  // size of a block
     ssize_t readNb;   // number of bytes read
     size_t readTotNb = 0;
-    char* bBuff; //big buffer which will contain all file and be realloc'd at each iteration
+    char* bBuff = tryalc(malloc(initSize)); //big buffer which will contain all file and be realloc'd at each iteration
 
 
     // Error handling if unable to open source in read-only or the destination in write-only, create or excl (error if create but file already exists)
