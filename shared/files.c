@@ -129,7 +129,7 @@ char*   buffeReadFd(int fd, int chunkSize, int totalSize) {
  */
 char* buffread(const char* fileToRead) {
     int fd;
-    char buff[4096];  // size of a block
+    char buff[4096];
     ssize_t readNb;   // number of bytes read
     size_t readTotNb = 0;
     char* bBuff; //big buffer which will contain all file and be realloc'd at each iteration
