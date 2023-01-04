@@ -1,49 +1,16 @@
-\documentclass{beamer}
-\usepackage[utf8]{inputenc}
-\newcommand{\num}{02}
-\newcommand{\sn}{\secname}
-\newcommand{\ssn}{\subsecname}
-\beamertemplatenavigationsymbolsempty
-\newcommand{\unilogo}[1]{\includegraphics[scale=#1]{images/unige.png}}
-%
-%
-\definecolor{light-gray}{gray}{0.95}
-\newcommand{\code}[1]{$\mbox{\colorbox{light-gray}{\texttt{#1}}}$}
-\newcommand{\quo}[1]{``{#1}''}
-%
+% !TeX root = main.tex
+\documentclass[french]{beamer}
 
-\usetheme{Boadilla}
-%\useoutertheme{miniframes}
-
-\usecolortheme{whale}
-
-\title[Systèmes d'Exploitation: TP \num]{Systèmes d'Exploitation - Examen}
-
-\subtitle{12X009 - TP\num}
-\author[Noah Munz, Sciences Informatiques]{Noah Munz (19-815-489)}
-\institute[]{Département d'Informatique \\ Université de Genève}
-
-\date[Examen Oral]{Mardi 31 Janvier 2023}
-\logo{\includegraphics[height=1cm]{images/unige.png}}
-
-\AtBeginSection[]{
-  \begin{frame}
-    \frametitle{Table of Contents}
-    \tableofcontents[currentsection]
-  \end{frame}
-}
-
+\usepackage{defPreamble}
 
 \begin{document}
 
-\pdfcompresslevel=0
-\pdfobjcompresslevel=0
-
+%\pdfcompresslevel=0
+%\pdfobjcompresslevel=0
 
 \frame{\titlepage}
+\begin{frame}{Table of Contents}
 
-\begin{frame}
-\frametitle{Table of Contents}
 \tableofcontents
 \end{frame}
 
@@ -52,104 +19,13 @@
 % ------- REAL START -------------
 %
 
+\include{segments/1_rappel.tex}
 
-%
-\section{Rappel: But du TP}
-\begin{frame}{\secname \subsecname}
-%
+\include{segments/2_tads_relations.tex}
 
-\begin{itemize}
-    \item Se familiariser avec la manipulation de chaînes de caractères via la manipulation de \code{argv}/\code{argc} ainsi qu'avec le parsing d'option \& paramètre (\code{getopt}, \code{optstring}...) \\
-    
-    \item Se familiariser avec la liaison de libairies externes (openssl), Makefile...\\
-    
-    \item Se familiariser avec l'utlisation fonctions de hashages
-\end{itemize}
+\include{segments/3_tests.tex}
 
-\end{frame}
-
-
-%
-%
-\section{TADs \& leurs relations}
-\subsection{Décomposition modulaire}
-\begin{frame}{\sn : \ssn}
-%
-
-TP reste assez simple, seulement 2 modules ont été créés.\\ Le premier \code{OptionParser} (qui, part la suite, sera le début d'un module \code{util} qui sera réutilisé et aggrandi à chaque TP suivant) qui s'occupe de vérifier si l'input de l'utilisateur est valide ou pas, \textit{sépare}, \textit{copie} et \textit{stoque} les différentes parties des différentes entrées en fonctions des options de ces dernières.\\
-
-
-\vspace{0.5cm}
-//INTRO AUTRE MODULE
-
-\end{frame}
-
-
-\begin{frame}{\sn : \ssn}
-    Par exemple \code{OptionParser} contient une fonction \code{checkEnoughArgs()}  (dont le nom est déjà assez explicite), ainsi qu'une autre fonction \code{\scriptsize  int parseArgs(int argc, char* argv[], char** fileToHash[], }\\
-    \indent $\quad$ \code{\scriptsize int* fileAmnt, char** stringToHash   )}
-    qui va :
-    \begin{itemize}
-        \item parse les arguments optionnels\\
-        \vspace{0.1cm}
-        
-        \item Si \code{-f} n'as \textit{pas} été fourni $\Rightarrow$ appel une fonction plus simple pour juste hash la concaténation des entrées avec la méthode donnée avec \code{-t}. i.e. va stocker la concaténation dans 
-        \code{stringToHash}.\\
-        \vspace{0.1cm}
-        
-        \item Si \code{-f} a été fourni, va extraire chaque nom de fichier et les stocker dans le buffer \code{fileToHash}.
-        \vspace{0.1cm}
-        
-    \end{itemize}
-
-%!! METTRE çA QQ PART POUR LAVOIR A LEXAMEN !!
-
-%/**
- %* Call parseOptArgs to parse given ptions then if "-f" was not provided, 
- %* call parseArgsAsString to interpret all given argument (that are not options) as 1 single string
- %* i.e. "-f file1 file2 [-t <hashMethod>]" parses file1, file2 and hashMethod as separate %things to hash.
- %* and "s1 s2 [-t <hashMethod>]" parses "s1 s2" as 1 string to hash.
- %* 
- %* @param argc Number of arguments passed to the program.
- %* @param argv Array of arguments given to the program.
- %* @param givenFilesToHash pointer to string array into which store the parsed files to hash or null if -f was not provided. Does a malloc. Remember to free! (when according option was chosen)
- %* @param fileAmnt Variable into which store the amount of given files.
- %* @param givenStringToHash pointer to string into which store the parsed string to hash or null if -f was provided. Does a malloc. Remember to free! (when according option was chosen)
- %* @return 0 if success else error code
- %*/
-\end{frame}
-
-
-%
-\subsection{Structures de données utilisées}
-\begin{frame}{\sn : \ssn}
-
-Pareil qu'avant, l'implémentation de structure n'a pas été nécessaire.
-    
-\end{frame}
-%
-
-%
-\subsection{Décomposition fonctionnelle}
-\begin{frame}{\sn : \ssn}
-    Lorem ipsum dolor sit amet
-\end{frame}
-
-%
-%
-\section{Test realisés pour valider le fonctionnement du TP}
-\begin{frame}{\sn}
-%
-
-\end{frame}
-%
-\section{Réponses aux questions (de l'énoncé du TP)}
-\begin{frame}{\secname}
-%
-    Lorem ipsum dolor sit amet
-
-    
-\end{frame}
+\include{segments/4_questions.tex}
 
 \section{Réponses aux questions (générales)}
 
@@ -157,4 +33,6 @@ Pareil qu'avant, l'implémentation de structure n'a pas été nécessaire.
     
 \end{frame}
 
+%
+%
 \end{document}
