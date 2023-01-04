@@ -1,5 +1,7 @@
 .vscode/
 **/.vscode/
+**/.idea
+
 
 #.clang-format
 **/.clang-format
