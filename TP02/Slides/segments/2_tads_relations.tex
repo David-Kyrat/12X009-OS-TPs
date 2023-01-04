@@ -1,28 +1,15 @@
 \section{TADs \& leurs relations}
 \subsection{Décomposition modulaire}
-\bframe{
 
-\setbeamertemplate{itemize items}[circle]
-\begin{itemize}
-\item First item.
-\item Second item.
-\item Third item.
-\end{itemize}
+\bframes{
+    TP reste assez simple, seulement 2 modules ont été créés.\\ Le premier \code{OptionParser} (qui, part la suite, sera le début d'un module \code{util} qui sera réutilisé et aggrandi à chaque TP suivant) qui s'occupe de vérifier si l'input de l'utilisateur est valide ou pas, \textit{sépare}, \textit{copie} et \textit{stoque} les différentes parties des différentes entrées en fonctions des options de ces dernières.\\
+
+
+    \vspace{0.5cm}
+    Le second \code{hash\_calc} qui s'occupe de gérer les \quo{digest context}, i.e. les créer, y rajouter du text à hash\ldots \(\, \)
+    ces contexts sont une interface qui va permettre d'ajouter différents message à la suite puis d'en hash le tout uniqument lorsqu'on
+    décide de le terminer.
 }
-
-
-\begin{frame}{\sn : \ssn}
-%
-
-TP reste assez simple, seulement 2 modules ont été créés.\\ Le premier \code{OptionParser} (qui, part la suite, sera le début d'un module \code{util} qui sera réutilisé et aggrandi à chaque TP suivant) qui s'occupe de vérifier si l'input de l'utilisateur est valide ou pas, \textit{sépare}, \textit{copie} et \textit{stoque} les différentes parties des différentes entrées en fonctions des options de ces dernières.\\
-
-
-\vspace{0.5cm}
-Le second \code{hash\_calc} qui s'occupe de gérer les \quo{digest context}, i.e. les créer, y rajouter du text à hash\ldots \(\, \)
-ces contexts sont une interface qui va permettre d'ajouter différents message à la suite puis d'en hash le tout uniqument lorsqu'on
-décide de le terminer.
-
-\end{frame}
 
 \bframes{
     Par exemple \code{OptionParser} contient une fonction \code{checkEnoughArgs()}  (dont le nom est déjà assez explicite), ainsi qu'une autre fonction \code{\scriptsize  int parseArgs(int argc, char* argv[], char** fileToHash[], }\\
@@ -68,7 +55,7 @@ décide de le terminer.
 %
 
 \subsection{Structures de données utilisées}
-\bframe{
+\bframes{
     L'implémentation de structure n'a pas été nécessaire.
 }
 
