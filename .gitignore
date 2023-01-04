@@ -1,9 +1,18 @@
 .vscode/
 **/.vscode/
+**/.idea
+
 
 #.clang-format
-#**/.clang-format
+**/.clang-format
 TP03/out
 
 .fake
 *.zip
+*.gz
+*.tar.gz
+
+**/noah.munz.gregory.sedykh.tp?
+
+.directory
+**/c_cpp_properties.json
