@@ -1,4 +1,6 @@
 // Standard libraries
+#include <sys/types.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 // memset
@@ -8,7 +10,6 @@
 // Error
 #include <errno.h>
 // Types
-#include <sys/types.h>
 // Sockets, inet addresses
 #include <arpa/inet.h>
 #include <sys/socket.h>
@@ -21,7 +22,6 @@
 #include "functions.h"
 #include "optprsr.h"
 #include "util.h"
-
 
 const int INTERVAL_MIN = 0;
 const int INTERVAL_MAX = 64;  
@@ -59,7 +59,7 @@ int main(int argc, char* argv[]) {
 
     for (;;) {  // While the program is running, listen for new clients
         sockaddr_in clientAddress;
-        uint clientLength = sizeof(clientAddress);
+        unsigned int clientLength = sizeof(clientAddress);
         printf("Waiting for clients at port %d.\n", port);
 
         int client_socket = accept(server_socket, (struct sockaddr*)&clientAddress, &clientLength);
@@ -87,7 +87,7 @@ int main(int argc, char* argv[]) {
                 const char* pretty_clientAddress = inet_tostr(&clientAddress.sin_addr);
 
                 // Display when a new client is connected
-                printf("Client %d connected with IP: %s.\n", client_socket, pretty_clientAddress);
+                printf("Client %d connected with IP: %s.\n", client_socket-3, pretty_clientAddress);
 
                 // Read / Write here
                 srand(time(NULL));
@@ -102,7 +102,7 @@ int main(int argc, char* argv[]) {
 
 
                 // Display when a new random number is chosen for the client
-                printf("Selected value for client %d: %d.\n", client_socket, numberToGuess);
+                printf("Selected value for client %d: %d.\n", client_socket-3, numberToGuess);
 
                 // Communicate the interval to the client
                 write(client_socket, &INTERVAL_MIN, 4);
