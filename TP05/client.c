@@ -50,7 +50,7 @@ int main(int argc, char* argv[]) {
     read(client_socket, &max, 4);
     printf("Maximum: %d\n", max);
 
-    int received;
+    int received = -1;
 
     while (received != 0) {
 
