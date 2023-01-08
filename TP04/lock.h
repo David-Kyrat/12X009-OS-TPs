@@ -1,7 +1,7 @@
-#ifndef OPTPRSR
-#define OPTPRSR
+#ifndef LOCK
+#define LOCK
 
-/* #include "inp.h" */
+#include "inp.h"
 
 
 /**
@@ -17,4 +17,4 @@
  */
 int lock(int fd, Inp* input);
 
-#endif /* OPTPRSR */
+#endif /* LOCK */

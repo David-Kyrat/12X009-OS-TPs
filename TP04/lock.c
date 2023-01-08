@@ -48,8 +48,10 @@ int lock(int fd, Inp* input) {
                 fprintf(stderr, "%s: Could not get lock at %ld:%ld (whence = %c)\n", strerror(savedErr), inp_start(input), inp_length(input), inp_whc(input));
                 return hdl_lk_conflict(savedErr, fl, input);
             }
+            if (fl.l_type == F_UNLCK)
+                printf("%c lock not present\n", inp_ltp(input));
             else 
-                printf("%c lock present (held by %d)\n", inp_ltp(input), fl.l_pid   );
+                printf("%c lock present (held by %d)\n", inp_ltp(input), fl.l_pid);
             break;
 
         case F_SETLK:

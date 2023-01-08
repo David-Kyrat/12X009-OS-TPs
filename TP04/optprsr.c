@@ -13,7 +13,7 @@
 #include "lock.h"
 
 static const char VALID_CMD[3] = {'g', 's', 'w'}, VALID_LTYPE[3] = {'r', 'w', 'u'}, VALID_WHENCE[3] = {'s', 'c', 'e'};
-static const char HELP_CHAR = '?', QUIT_CHAR = 'Q';
+static const char HELP_CHAR = '?', QUIT_CHAR = 'q';
 
 //const char* OPT_STRING = "fa";
 const int MIN_ARG_NB = 1, MAX_ARG_NB = 1;
@@ -32,7 +32,7 @@ int checkArgsNb(int argc) {
     int relevantNb = argc - 1;
     if (relevantNb < MIN_ARG_NB || relevantNb > MAX_ARG_NB) {
         errno = EINVAL;
-        return EINVAL;
+        exit(errno);
     }
     return 0;
 }
@@ -141,7 +141,7 @@ const char* parseArgv(int argc, char* argv[]) {
     const char* parsedArg;
     if (checkArgsNb(argc) != 0) {
         fprintf(stderr, "%s: Not Enough arguments: Expecting at least %d.\n", argv[0], MIN_ARG_NB);
-        return NULL;
+        exit(EXIT_FAILURE);
     }
 
     // relevant arg i.e. not program name. (Waiting only 1 arg)
@@ -150,7 +150,7 @@ const char* parseArgv(int argc, char* argv[]) {
     int argLen = strlen(arg);
     if (argLen <= 0 || argLen >= PATH_MAX) {
         errno = EINVAL;
-        return NULL;
+        exit(errno);
     }
     // argv[i] is not destination i.e. last element and argv[i] does not exists
     if (!exists(arg)) {
@@ -163,7 +163,7 @@ const char* parseArgv(int argc, char* argv[]) {
     if (parsedArg == NULL) {
         int savedErr = errno;
         fprintf(stderr, "Cannot resolve file %s: %s\n", arg, strerror(savedErr));
-        return NULL;
+        exit(errno);
     }
     FILE_SIZE = getFileSize(parsedArg);
     
