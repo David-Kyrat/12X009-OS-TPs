@@ -35,11 +35,6 @@ $(SERV_EXEC): $(SERV_OBJS)
 $(CLIENT_EXEC): $(CLIENT_OBJS)
 	$(CC) $(CLIENT_OBJS) -o $(CLIENT_EXEC)
 
-
-test: test.c $(SHARED_OBJS)
-	$(CC) test.c $(SHARED_OBJS) $(CFLAGS) $(DBGFLAGS) -o test.out
-
-
 out/client.o: client.c functions.h optprsr.h util.h
 	$(CC) -c client.c $(CFLAGS) $(DBGFLAGS) -o out/client.o
 
