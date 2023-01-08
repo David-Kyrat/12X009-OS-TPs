@@ -1,3 +1,6 @@
+#ifndef FILES
+#define FILES
+
 
 /**
  * Returns true if the given string is either "." or ".."
@@ -74,5 +77,5 @@ ssize_t getFileSize(const char* path);
  */
 const char* absPath(const char* path);
 
-
+#endif /* FILES */
 
