@@ -15,7 +15,7 @@ DBGFLAGS = -g -DDEBUG
 #
 # Name of the final executable
 #
-EXEC = main.out
+EXEC = main
 #
 # All headers. i.e. dependency of the out/main.o target
 #
@@ -27,11 +27,11 @@ OBJS = out/main.o out/shell.o out/input.o out/files.o out/util.o
 all: $(EXEC)
 
 
-$(EXEC): $(OBJS)
+$(EXEC): init $(OBJS)
 	$(CC) $(OBJS) -o $(EXEC) -lreadline
 
 
-test: test.c $(OBJS)
+test: init test.c $(OBJS)
 	$(CC) test.c out/shell.o out/input.o out/util.o $(CFLAGS) $(DBGFLAGS) -o test.out
 
 # same as $(EXEC) but executable has a different name
@@ -68,7 +68,7 @@ out:
 	mkdir out
 
 clean:
-	- @rm *.out out/*.o
+	- @rm $(EXEC) *.out out/*.o
 
 
 #out/old-shell.o: old-shell.c old-shell.h files.h input.h util.h

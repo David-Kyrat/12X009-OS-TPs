@@ -14,7 +14,7 @@ int main(int argc, char* argv[]) {
     // so this is the only way of accessing an instance of 'Shell' which is not a global variable)
     void manage_signals_wrapper(int signum, siginfo_t* info, void* ucontext) { manage_signals(signum, info, shell); }
 
-    if (initSigHandlers(shell, &manage_signals_wrapper) < 0)  exit(EXIT_FAILURE);
+    if (initSigHandlers(&manage_signals_wrapper) < 0)  exit(EXIT_FAILURE);
 
     for (;;) {
         int crtCode = sh_getAndResolveCmd(shell);

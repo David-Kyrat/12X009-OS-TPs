@@ -1,5 +1,4 @@
 #include <asm-generic/errno-base.h>
-#include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
@@ -7,8 +6,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/types.h>  //pid_t
-#include <sys/wait.h>
 #include <unistd.h>
 #include <time.h>
 
@@ -19,7 +16,7 @@
 
 
 /**
- * If 'isForground' is -1 prints "job exited with exit code 'exitcode'"
+ * If 'isForeground' is -1 prints "job exited with exit code 'exitcode'"
  * else if 'isForeground' is 0 prints "Background job exited with exit code 'exitcode'"
  * else prints "Foreground job exited with exit code 'exitcode'"
  */
@@ -137,8 +134,6 @@ void update_old_fj(Shell* sh, char*** new_oldArgv, int old_fj_argc) { update_old
 void update_old_bj(Shell* sh, char*** new_oldArgv, int old_bj_argc) { update_old_job(sh, 0, new_oldArgv, old_bj_argc);  }
 
 
-//Global variable referring to the current environment
-extern char** environ;
 void hdl_sigint(Shell* sh);
 void hdl_sigchild(Shell*, pid_t);
 void hdl_sigup(Shell* sh);
@@ -189,7 +184,7 @@ void terminate_all_children(Shell* sh) {
 
 /**
  * Perform different cleanup actions before exiting.
- * E.g. kill/wait for all childs still alive / zombified to avoid orphans,
+ * E.g. kill/wait for all children still alive / zombified to avoid orphans,
  * free fields 'sh'... Then exits
  *
  * @param sh ptr to Shell instance
@@ -279,6 +274,7 @@ void exit_shell(Shell* sh, const char* arg) {
 void redirectIO() {
     const char* redirection = "/dev/null";
     //close stdin, stdout
+    //TODO: USE DUP2
     //- do not close stderr/out
     if (close(0) < 0) hdlCloseErr("stdin/out", 1);
     //reopens /dev/null, so that the first file descriptor points to it.
@@ -292,14 +288,12 @@ void redirectIO() {
  */
 int exec(Shell* sh, const char* filename, char* const argv[], int isForeground) {
     errno = 0;
-    int exitcode = 0;
-
     if (execvp(filename, argv) < 0) {
         if (isForeground)
             sh->foreground_job = -2;
         else
             sh->background_job = -2;
-        exitcode = errno;
+        int exitcode = errno;
         fprintf(stderr, "%s: \"%s\" \n", exitcode == ENOENT ? "command not found" : strerror(exitcode), filename);
     }
     return -1;
@@ -308,11 +302,11 @@ int exec(Shell* sh, const char* filename, char* const argv[], int isForeground) 
 
 
 /**
- * Handle forks and updatet the corresponding attributes of 'sh', and whether we already have a background job or not
+ * Handle forks and update the corresponding attributes of 'sh', and whether we already have a background job or not
  * Forks a child process, if the child process is successfully created, it executes the command in
  * the child process, if the command is a foreground command, it waits for the child process to finish,
  * 
- * @param sh shell instaance
+ * @param sh shell instance
  * @param cmd_name name of the command to execute
  * @param argv arguments of the command
  * @param isForeground if the job is a foreground job or not
@@ -434,13 +428,7 @@ const int SIG_TO_HDL[] = {SIGUSR1, SIGINT, SIGHUP, SIGCHLD};
 const int SIG_TO_IGNORE[] = {SIGQUIT, SIGTERM};
 const int SIG_NB = 4, IGNORE_NB = 2;  // Number of signal to handle
 
-/**
- * Signal Handler => Call the signal handling function corresponding to the given signal.
- * 
- * @param sig signal number
- * @param info pointer to a siginfo_t structure
- * @param sh pointer shell instance
- */
+
 void manage_signals(int sig, siginfo_t* info, Shell* sh) {
     switch (sig) {
         case SIGUSR1:
@@ -512,7 +500,6 @@ void hdl_sigchild(Shell* sh, pid_t dying_child_pid) {
     int s = errno;
 
     if (dying_child_pid == sh->background_job) {
-        //if (s != 0) fprintf(stderr, "hdl_sigchild, errno: %s\n", strerror(s));
         int exitStatus, code;
         code = waitpid_s(dying_child_pid, &exitStatus);
         if (code == 2) {
@@ -526,7 +513,7 @@ void hdl_sigchild(Shell* sh, pid_t dying_child_pid) {
         if (s == EINTR) {
             // if previous job was stopped by a signal => relaunch it
             const char** argv = sh_oldBJ(sh);
-            //set_BJ(sh, -2); // setting bj pid to -2 so that the relaunching of bj doesnt get denied (we can only have 1 background_job)
+            //set_BJ(sh, -2); // setting bj pid to -2 so that the relaunching of bj doesn't get denied (we can only have 1 background_job)
             const char* msg = "\ninterrupted by signal, restarting background job...\n";
             write(2, msg, strlen(msg)+1);
             executeJob(sh, argv[0], argv, 0);
@@ -536,14 +523,7 @@ void hdl_sigchild(Shell* sh, pid_t dying_child_pid) {
 }
 
 
-/**
- * Initialize signal handlers.
- * 
- * @param sh Shell
- * @param sig_hdler Signal handler (which do not take a Shell instance as argument) to use (see 'manage_signals' for example)
- * @return int -1 if an error occured, 0 otherwise.
- */
-int initSigHandlers(Shell* sh, void (*sig_hdler)(int, siginfo_t* info, void* ucontext)) {
+int initSigHandlers(void (*sig_hdler)(int, siginfo_t* info, void* ucontext)) {
     struct sigaction sa;
     sa.sa_flags = SA_SIGINFO | SA_RESTART;
 
@@ -570,7 +550,7 @@ int initSigHandlers(Shell* sh, void (*sig_hdler)(int, siginfo_t* info, void* uco
     struct sigaction sa_ign;  //use same sa struct does not work
     
     sigemptyset(&sa_ign.sa_mask);
-    for (int i = 0; i < SIG_NB; i++) sigaddset(&sa_ign.sa_mask, SIG_TO_IGNORE[i]);
+    for (int i = 0; i < IGNORE_NB; i++) sigaddset(&sa_ign.sa_mask, SIG_TO_IGNORE[i]);
 
     
     sa_ign.sa_handler = SIG_IGN;

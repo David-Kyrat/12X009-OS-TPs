@@ -82,13 +82,25 @@ int sh_oldBJ_argc(Shell* sh);
 /** Getter for argc of last foreground_job */
 int sh_oldFJ_argc(Shell* sh);
 
-/** TODO:Comment
- * asd
+
+/**
+ * Manage which signal handling function (e.g. `hdl_sigint`, `hdl_sigup`...) to use based on given `sig`
+ * and extract info (e.g. pid) from given `siginfo_t` pointer
+ * @param sig signal number
+ * @param info pointer to a siginfo_t structure
+ * @param sh pointer shell instance
  */
 void manage_signals(int sig, siginfo_t* info, Shell* sh);
 
-/** TODO:Comment */
-int initSigHandlers(Shell* sh, void (*sig_hdler)(int, siginfo_t* info, void* ucontext));
+
+/**
+ * Initialize signal handlers.
+ *
+ * @param sh Shell
+ * @param sig_hdler Signal handler (which do not take a Shell instance as argument) to use (see 'manage_signals' for example)
+ * @return int -1 if an error occurred, 0 otherwise.
+ */
+int initSigHandlers(void (*sig_hdler)(int, siginfo_t* info, void* ucontext));
 
 
 /**
