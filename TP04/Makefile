@@ -18,10 +18,10 @@ OBJS = out/main.o out/lock.o out/inp.o out/files.o out/optprsr.o out/util.o
 
 all: $(EXEC)
 
-$(EXEC): $(OBJS)
+$(EXEC): init $(OBJS)
 	$(CC) $(OBJS) -o $(EXEC)
 
-debug: $(OBJS)
+debug: init $(OBJS)
 	$(CC) $(OBJS) -o main.out
 
 
