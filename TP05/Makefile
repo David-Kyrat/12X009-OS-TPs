@@ -13,18 +13,17 @@ CFLAGS = -lm -Wall -Wuninitialized -Wfloat-equal -Wshadow -Wbad-function-cast -W
 #
 DBGFLAGS = -g -DDEBUG
 
-SERV_EXEC = server.out
-CLIENT_EXEC = client.out
+SERV_EXEC = server
+CLIENT_EXEC = client
 
 EXEC = $(SERV_EXEC) $(CLIENT_EXEC)
 
-SHARED_OBJS = out/functions.o out/files.o out/optprsr.o out/util.o
+SHARED_OBJS = out/functions.o out/optprsr.o out/util.o
 
 CLIENT_OBJS = out/client.o $(SHARED_OBJS)
 SERV_OBJS = out/server.o $(SHARED_OBJS)
 
 OBJS = out/client.o $(SERV_OBJS) 
-#out/main.o out/files.o out/optprsr.o out/util.o
 
 
 all: $(EXEC)
@@ -36,12 +35,7 @@ $(SERV_EXEC): $(SERV_OBJS)
 $(CLIENT_EXEC): $(CLIENT_OBJS)
 	$(CC) $(CLIENT_OBJS) -o $(CLIENT_EXEC)
 
-
-test: test.c $(SHARED_OBJS)
-	$(CC) test.c $(SHARED_OBJS) $(CFLAGS) $(DBGFLAGS) -o test.out
-
-
-out/client.o: client.c functions.h optprsr.h files.h util.h
+out/client.o: client.c functions.h optprsr.h util.h
 	$(CC) -c client.c $(CFLAGS) $(DBGFLAGS) -o out/client.o
 
 out/server.o: server.c functions.h optprsr.h util.h
@@ -50,10 +44,6 @@ out/server.o: server.c functions.h optprsr.h util.h
 
 out/functions.o: functions.c functions.h util.h
 	$(CC) -c functions.c $(CFLAGS) $(DBGFLAGS) -o out/functions.o
-
-
-out/files.o: files.c files.h util.h
-	$(CC) -c files.c $(CFLAGS) $(DBGFLAGS) -o out/files.o
 
 
 out/optprsr.o: optprsr.c optprsr.h util.h
@@ -73,11 +63,3 @@ out:
 
 clean:
 	rm *.out out/*.o out/*.out
-
-
-#debugs: $(SERV_OBJS)
-#	$(CC) $(SERV_OBJS) -o server.out
-#debugc: $(CLIENT_OBJS)
-#	$(CC) $(CLIENT_OBJS) -o client.out
-#out/main.o: main.c files.h optprsr.h util.h
-#	$(CC) -c main.c $(CFLAGS) $(DBGFLAGS) -o out/main.o
