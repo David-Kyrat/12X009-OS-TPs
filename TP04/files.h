@@ -1,3 +1,6 @@
+#ifndef FILES
+#define FILES
+
 
 /**
  * Returns true if the given string is either "." or ".."
@@ -9,12 +12,6 @@
  */
 int isDot(const char *entry_name);
 
-/**
- * Takes the mode (int) and dtype (int) of an inode and returns a string representing the permissions of the file
- * @param mode the mode of the file,
- * @return Permissions of the file, as a String. (i.e. -rw-r--r-x ...)
- */
-//char* computePerm(int mode);
 
 /**
  * Checks if a file exists
@@ -33,12 +30,6 @@ int exists(const char* path);
  */
 int isFile(const char* path, int lstat);
 
-/**
- * Checks if given path is a Directory
- * @param path path to entry to check
- * @return int 0 if not a directory, non-zero otherwise
- */
-int isDir(const char* path);
 
 /**
  * Takes a parent path and a current path and concatenates them into a buffer. 
@@ -74,5 +65,5 @@ ssize_t getFileSize(const char* path);
  */
 const char* absPath(const char* path);
 
-
+#endif /* FILES */
 

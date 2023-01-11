@@ -14,8 +14,6 @@
 #include "util.h"
 
 
-//TODO: recomment correctly optparser.h
-
 int main(int argc, char* argv[]) {
     const char* file = parseArgv(argc, argv);
     if (file == NULL) {
@@ -31,12 +29,15 @@ int main(int argc, char* argv[]) {
     Inp* inp = NULL;
     int err = EXIT_SUCCESS;
     for(;;) {
+        free(inp);
         inp = inp_askUser();
         if (inp != NULL) {
             err = lock(fd, inp);
         }
         printf("--------\n\n");
     }
-        
+    
+    free(inp);
+    free(file);
     return err != 0;
 }

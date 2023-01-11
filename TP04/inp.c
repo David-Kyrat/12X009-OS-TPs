@@ -12,7 +12,7 @@
 
 const char* INP_FORMAT = "%1s %1s %ld %ld %1s"; //read max 1 char by "string position" (used %s and not %c for mode... to prevent user to enter an int instead of char)
 //* default message displayed when beginning program
-const char DEF_MSG[] = "Enter ? for help or Q to exit.";
+const char DEF_MSG[] = "Enter ? for help or q to exit.";
 
 const int strArgNb = 3;  //* nb of char argument stored in field 'props'
 

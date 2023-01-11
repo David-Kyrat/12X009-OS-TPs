@@ -2,8 +2,6 @@
 **/.vscode/
 **/.idea
 
-
-#.clang-format
 **/.clang-format
 TP03/out
 

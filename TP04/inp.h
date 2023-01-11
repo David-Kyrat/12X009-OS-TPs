@@ -1,3 +1,7 @@
+#ifndef INP
+#define INP
+
+
 /**
  *  Representation of a user input, i.e. wraps these:
  * 
@@ -112,3 +116,5 @@ int toFlock_ltype(Inp* inp);
  * @return Corresponding whence value for the flock function
  */
 int toFlock_whence(Inp* inp);
+
+#endif /* INP */

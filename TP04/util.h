@@ -1,3 +1,6 @@
+#ifndef UTIL
+#define UTIL
+  
 
 /**
  * @file util.h
@@ -128,3 +131,5 @@ int dateCmpr(struct timespec ts2, struct timespec ts1);
  * @return src[0 : stop_idx] i.e. substring of length 'stop_idx'
  */
 char* strsub(char* src, int stop_idx);
+
+#endif /* UTIL */

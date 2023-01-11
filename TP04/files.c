@@ -50,11 +50,6 @@ int isFile(const char* path, int lstat) {
     return S_ISREG(infos.st_mode);
 }
 
-int isDir(const char* path) {
-    struct stat infos = stat_s(path);
-    return S_ISDIR(infos.st_mode);
-}
-
 
 const char* getFileName(const char* path) {
     const char* absPath = realpath(path, NULL);
@@ -88,53 +83,3 @@ ssize_t getFileSize(const char* path) {
     return out;
 }
 
-/**
- * Rread file and returns its content
- * 
- * @return Content of 'fileToRead' (returned string is malloc'd => remember to free().)
- */
-char* buffread(const char* fileToRead) {
-    int fd;
-    char buff[4096];  // size of a block
-    ssize_t readNb;   // number of bytes read
-    size_t readTotNb = 0;
-    char* bBuff; //big buffer which will contain all file and be realloc'd at each iteration
-
-    // lstat the source file/folder
-    struct stat infos = lstat_s(fileToRead);
-
-    // Error handling if unable to open source in read-only or the destination in write-only, create or excl (error if create but file already exists)
-    if ((fd = open(fileToRead, O_RDONLY)) < 0) {
-        hdlOpenErr(fileToRead, 0);
-        return NULL;
-    }
-
-    // Check that it's a regular file or link
-    if (!(S_ISREG(infos.st_mode) || S_ISLNK(infos.st_mode))) {
-        errno = EINVAL;
-        fprintf(stderr, "\"%s\": Wrong file type\n", fileToRead);
-        return NULL;
-    }
-    
-    //* While there are bytes left to be read, reads them 4096 by 4096 (4096 or current size of 'buff' if its not that)
-    //* nb: if readNb is < to what we expected we dont really care because the program will retry until having read everything
-    while ((readNb = read(fd, buff, sizeof buff)) > 0) {
-        char* crtToCopy = &buff[readTotNb];  // pointer to start of current 'portion of data' to copy
-        readTotNb += readNb;
-        //update allocated memory to the size of whats been read until now.
-        bBuff = realloc(bBuff, (readTotNb+1)*sizeof(char));
-        //copy at most readNb bytes fileToRead buff to bBuff i.e. append current content of the small buffer 'buff'.
-        strncat(bBuff, crtToCopy, readNb);
-    }
-    if (readNb < 0) {
-        hdlReadErr(fileToRead, 0, 1, fd);
-        return NULL;
-    }
-
-    if (close(fd) < 0) {
-        hdlCloseErr(fileToRead, 0);
-        return NULL;
-    }
-
-    return bBuff;
-}

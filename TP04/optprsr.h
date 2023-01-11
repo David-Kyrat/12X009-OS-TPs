@@ -1,3 +1,6 @@
+#ifndef OPTPRSR
+#define OPTPRSR
+
 /**
  * Parses & extract path of file given at main function and return a copy of it.
  * (does a malloc remember to free.)
@@ -36,3 +39,5 @@ int parseInput(const char* INP_FORMAT, char* cmd, char* ltype, long* start, long
  * @return 1 if input is valid, 0 if its not or -1 if an error happened (in such case, input should be considered as not valid).
  */
 int isLockInputValid(char* cmd, char* ltype, long start, long length, char* whence);
+
+#endif /* OPTPRSR */

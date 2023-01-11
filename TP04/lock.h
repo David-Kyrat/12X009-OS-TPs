@@ -1,3 +1,6 @@
+#ifndef LOCK
+#define LOCK
+
 #include "inp.h"
 
 
@@ -13,3 +16,5 @@
  * @return 0 if success, -1 if error
  */
 int lock(int fd, Inp* input);
+
+#endif /* LOCK */
