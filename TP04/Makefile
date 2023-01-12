@@ -1,7 +1,4 @@
-.PHONY : clean all init
-#
-# ! To Init workspace and allows makefile to compile correctly first launch target 'init'
-#
+.PHONY : clean all init __clean__
 
 #
 # Compiler flags
@@ -13,17 +10,13 @@ CFLAGS = -lm -Wall -Wuninitialized -Wfloat-equal -Wshadow -Wbad-function-cast -W
 # Debug build settings
 #
 DBGFLAGS = -g -DDEBUG
-EXEC = main.out
+EXEC = main
 OBJS = out/main.o out/lock.o out/inp.o out/files.o out/optprsr.o out/util.o
 
 all: $(EXEC)
 
 $(EXEC): init $(OBJS)
 	$(CC) $(OBJS) -o $(EXEC)
-
-debug: init $(OBJS)
-	$(CC) $(OBJS) -o main.out
-
 
 out/main.o: main.c inp.h files.h optprsr.h util.h
 	$(CC) -c main.c $(CFLAGS) $(DBGFLAGS) -o out/main.o
@@ -48,12 +41,15 @@ out/optprsr.o: optprsr.c optprsr.h util.h
 out/util.o: util.c util.h
 	$(CC) -c util.c $(CFLAGS) $(DBGFLAGS) -o out/util.o
 
-#! Make directory that will contain all .o & .out (except for main.out wich will be at root of source dir i.e. where Makefile is)
-#
 init: out
 
 out: 
 	mkdir out
 
+__clean__:
+	- @rm *.out out/*.o out/*.out 2> /dev/null
+
+# supress error ouput because cleaning without having compiled "throws" ENOENT error, whereas
+# we don't really care whether they were indeed files to delete or not
 clean:
-	rm *.out out/*.o out/*.out
+	@make __clean__ -s
