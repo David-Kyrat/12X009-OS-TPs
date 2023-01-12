@@ -17,7 +17,7 @@ static const char HELP_CHAR = '?', QUIT_CHAR = 'q';
 
 //const char* OPT_STRING = "fa";
 const int MIN_ARG_NB = 1, MAX_ARG_NB = 1;
-const char* USAGE_MSG = "Usage: %s folder1 folder2/ destination \n";
+const char* USAGE_MSG = "Usage: main <filename> \n";
 
 //* Size of the file given when calling program
 size_t FILE_SIZE; 
@@ -32,7 +32,7 @@ int checkArgsNb(int argc) {
     int relevantNb = argc - 1;
     if (relevantNb < MIN_ARG_NB || relevantNb > MAX_ARG_NB) {
         errno = EINVAL;
-        exit(errno);
+        return errno; // return here because we want to print what happened to stderr later then exit
     }
     return 0;
 }
@@ -140,7 +140,7 @@ int parseInput(const char* INP_FORMAT, char* cmd, char* ltype, long* start, long
 const char* parseArgv(int argc, char* argv[]) {
     const char* parsedArg;
     if (checkArgsNb(argc) != 0) {
-        fprintf(stderr, "%s: Not Enough arguments: Expecting at least %d.\n", argv[0], MIN_ARG_NB);
+        printErr("%s: %s: Not Enough arguments, expecting at least %d\n\t%s\n", argv[0], MIN_ARG_NB, USAGE_MSG);
         exit(EXIT_FAILURE);
     }
 
@@ -148,27 +148,22 @@ const char* parseArgv(int argc, char* argv[]) {
     char* arg = argv[1];
 
     int argLen = strlen(arg);
-    if (argLen <= 0 || argLen >= PATH_MAX) {
+    if (argLen <= 0 || argLen >= PATH_MAX || !exists(arg)) {
         errno = EINVAL;
+        printErr("%s: Invalid argument: \"%s\"\n\t%s\n", arg, USAGE_MSG);
         exit(errno);
     }
-    // argv[i] is not destination i.e. last element and argv[i] does not exists
-    if (!exists(arg)) {
-        errno = ENOENT;
-        fprintf(stderr, "\"%s\" Invalid argument: %s", arg, strerror(ENOENT));
-        return NULL;
-    }
+
     // returns absolute path if it was computed correctly.
     parsedArg = realpath(arg, NULL);
     if (parsedArg == NULL) {
-        int savedErr = errno;
-        fprintf(stderr, "Cannot resolve file %s: %s\n", arg, strerror(savedErr));
+        printErr("%s: Cannot resolve file %s\n\t%s\n", arg, USAGE_MSG);
         exit(errno);
     }
     FILE_SIZE = getFileSize(parsedArg);
     
     if (FILE_SIZE < 0) {
-        fprintf(stderr, "Cannot get size of given file %s, ==> Max size will then be infered.\n", parsedArg);
+        printErr("%s: Cannot get size of given file %s, ==> Max size will then be infered.\n", parsedArg);
         FILE_SIZE = SSIZE_MAX;
     }
     return parsedArg;

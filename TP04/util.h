@@ -1,12 +1,21 @@
 #ifndef UTIL
 #define UTIL
-  
 
 /**
  * @file util.h
  * @brief Utility functions mostly used for error handling
  * 
  */
+
+/** Macro that Prints given message to stderr. Message should be printf formatted and the first arg is always strerror(savedErr) where savedErr is the saved value of errno.
+        * Usage: 'printErr("%s, %d: port number not valid\n", port)' first %s will be 'strerror(savedErr)' */
+#define printErr(mess, args...) \
+    { int savedErr = errno;      \
+    fprintf(stderr, mess, savedErr == 0 ? "" : strerror(savedErr), args); }
+    // if savedErr == 0 then strerror(savedError) will return "success" which wouldn't make any sense for an error message.
+
+//* Macro that Prints given (printf formatted) message to stderr and returns -1. See 'printErr' for more info
+#define printRErr(mess, args...) { printErr(mess, args); return -1; }
 
 /**
  * Checks if alloc (malloc, calloc ...) returned Null, if it did prints error message error message to stderr and exit with error ENOMEM
