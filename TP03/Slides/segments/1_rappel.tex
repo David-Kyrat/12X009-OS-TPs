@@ -1,7 +1,18 @@
 \section{Rappel: But du TP}
 \bframe{
     \begin{itemize}
-      \item
+      \item L'objectif général du TP est de créer un programme qui permet de faire des backups d'architecture
+      de fichiers facilement, en s'insiprant du programme \code{rsync}.
+      \item Le programme doit être capable de faire des backups incrémentaux, c'est à dire qu'il doit être
+      capable de détecter les fichiers qui ont été modifiés depuis la dernière sauvegarde, et de ne sauvegarder
+      que ceux-ci.
+    \end{itemize}
+
+    Les principaux défis de ce TP sont:
+    \begin{itemize}
+        \item La gestion de fichiers et de répertoires ainsi que leurs architectures.
+        \item La gestion et manipulations d'attributs d'inodes.
+        \item La manipulations de liens symboliques.
     \end{itemize}
     
 }
