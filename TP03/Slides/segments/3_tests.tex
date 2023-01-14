@@ -1,27 +1,60 @@
 \section{Tests realisés pour valider le fonctionnement du TP}
 \bframe{
-    Les tests réalisés ont étés les suivants:
+Les tests réalisés ont étés les suivants:
 
-    \begin{enumerate}
-        \item \code{./digest -f file1 file2 ...[-t <hashMethod>]} \\
-        
-        \begin{itemize}
-            \item \code{./digest -f res/test.txt res/string-tohash.txt -t md5}
-            \item output: \\
-            \code{Hashing Method: md5}
-    
-            \code{Hashing file "res/string-tohash.txt"\ldots}\\
-            \code{120227d6118cfddbd21639644aa0884d File: res/string-tohash.txt}\\ 
-            (ou \code{ef81ae80ec507096f761cefa49f7b63e} sans retour à la ligne final)\\
-            \code{------------------------}\\
-            
-            \code{Hashing file "res/test.txt"\ldots}\\
-            \code{4e1243bd22c66e76c2ba9eddc1f91394e57f9f83 File: res/test.txt}\\
-            \code{------------------------}\\
-        \end{itemize}
+%\item \code{./digest -f file1 file2 ...[-t <hashMethod>]} \\
+{\scriptsize \code{./ultra-cp dossier\_1 [[$\cdots$ dossier\_n] [fichier\_1 $\cdots$
+    fichier\_n]]}\\
 
-        \item \code{./digest string1 string2 \ldots [-t <hashMethod>]}.\\
+    $\qquad \qquad \qquad \qquad \qquad$ \code{[destination] [-a] [-f] }}
 
-    \end{enumerate}
-    
+Selon les utilisations suivantes: (commentaire copié du code)
+\begin{enumerate}
+    \item[1.] Just 1 file/folder $\Rightarrow$ print/ls contents
+    \item[2.] If only 2 files are given $\Rightarrow$ create/replace the file
+    \item[3.] If multiple files \& folder and \quo{dest} exists $\Rightarrow$ create/replace architecture in \quo{dest}
+    \item[4.] If -a is passed, change the permissions
+    \item[5.] If -f is passed, links are copied as links (stored in optional state)
+\end{enumerate}
+
 }
+
+\bframe{
+    \vspace{-0.2cm}
+    {\scriptsize Soit le dossier \code{res/} contenant les fichiers suivants:}
+    \includegraphics[scale=0.48]{images/os-tp3-prez-resDir2.png}
+}
+
+\bframe{
+    Les tests suivants ont été réalisés:
+  
+  \begin{enumerate}
+      \item \code{./ultra-cp res/fool tmp}
+      \item \code{./ultra-cp res/fool/bar.txt tmp}
+      \item \code{./ultra-cp  res/test\_src/foo.txt}
+      \item \code{./ultra-cp  res/test\_src/foo.txt foo}
+      \item \code{./ultra-cp res/test\_src/bar.txt res/test\_src/foo.txt  res/test\_src res/fool}
+   
+  \end{enumerate}
+}
+
+
+\bframe{
+    Les tests suivants ont été réalisés:
+  
+  \begin{enumerate}
+      \item \code{./ultra-cp res/fool tmp -f}
+      \item \code{./ultra-cp res/fool/bar.txt tmp.txt}
+      \item \code{./ultra-cp  res/test\_src/foo.txt}
+      \item \code{./ultra-cp  res/test\_src/foo.txt foo}
+      \item \code{./ultra-cp res/test\_src/bar.txt res/test\_src/foo.txt  res/test\_src res/fool -f}
+  \end{enumerate}
+  La dernière commande donnant l'output suivant:
+}
+
+\bframe{
+    \vspace{-0.2cm}
+    \includegraphics[scale=0.48]{images/os-tp3-prez-lastTest.png}
+}
+
+
