@@ -4,11 +4,14 @@
 %
 
 \begin{itemize}
-    \item 
-    \vspace{0.3cm}
-
+    \item Dans quels cas les droits du fichier copié ne pourront pas être les mêmes que ceux du fichier source?
+    \vspace{0.3cm} 
     \begin{itemize}
-        \item  
+        \item  Les droits ne pourront pas être les mêmes dans le cas ou les droits du dossier source n'est pas le
+        meme que ceux du dossier destination, c'est-à-dire que le umask de la destination est plus restrictif
+        que celle la source.
+        Si on a pas les droits sur un dossier (e.g. /sys, /bin, /etc/mount \ldots) on ne pourra pas y copier de fichiers
+        et donc par extension pas modifier les droits.
     \end{itemize}
    
 \end{itemize}
