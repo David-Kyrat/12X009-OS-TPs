@@ -119,7 +119,7 @@ int copy(const char* from, const char* to) {
         } while (readNb > 0);
     }
     if (readNb < 0) {
-        hdlReadErr(from, 0, 0, (int)NULL);
+        hdlReadErr(from, 0, 0, -2);
         return hdlCopyErr(from, to, 1, 0, fd_from, fd_to);
     }
     if (close(fd_to) < 0) {

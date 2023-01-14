@@ -4,8 +4,8 @@
 #include <string.h>  //snprintf
 #include <limits.h>  //PATH_MAX
 #include <dirent.h>  // opendir
-#include <sys/stat.h>   // open
-#include <sys/types.h> //  idem
+#include <sys/types.h> //  open
+#include <sys/stat.h>  //  idem
 #include <fcntl.h>    //   idem
 #include <unistd.h>  //    close, stat 
 #include <time.h>
@@ -21,7 +21,6 @@ int isDot(const char *entry_name) {
 
 const char permRepr[] = {'r', 'w', 'x'};
 
-
 char* computePerm(int mode) {
       //* 3 groups: owner, group, others, 3 perm: read write execute
     int x = 01, r = 04, w = 02, permNb = 3, dashNb = 10;
@@ -29,14 +28,14 @@ char* computePerm(int mode) {
     char permsPrty[10];  // Permission as a readable string
     for (int i = 0; i < dashNb; i++) permsPrty[i] = '-';
 
-    char typeLetter = '-';
-    if (S_ISDIR(mode)) typeLetter = 'd';
-    else if (S_ISLNK(mode)) typeLetter = 'l';
-    else if (S_ISCHR(mode)) typeLetter = 'c';
-    else if (S_ISBLK(mode)) typeLetter = 'b';
-    else if (S_ISFIFO(mode)) typeLetter = 'p';
-    else if (S_ISSOCK(mode)) typeLetter = 's';
-    permsPrty[0] = typeLetter;
+    switch(mode & S_IFMT) {  // Bitwise OR to get only the bits related to file type (code taken from the manual)
+        case S_IFDIR : permsPrty[0] = 'd';        break;
+        case S_IFLNK : permsPrty[0] = 'l';        break;
+        case S_IFCHR : permsPrty[0] = 'c';        break;
+        case S_IFBLK : permsPrty[0] = 'b';        break;
+        case S_IFIFO : permsPrty[0] = 'p';        break;
+        case S_IFSOCK: permsPrty[0] = 's';        break;
+    }
 
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < permNb; j++) {
