@@ -3,23 +3,22 @@
 
 \bframes{
     4 modules (+ \texttt{main.c}) ont été créés pour la réalisation du TP\@:
-    \begin{itemize}
+    \begin{enumerate}
         \item \code{main.c}: contient le code principal du programme \& appelle les fonctions appropriées
-              des autres modules.
+              des autres modules.\\
 
-        \item \code{copy.c}: contient 4 fonctions 
-    \end{itemize}
+        \item \code{copy.c}: contient 4 fonctions, sert à gérer la copie des fichiers et répertoires,
+              de définir quand est-ce qu'un fichier est considéré comme \quo{modifié}\ldots \\
+
+        \item \code{files.c}: contient 11 fonctions, servant à gérer les fichiers et leurs attributs.\\
+        \item \code{optprsr.c}: contient 3 fonctions, servant à gérer les options passées en paramètres.
+              (Plus ou moins la même reprise du tp d'avant)\\
+
+        \item \code{util.c}: contient 9 fonctions, servant divers usages allant de la gestion
+              d'erreurs à la gestion de chaînes de caractères, en passant par des wrappers qui incluent
+              lesdites fonctions de gestions d'erreurs.\\
+    \end{enumerate}
 }
-
-\bframes{
-
-}
-
-\bframes{
-
-}
-
-
 %
 
 \subsection{Structures de données utilisées}
@@ -27,8 +26,75 @@
     L'implémentation de structure n'a pas été nécessaire.
 }
 
-\subsection{Décomposition fonctionnelle et appels aux fonctions}
+\subsection{Décomposition fonctionnelle}
 \bframes{
+    \begin{enumerate}
+        \item[(1)]  \code{main.c}\\
+              \begin{itemize}
+                  \item \code{handleArgs}: Permet de gérer la totalité des arguments passés (les fichiers/dossiers (obligatoire) et les arguments optionnels tels que \code{-a} et \code{-f})
+                        appelle \code{optprsr.c} pour parse/extraire les arguments obligatoire \& optionnels et leurs fait
+                        correspondre le bon chant du bitfield \code{ST\_\ldots}.
+
+                        \vspace{0.3cm}
+
+                  \item \code{main}: Gère les differentes possibilités de copier les fichiers/dossiers (seulement 2 fichiers, 1 fichier et un dossier, 1 (ou plus) dossier(s) vers 1 dossier et les arguments optionnels)
+                        i.e. appelle \code{handleArgs} récupérer le \textit{state} (bitfield \code{ST\_\ldots}) pour ensuite déléguer aux fonctions du module \code{copy} en fonctions des différents
+              \end{itemize}\end{enumerate}
+}
+\bframes{
+    \begin{enumerate}
+        \item[(2)] \code{copy.c}
+        \begin{itemize}
+            \item \code{is\_modified}: Compare les temps de la dernière modification, et leurs tailles. S'il y a une différence entre les deux, le fichier sera remplacé par le nouveau
+            \item \code{copy}: Copie le contenu d'un fichier à un autre (code de l'exemple du chapitre 7: I/0 du cours, avec quelques modifications)
+            \item \code{copy\_ifneeded}: Vérifie si deux fichiers diffèrent et copie si c'est le cas
+            \item \code{ultra-cp-single}: Si le fichier passé en argument a été modifié\\ $\Rightarrow$ copie à la destination passée en argument;
+            en changeant les permissions du fichier copié si demandé en option.
+            \item \code{ultra\_cp}: Backup le dossier passé en argument à la destination passée en argument. Traverse récursivement tous les 
+            dossiers en créant les dossiers nécessaires au passage et appelles \code{ultra-cp-single} pour chaque fichier rencontré.
+        \end{itemize}
+    \end{enumerate}
+
+}
+
+\bframes{
+    \begin{enumerate}
+        \item[(3)] \code{files.c}
+            \begin{itemize}
+                \item Les fonctions \code{is\ldots}: Vérifient si l'argument est quelque chose. Ex: isDir vérifie si l'argument est un directory
+                \item \code{computePerm}: Retrouve les permissions d'un fichier donné
+                \item \code{exists}: Dit si un fichier donné existe. Retourne un erreur sinon
+                \item \code{concat\_path}: Concatène le path d'un fichier et de son directory parent
+                \item \code{absPath}: Retourne le path absolu d'un fichier
+                \item \code{getFileName}: Retourne le vrai nom d'un fichier à partir du path absolu
+                \item \code{listEntry}: Print les informations d'un fichier: type, permissions, taille, heure de modification et son path
+                \item \code{listEntryNoIn}: Idem, mais sans inode en argument
+                \item \code{list\_dir}: Print les informations de chaque fichier dans un directory
+            \end{itemize}
+    \end{enumerate}
+
+}
+
+\bframes{
+    \begin{enumerate} 
+        \item[(4)] \code{optprsr.c}
+            \begin{itemize}
+                \item \code{checkEnoughArgs}: Vérifie que suffisamment d'arguments obligatoires ont été entrées
+                \item \code{parseArgs}: Parse les arguments obligatoires. Ici, ce sont les fichiers et dossiers sources et la destination
+                \item \code{parseOptArgs}: Parse les arguments optionnels. Ici, ce sont \code{-a} et \code{-f}
+            \end{itemize}
+    \end{enumerate}
+}
+\bframes{
+    \begin{enumerate} 
+        \item[(5)] \code{util.c}
+            \begin{itemize}
+                \item \code{tryalc}: Vérifie que malloc a été effecté sans problème
+                \item Les fonctions \code{hdl...}: Gèrent multiples erreurs avec les fichers (ouvrir, fermer etc.)
+                \item \code{stat\_s} et \code{lstat\_s}: Permettent d'obtenir les informations d'un fichier (comme stat et lstat dans bash)
+            \end{itemize}
+    \end{enumerate}
+    %  \end{enumerate}
 
 }
 
