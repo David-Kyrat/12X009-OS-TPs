@@ -41,6 +41,7 @@ out/optprsr.o: optprsr.c optprsr.h out/util.o
 out/util.o: util.c util.h
 	$(CC) -c util.c $(CFLAGS) $(DBGFLAGS) -o out/util.o
 
+
 init: out
 
 out: 

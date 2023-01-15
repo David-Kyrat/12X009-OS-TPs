@@ -1,4 +1,4 @@
-.PHONY : clean all init
+.PHONY : clean all init __clean__
 
 # ! To Init workspace and allows makefile to compile correctly first launch target 'init'
 
@@ -23,7 +23,7 @@ CUISINIER_OBJS = out/cuisinier.o
 SERVEUR_OBJS = out/serveur.o
 
 
-all: $(EXEC)
+all: init $(EXEC)
 
 $(SERVEUR_EXEC): $(SERVEUR_OBJS)
 	$(CC) $(SERVEUR_OBJS) -o $(SERVEUR_EXEC) $(LFLAGS)
@@ -39,13 +39,15 @@ out/cuisinier.o: cuisinier.c
 
 
 
-#! Make directory that will contain all .o & .out (except for main.out which will be at root of source dir i.e. where Makefile is)
-
 init: out
 
 out: 
 	mkdir out
 
-clean:
-	rm *.out out/*.o out/*.out
+__clean__:
+	- @rm $(EXEC) *.out out/*.o out/*.out 2> /dev/null
 
+# supress error ouput because cleaning without having compiled "throws" ENOENT error, whereas
+# we don't really care whether they were indeed files to delete or not
+clean:
+	@make __clean__ -s
