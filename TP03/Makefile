@@ -21,23 +21,20 @@ $(EXEC): init $(OBJS)
 debug: $(OBJS)
 	$(CC) $(OBJS) -o main.out
 
-copy.out: out/copy.o out/util.o
-	$(CC) out/copy.o out/util.o -o copy.out
 
-
-out/main.o: main.c files.h copy.h optprsr.h util.h
+out/main.o: main.c $(OBJS)
 	$(CC) -c main.c $(CFLAGS) $(DBGFLAGS) -o out/main.o
 
 
-out/files.o: files.c files.h copy.h util.h
+out/files.o: files.c files.h out/copy.o out/util.o
 	$(CC) -c files.c $(CFLAGS) $(DBGFLAGS) -o out/files.o
 
 
-out/copy.o: copy.c copy.h util.h
+out/copy.o: copy.c copy.h out/util.o
 	$(CC) -c copy.c $(CFLAGS) $(DBGFLAGS) -o out/copy.o
 
 
-out/optprsr.o: optprsr.c optprsr.h util.h
+out/optprsr.o: optprsr.c optprsr.h out/util.o
 	$(CC) -c optprsr.c $(CFLAGS) $(DBGFLAGS) -o out/optprsr.o
 
 

@@ -18,23 +18,23 @@ all: $(EXEC)
 $(EXEC): init $(OBJS)
 	$(CC) $(OBJS) -o $(EXEC)
 
-out/main.o: main.c inp.h files.h optprsr.h util.h
+out/main.o: main.c $(OBJS)
 	$(CC) -c main.c $(CFLAGS) $(DBGFLAGS) -o out/main.o
 
 
-out/lock.o: lock.c lock.h inp.h
+out/lock.o: lock.c lock.h out/inp.o
 	$(CC) -c lock.c $(CFLAGS) $(DBGFLAGS) -o out/lock.o
 
 
-out/inp.o: inp.c inp.h util.h
+out/inp.o: inp.c inp.h out/util.o
 	$(CC) -c inp.c $(CFLAGS) $(DBGFLAGS) -o out/inp.o
 
 
-out/files.o: files.c files.h util.h
+out/files.o: files.c files.h out/util.o
 	$(CC) -c files.c $(CFLAGS) $(DBGFLAGS) -o out/files.o
 
 
-out/optprsr.o: optprsr.c optprsr.h util.h
+out/optprsr.o: optprsr.c optprsr.h out/util.o
 	$(CC) -c optprsr.c $(CFLAGS) $(DBGFLAGS) -o out/optprsr.o
 
 

@@ -18,15 +18,12 @@ all: $(EXEC)
 $(EXEC): init out/main.o $(OBJS)
 	$(CC) out/main.o $(OBJS) -o $(EXEC) -lssl -lcrypto
 
-main.out: out/main.o $(OBJS)
-	$(CC) out/main.o $(OBJS) -o main.out -lssl -lcrypto
 
-
-out/main.o: main.c hash_calc.h OptionParser.h
+out/main.o: main.c out/hash_calc.o out/OptionParser.o
 	$(CC) -c main.c $(CFLAGS) $(DBGFLAGS) -o out/main.o
 
 
-out/hash_calc.o: hash_calc.c hash_calc.h OptionParser.h
+out/hash_calc.o: hash_calc.c hash_calc.h out/OptionParser.o
 	$(CC) -c hash_calc.c $(CFLAGS) $(DBGFLAGS) -o out/hash_calc.o
 
 
