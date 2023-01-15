@@ -1,3 +1,5 @@
+.PHONY : clean all init __clean__
+
 #
 # Compiler flags
 #
@@ -13,7 +15,7 @@ DBGFLAGS = -g -DDEBUG
 
 all: $(EXEC)
 
-$(EXEC): out/main.o $(OBJS)
+$(EXEC): init out/main.o $(OBJS)
 	$(CC) out/main.o $(OBJS) -o $(EXEC) -lssl -lcrypto
 
 main.out: out/main.o $(OBJS)
@@ -32,5 +34,15 @@ out/OptionParser.o: OptionParser.c OptionParser.h
 	$(CC) -c OptionParser.c $(CFLAGS) $(DBGFLAGS) -o out/OptionParser.o
 
 
+init: out
+
+out: 
+	mkdir out
+
+__clean__:
+	- @rm $(EXEC) *.out out/*.o out/*.out 2> /dev/null
+
+# supress error ouput because cleaning without having compiled "throws" ENOENT error, whereas
+# we don't really care whether they were indeed files to delete or not
 clean:
-	- rm *.out out/*.o out/*.out
+	@make __clean__ -s

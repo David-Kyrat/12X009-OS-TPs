@@ -1,4 +1,4 @@
-.PHONY : clean all
+.PHONY : clean all init __clean__
 #
 # Compiler flags
 #
@@ -15,7 +15,7 @@ OBJS = out/main.o out/copy.o out/files.o out/optprsr.o out/util.o
 all: $(EXEC)
 
 
-$(EXEC): $(OBJS)
+$(EXEC): init $(OBJS)
 	$(CC) $(OBJS) -o ultra-cp
 
 debug: $(OBJS)
@@ -45,5 +45,15 @@ out/util.o: util.c util.h
 	$(CC) -c util.c $(CFLAGS) $(DBGFLAGS) -o out/util.o
 
 
+init: out
+
+out: 
+	mkdir out
+
+__clean__:
+	- @rm $(EXEC) *.out out/*.o out/*.out 2> /dev/null
+
+# supress error ouput because cleaning without having compiled "throws" ENOENT error, whereas
+# we don't really care whether they were indeed files to delete or not
 clean:
-	rm *.out out/*.o out/*.out
+	@make __clean__ -s
