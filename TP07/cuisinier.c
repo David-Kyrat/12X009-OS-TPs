@@ -10,7 +10,34 @@
 #include <errno.h>
 
 #include "shm.h"
-#include "cook.h"
+
+// Inform the server that it can start serving
+sem_t* sem_server;
+
+// Inform the chef that it can rest
+sem_t* sem_cook;
+
+// Mutual exclusion of the shelf
+sem_t* sem_shelf;
+
+
+// Initialize the semaphores
+void init_semaphores() {
+    sem_server = sem_open("sem_server", O_CREAT, 0666, 0);
+    sem_cook = sem_open("sem_cook", O_CREAT, 0666, 0);
+    sem_shelf = sem_open("sem_shelf", O_CREAT, 0666, 1);
+}
+
+// Destroy the semaphores
+void destroy_semaphores() {
+    sem_close(sem_server);
+    sem_close(sem_cook);
+    sem_close(sem_shelf);
+    sem_unlink("sem_server");
+    sem_unlink("sem_cook");
+    sem_unlink("sem_shelf");
+}
+
 
 /* Handles the chef's job of making pizzas */
 void cook_pizza(sharedMemory *shm, int i){
@@ -48,7 +75,7 @@ int main (int argc, char* argv[]) {
     sharedMemory *shm;
 
     // Create a read/write shared memory
-    if ((fd = shm_open("shelfPizzas", O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR)) == -1){
+    if ((fd = shm_open("pizzaShelf", O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR)) == -1){
         perror("Failed to create shared mem");
         exit(EXIT_FAILURE);
     }
@@ -91,7 +118,7 @@ int main (int argc, char* argv[]) {
         fprintf(stderr, "munmap");
     
     // Unlink the shared memory
-    shm_unlink("shelfPizzas");
+    shm_unlink("pizzaShelf");
 
     return 0;
 
