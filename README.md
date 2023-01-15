@@ -7,7 +7,7 @@
 Below you can find the links to the enonce & reports for each TP of the semester.  
 
 - [TP 01](TP01/instructions-report/TP1.pdf)
-  - [Report](TP01/TP01-rapport.pdf)  
+  - [Report](TP01/instructions-report/TP01-rapport.pdf)  
   
 - [TP 02](TP02/instructions-report/TP2.pdf)
   - [Report](TP02/instructions-report/TP02-rapport.pdf)
