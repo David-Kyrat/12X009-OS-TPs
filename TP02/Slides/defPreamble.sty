@@ -12,7 +12,13 @@
 \usepackage{fancyhdr}
 \usepackage{pdfpages}
 \usepackage{lastpage}
-\usepackage{lipsum}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=blue,
+    pdfpagemode=FullScreen,
+    }
 
 \newcommand{\num}{02}
 \newcommand{\sn}{\secname}
@@ -47,8 +53,14 @@
 \author[Noah Munz, Sciences Informatiques]{Noah Munz (19-815-489)}
 \institute[]{Département d'Informatique \\ Université de Genève}
 
-\date[Examen Oral]{Mardi 31 Janvier 2023}
-\logo{\includegraphics[height=1cm]{images/unige.png}}
+\date[Examen Oral]{Mardi 31 Janvier 2023 \\ $\quad $\\
+
+Code: {\small \href{https://github.com/David-Kyrat/12X009-OS-TPs/tree/master/TP02}{Lien GitHub du code} }\\
+
+Rapport: {\small 
+    \href{https://github.com/David-Kyrat/12X009-OS-TPs/blob/master/TP02/instructions-report/TP02-rapport.pdf}{Lien GitHub du rapport}
+    }
+}\logo{\includegraphics[height=1cm]{images/unige.png}}
 
 \AtBeginSection[]{
   \begin{frame}{Table of Contents}
