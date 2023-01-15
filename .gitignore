@@ -9,6 +9,8 @@ TP03/out
 *.zip
 *.gz
 *.tar.gz
+*.xcf
+*.xfc
 
 **/noah.munz.gregory.sedykh.tp?
 
