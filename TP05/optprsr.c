@@ -8,7 +8,6 @@
 #include <unistd.h>
 
 #include "functions.h"
-#include "files.h"
 #include "optprsr.h"
 #include "util.h"
 
@@ -86,6 +85,16 @@ int parseArgv(int argc, char* argv[], int isServ, int* port_dest, char** ip_addr
     return 0;
 }
 
+//unused
+/**
+ * Parses the command line arguments and stores the port number into the given *_dest arguments.
+ * 
+ * @param argc the number of arguments passed to the program
+ * @param argv the array of arguments passed to the program
+ * @param port_dest the port number to be used for the connection
+ * 
+ * @return error code. -1 if an error happened (errno set appropriately), 0 for success.
+ */
 int parseArgvServ(int argc, char* argv[], int* port_dest) {
     return parseArgv(argc, argv, 1, port_dest, NULL);
 }

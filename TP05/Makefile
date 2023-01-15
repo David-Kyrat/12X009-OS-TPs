@@ -29,20 +29,25 @@ OBJS = out/client.o $(SERV_OBJS)
 all: $(EXEC)
 
 
-$(SERV_EXEC): $(SERV_OBJS)
+$(SERV_EXEC): init $(SERV_OBJS)
 	$(CC) $(SERV_OBJS) -o $(SERV_EXEC)
 
-$(CLIENT_EXEC): $(CLIENT_OBJS)
+$(CLIENT_EXEC): init $(CLIENT_OBJS)
 	$(CC) $(CLIENT_OBJS) -o $(CLIENT_EXEC)
 
-out/client.o: client.c functions.h optprsr.h util.h
+
+test: test.c $(SHARED_OBJS)
+	$(CC) test.c $(SHARED_OBJS) $(CFLAGS) $(DBGFLAGS) -o test.out
+
+
+out/client.o: client.c out/functions.o out/optprsr.o out/util.o
 	$(CC) -c client.c $(CFLAGS) $(DBGFLAGS) -o out/client.o
 
-out/server.o: server.c functions.h optprsr.h util.h
+out/server.o: server.c out/functions.o out/util.o
 	$(CC) -c server.c $(CFLAGS) $(DBGFLAGS) -o out/server.o
 
 
-out/functions.o: functions.c functions.h util.h
+out/functions.o: functions.c functions.h out/util.o
 	$(CC) -c functions.c $(CFLAGS) $(DBGFLAGS) -o out/functions.o
 
 

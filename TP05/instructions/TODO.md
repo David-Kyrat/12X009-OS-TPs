@@ -42,8 +42,8 @@ Example:
 ### Functions:
 
 ```c 
-    int socket(int domain, int type, int protocol);                              -> creates a socket
-    int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);     -> initiates a connection
+    int socket(int domain, int type, int protocol);                                     -> creates a socket
+    int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);            -> initiates a connection
 ```
 
 ---
@@ -111,10 +111,10 @@ The server should display:
 ### Functions:
 
 ```c
-    int socket(int domain, int type, int protocol);                             -> creates a socket
-    int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);       -> attaches socket to address
-    int listen(int sockfd, int backlog);                                        -> marks a socket as passive (can accept connections)
-    int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);          -> accepts a connection
+    int socket(int domain, int type, int protocol);                                   -> creates a socket
+    int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);             -> attaches socket to address
+    int listen(int sockfd, int backlog);                                              -> marks a socket as passive (can accept connections)
+    int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);                -> accepts a connection
 ```
 
 ---

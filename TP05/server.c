@@ -19,9 +19,7 @@
 #include <unistd.h>
 
 #include "functions.h"
-#include "optprsr.h"
 #include "util.h"
-
 
 const int INTERVAL_MIN = 0;
 const int INTERVAL_MAX = 64;  
