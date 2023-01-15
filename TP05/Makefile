@@ -36,10 +36,6 @@ $(CLIENT_EXEC): init $(CLIENT_OBJS)
 	$(CC) $(CLIENT_OBJS) -o $(CLIENT_EXEC)
 
 
-test: test.c $(SHARED_OBJS)
-	$(CC) test.c $(SHARED_OBJS) $(CFLAGS) $(DBGFLAGS) -o test.out
-
-
 out/client.o: client.c out/functions.o out/optprsr.o out/util.o
 	$(CC) -c client.c $(CFLAGS) $(DBGFLAGS) -o out/client.o
 
