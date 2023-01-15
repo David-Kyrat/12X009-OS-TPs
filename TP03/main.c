@@ -162,7 +162,7 @@ int main(int argc, char* argv[]) {
             concat_path(path, dest, src);
             ultra_cp_single(files[0], path, modif_perm, preserve_links);
             break;
-        }  //TODO: check if break must be in or out
+        }
 
         case ST_MIX:
         case ST_MIX | ST_PRESERVE_LINKS:
