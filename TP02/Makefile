@@ -1,4 +1,6 @@
-.PHONY : clean all init __clean__
+.PHONY : clean all $(INIT) __clean__
+INIT = out
+
 
 #
 # Compiler flags
@@ -31,9 +33,8 @@ out/OptionParser.o: OptionParser.c OptionParser.h
 	$(CC) -c OptionParser.c $(CFLAGS) $(DBGFLAGS) -o out/OptionParser.o
 
 
-init: out
 
-out: 
+$(INIT): 
 	mkdir out
 
 __clean__:

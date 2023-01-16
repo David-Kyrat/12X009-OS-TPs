@@ -1,6 +1,6 @@
-.PHONY : clean all init __clean__
-#
-# ! To Init workspace and allows makefile to compile correctly first launch target 'init'
+.PHONY : clean all $(INIT) __clean__
+INIT = out
+
 
 #
 # Compiler flags
@@ -51,9 +51,8 @@ out/util.o: init util.c util.h
 	$(CC) -c util.c $(CFLAGS) $(DBGFLAGS) -o out/util.o
 
 
-init: out
 
-out: 
+$(INIT): 
 	mkdir out
 
 __clean__:

@@ -1,6 +1,6 @@
 .PHONY : clean all $(INIT) __clean__
-#
-# ! To Init workspace and allows makefile to compile correctly first launch target 'init'
+INIT = out
+
 
 #
 # Compiler flags
@@ -12,8 +12,6 @@ CFLAGS = -lm -Wall -Wuninitialized -Wfloat-equal -Wshadow -Wbad-function-cast -W
 # Debug build settings
 #
 DBGFLAGS = -g -DDEBUG
-
-INIT = out
 
 SERV_EXEC = server
 CLIENT_EXEC = client
