@@ -144,28 +144,3 @@ The server should display:
         close( clientSock );
     }
 ```
-
----
-
----
-
-## Useful functions
-
-    ssize_t recv(int sockfd, void *buf, size_t len, int flags);                         -> instead of read (for sockets)
-    ssize_t send(int sockfd, const void *buf, size_t len, int flags);                   -> instead of write (for sockets)
-    ssize_t sendfile(int out_fd, int in_fd, off_t *offset, size_t count)                -> also instead of read/write
-
----
-
-## Unix sockets
-
-
-    #define UNIX_PATH_MAX    108
-    struct sockaddr_un {
-        sa_family_t sun_family;        /* Famille: AF_UNIX*/
-        char sun_path[UNIX_PATH_MAX];  /* Chemin sur le systeme de fichiers */
-    };
-
-
----
-
