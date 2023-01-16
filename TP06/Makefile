@@ -17,7 +17,7 @@ DBGFLAGS = -g -DDEBUG
 #
 # Name of the final executable
 #
-EXEC = main
+EXEC = shell
 #
 # All headers. i.e. dependency of the out/main.o target
 #
