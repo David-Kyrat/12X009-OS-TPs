@@ -1,4 +1,4 @@
-.PHONY : clean all $(INIT) __clean__
+.PHONY : clean all __clean__
 INIT = out
 
 # * Compiler flags
@@ -21,18 +21,18 @@ CUISINIER_OBJS = out/cuisinier.o
 SERVEUR_OBJS = out/serveur.o
 
 
-all: init $(EXEC)
+all: $(EXEC)
 
-$(SERVEUR_EXEC): $(SERVEUR_OBJS)
+$(SERVEUR_EXEC): $(INIT) $(SERVEUR_OBJS)
 	$(CC) $(SERVEUR_OBJS) -o $(SERVEUR_EXEC) $(LFLAGS)
 
-$(CUISINIER_EXEC): $(CUISINIER_OBJS)
+$(CUISINIER_EXEC): $(INIT) $(CUISINIER_OBJS)
 	$(CC) $(CUISINIER_OBJS) -o $(CUISINIER_EXEC) $(LFLAGS)
 
-out/serveur.o: init serveur.c
+out/serveur.o: serveur.c
 	$(CC) -c serveur.c $(CFLAGS) $(DBGFLAGS) -o out/serveur.o $(LFLAGS)
 
-out/cuisinier.o: init cuisinier.c
+out/cuisinier.o: cuisinier.c
 	$(CC) -c cuisinier.c $(CFLAGS) $(DBGFLAGS) -o out/cuisinier.o $(LFLAGS)
 
 

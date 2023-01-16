@@ -1,4 +1,4 @@
-.PHONY : clean all $(INIT) __clean__
+.PHONY : clean all __clean__
 INIT = out
 
 
@@ -27,7 +27,7 @@ OBJS = out/main.o out/shell.o out/input.o out/files.o out/util.o
 all: $(EXEC)
 
 
-$(EXEC): init $(OBJS)
+$(EXEC): $(INIT) $(OBJS)
 	$(CC) $(OBJS) -o $(EXEC) -lreadline
 
 

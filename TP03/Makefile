@@ -1,4 +1,4 @@
-.PHONY : clean all $(INIT) __clean__
+.PHONY : clean all __clean__
 INIT = out
 
 #
@@ -17,11 +17,8 @@ OBJS = out/main.o out/copy.o out/files.o out/optprsr.o out/util.o
 all: $(EXEC)
 
 
-$(EXEC): init $(OBJS)
+$(EXEC): $(INIT) $(OBJS)
 	$(CC) $(OBJS) -o ultra-cp
-
-debug: $(OBJS)
-	$(CC) $(OBJS) -o main.out
 
 
 out/main.o: main.c $(OBJS)

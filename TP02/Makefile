@@ -1,4 +1,4 @@
-.PHONY : clean all $(INIT) __clean__
+.PHONY : clean all __clean__
 INIT = out
 
 
@@ -17,7 +17,7 @@ DBGFLAGS = -g -DDEBUG
 
 all: $(EXEC)
 
-$(EXEC): init out/main.o $(OBJS)
+$(EXEC): $(INIT) out/main.o $(OBJS)
 	$(CC) out/main.o $(OBJS) -o $(EXEC) -lssl -lcrypto
 
 

@@ -1,4 +1,4 @@
-.PHONY : clean all $(INIT) __clean__
+.PHONY : clean all __clean__
 INIT = out
 
 
@@ -29,10 +29,10 @@ OBJS = out/client.o $(SERV_OBJS)
 all: $(EXEC)
 
 
-$(SERV_EXEC): $(SERV_OBJS)
+$(SERV_EXEC): $(INIT) $(SERV_OBJS)
 	$(CC) $(SERV_OBJS) -o $(SERV_EXEC)
 
-$(CLIENT_EXEC): $(CLIENT_OBJS)
+$(CLIENT_EXEC): $(INIT) $(CLIENT_OBJS)
 	$(CC) $(CLIENT_OBJS) -o $(CLIENT_EXEC)
 
 
