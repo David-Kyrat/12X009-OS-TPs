@@ -14,6 +14,13 @@
 \usepackage{lastpage}
 \usepackage{lipsum}
 
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=blue,
+    pdfpagemode=FullScreen,
+    }
 \newcommand{\num}{03}
 \newcommand{\sn}{\secname}
 \newcommand{\ssn}{\subsecname}
@@ -41,14 +48,20 @@
 
 \usecolortheme{whale}
 
-\title[Systèmes d'Exploitation: TP \num]{Systèmes d'Exploitation - Examen}
+\title[{\color{white} Systèmes d'Exploitation: TP \num}]{Systèmes d'Exploitation - Examen}
 
 \subtitle{12X009 - TP\num\\ Ultra-cp}
 \author[Noah Munz, Sciences Informatiques]{Noah Munz (19-815-489)}
 \institute[]{Département d'Informatique \\ Université de Genève}
 
-\date[Examen Oral]{Mardi 31 Janvier 2023}
-\logo{\includegraphics[height=1cm]{images/unige.png}}
+\date[Examen Oral]{Mardi 31 Janvier 2023 \\ $\quad $\\
+
+Code: {\small \href{https://github.com/David-Kyrat/12X009-OS-TPs/tree/master/TP03}{Lien GitHub du code} }\\
+
+Rapport: {\small 
+    \href{https://github.com/David-Kyrat/12X009-OS-TPs/blob/master/TP03/instructions-report/TP03-rapport.pdf}{Lien GitHub du rapport}
+    }
+}\logo{\includegraphics[height=1cm]{images/unige.png}}
 
 \AtBeginSection[]{
   \begin{frame}{Table of Contents}

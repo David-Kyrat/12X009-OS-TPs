@@ -1,8 +1,12 @@
-\usepackage[utf8]{inputenc}
+\usepackage[utf8]{inputenc} 
 \usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{setspace}
+\usepackage{color}
+\usepackage{listings}
+
 \usepackage[autolanguage]{numprint}
 \usepackage{hyperref}
-\usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{graphicx}
 \usepackage{xcolor}
@@ -12,8 +16,38 @@
 \usepackage{fancyhdr}
 \usepackage{pdfpages}
 \usepackage{lastpage}
-\usepackage{lipsum}
 
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=blue,
+    pdfpagemode=FullScreen,
+    }
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+%
+\lstset{frame=tb,
+  language=C,
+  aboveskip=3mm,
+  belowskip=3mm,
+  label={lst:code_direct}
+  showstringspaces=true,
+  columns=flexible,
+  basicstyle={\footnotesize\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3
+}
+%
+%
+%
 \newcommand{\num}{0X}
 \newcommand{\sn}{\secname}
 \newcommand{\ssn}{\subsecname}
@@ -24,8 +58,18 @@
     #1
   \end{frame}
 }
+\newcommand{\bfframe}[1]{
+  \begin{frame}[fragile]{\sn}
+    #1
+  \end{frame}
+}
 \newcommand{\bframes}[1]{
   \begin{frame}{\sn : \ssn}
+    #1
+  \end{frame}
+}
+\newcommand{\bfframes}[1]{
+  \begin{frame}[fragile]{\sn : \ssn}
     #1
   \end{frame}
 }
@@ -41,13 +85,20 @@
 
 \usecolortheme{whale}
 
-\title[Systèmes d'Exploitation: TP \num]{Systèmes d'Exploitation - Examen}
+\title[{\color{white} Systèmes d'Exploitation: TP \num}]{Systèmes d'Exploitation - Examen}
 
 \subtitle{12X009 - TP\num}
 \author[Noah Munz, Sciences Informatiques]{Noah Munz (19-815-489)}
 \institute[]{Département d'Informatique \\ Université de Genève}
 
-\date[Examen Oral]{Mardi 31 Janvier 2023}
+\date[Examen Oral]{Mardi 31 Janvier 2023 \\ $\quad $\\
+
+Code: {\small \href{https://github.com/David-Kyrat/12X009-OS-TPs/tree/master/TP0X}{Lien GitHub du code} }\\
+
+Rapport: {\small 
+    \href{https://github.com/David-Kyrat/12X009-OS-TPs/blob/master/TP0X/instructions-report/TP0X-rapport.pdf}{Lien GitHub du rapport}
+    }
+}
 \logo{\includegraphics[height=1cm]{images/unige.png}}
 
 \AtBeginSection[]{
