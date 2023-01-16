@@ -1,6 +1,8 @@
 .PHONY : clean all __clean__
 INIT = out
 
+#
+# ! If using another target than '$EXEC'/'ALL' first launch target '$INIT'  to  create 'out' directory in which to put object (.o) files
 
 #
 # Compiler flags
