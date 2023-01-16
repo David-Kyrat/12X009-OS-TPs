@@ -24,7 +24,7 @@ $(EXEC): $(INIT) $(OBJS)
 	$(CC) $(OBJS) -o ultra-cp
 
 
-out/main.o: main.c $(OBJS)
+out/main.o: main.c copy.h files.h optprsr.h util.h
 	$(CC) -c main.c $(CFLAGS) $(DBGFLAGS) -o out/main.o
 
 
