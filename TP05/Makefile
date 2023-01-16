@@ -1,4 +1,4 @@
-.PHONY : clean all init __clean__
+.PHONY : clean all $(INIT) __clean__
 #
 # ! To Init workspace and allows makefile to compile correctly first launch target 'init'
 
@@ -12,6 +12,8 @@ CFLAGS = -lm -Wall -Wuninitialized -Wfloat-equal -Wshadow -Wbad-function-cast -W
 # Debug build settings
 #
 DBGFLAGS = -g -DDEBUG
+
+INIT = out
 
 SERV_EXEC = server
 CLIENT_EXEC = client
@@ -29,10 +31,10 @@ OBJS = out/client.o $(SERV_OBJS)
 all: $(EXEC)
 
 
-$(SERV_EXEC): init $(SERV_OBJS)
+$(SERV_EXEC): $(SERV_OBJS)
 	$(CC) $(SERV_OBJS) -o $(SERV_EXEC)
 
-$(CLIENT_EXEC): init $(CLIENT_OBJS)
+$(CLIENT_EXEC): $(CLIENT_OBJS)
 	$(CC) $(CLIENT_OBJS) -o $(CLIENT_EXEC)
 
 
@@ -51,13 +53,12 @@ out/optprsr.o: optprsr.c optprsr.h util.h
 	$(CC) -c optprsr.c $(CFLAGS) $(DBGFLAGS) -o out/optprsr.o
 
 
-out/util.o: init util.c util.h
+out/util.o: util.c util.h
 	$(CC) -c util.c $(CFLAGS) $(DBGFLAGS) -o out/util.o
 
 
-init: out
 
-out: 
+$(INIT): 
 	mkdir out
 
 __clean__:
