@@ -15,7 +15,11 @@ DBGFLAGS = -g -DDEBUG
 #
 # Name of the final executable
 #
-EXEC = shell
+EXEC = main
+#
+# All headers. i.e. dependency of the out/main.o target
+#
+HDRS = shell.h input.h files.h util.h
 
 OBJS = out/main.o out/shell.o out/input.o out/files.o out/util.o
 
@@ -27,19 +31,19 @@ $(EXEC): init $(OBJS)
 	$(CC) $(OBJS) -o $(EXEC) -lreadline
 
 
-out/main.o: main.c $(OBJS)
+out/main.o: main.c $(HDRS)
 	$(CC) -c main.c $(CFLAGS) $(DBGFLAGS) -o out/main.o
 
 
-out/shell.o: shell.c shell.h out/files.o out/util.o
+out/shell.o: shell.c shell.h files.h util.h
 	$(CC) -c shell.c $(CFLAGS) $(DBGFLAGS) -o out/shell.o
 
 
-out/input.o: input.c input.h out/util.o
+out/input.o: input.c input.h util.h
 	$(CC) -c input.c $(CFLAGS) $(DBGFLAGS) -o out/input.o
 
 
-out/files.o: files.c files.h out/util.o
+out/files.o: files.c files.h util.h
 	$(CC) -c files.c $(CFLAGS) $(DBGFLAGS) -o out/files.o
 
 

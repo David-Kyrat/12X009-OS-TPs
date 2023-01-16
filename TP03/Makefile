@@ -26,15 +26,15 @@ out/main.o: main.c $(OBJS)
 	$(CC) -c main.c $(CFLAGS) $(DBGFLAGS) -o out/main.o
 
 
-out/files.o: files.c files.h out/copy.o out/util.o
+out/files.o: files.c files.h copy.h util.h
 	$(CC) -c files.c $(CFLAGS) $(DBGFLAGS) -o out/files.o
 
 
-out/copy.o: copy.c copy.h out/util.o
+out/copy.o: copy.c copy.h util.h
 	$(CC) -c copy.c $(CFLAGS) $(DBGFLAGS) -o out/copy.o
 
 
-out/optprsr.o: optprsr.c optprsr.h out/util.o
+out/optprsr.o: optprsr.c optprsr.h util.h
 	$(CC) -c optprsr.c $(CFLAGS) $(DBGFLAGS) -o out/optprsr.o
 
 

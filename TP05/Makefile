@@ -36,18 +36,18 @@ $(CLIENT_EXEC): init $(CLIENT_OBJS)
 	$(CC) $(CLIENT_OBJS) -o $(CLIENT_EXEC)
 
 
-out/client.o: client.c out/functions.o out/optprsr.o out/util.o
+out/client.o: client.c functions.h optprsr.h util.h
 	$(CC) -c client.c $(CFLAGS) $(DBGFLAGS) -o out/client.o
 
-out/server.o: server.c out/functions.o out/util.o
+out/server.o: server.c functions.h util.h
 	$(CC) -c server.c $(CFLAGS) $(DBGFLAGS) -o out/server.o
 
 
-out/functions.o: functions.c functions.h out/util.o
+out/functions.o: functions.c functions.h util.h
 	$(CC) -c functions.c $(CFLAGS) $(DBGFLAGS) -o out/functions.o
 
 
-out/optprsr.o: optprsr.c optprsr.h out/util.o
+out/optprsr.o: optprsr.c optprsr.h util.h
 	$(CC) -c optprsr.c $(CFLAGS) $(DBGFLAGS) -o out/optprsr.o
 
 

@@ -31,10 +31,10 @@ $(SERVEUR_EXEC): $(SERVEUR_OBJS)
 $(CUISINIER_EXEC): $(CUISINIER_OBJS)
 	$(CC) $(CUISINIER_OBJS) -o $(CUISINIER_EXEC) $(LFLAGS)
 
-out/serveur.o: serveur.c
+out/serveur.o: init serveur.c
 	$(CC) -c serveur.c $(CFLAGS) $(DBGFLAGS) -o out/serveur.o $(LFLAGS)
 
-out/cuisinier.o: cuisinier.c
+out/cuisinier.o: init cuisinier.c
 	$(CC) -c cuisinier.c $(CFLAGS) $(DBGFLAGS) -o out/cuisinier.o $(LFLAGS)
 
 
