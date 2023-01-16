@@ -66,7 +66,7 @@ int main(int argc, char* argv[]) {
 
         // Make a temporary fork
         pid_t t_pid = fork();
-        printf("PID: %d\n", t_pid);
+        printf("\nPID: %d\n", t_pid);
 
         if (t_pid < 0) {
             printErr("%s: %s - Cannot Fork.\n", argv[0]);
@@ -138,9 +138,11 @@ int main(int argc, char* argv[]) {
                     result = 4;
                     write(client_socket, &result, 4);
                 }
+                printf("\n");
 
                 free(pretty_clientAddress);
                 close(client_socket);
+                exit(0); // Make child exit
             }
         }
 
