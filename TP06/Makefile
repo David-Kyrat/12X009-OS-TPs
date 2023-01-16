@@ -49,7 +49,7 @@ out/files.o: files.c files.h util.h
 	$(CC) -c files.c $(CFLAGS) $(DBGFLAGS) -o out/files.o
 
 
-out/util.o: init util.c util.h
+out/util.o: util.c util.h
 	$(CC) -c util.c $(CFLAGS) $(DBGFLAGS) -o out/util.o
 
 
