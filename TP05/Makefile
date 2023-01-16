@@ -47,11 +47,11 @@ out/functions.o: functions.c functions.h out/util.o
 	$(CC) -c functions.c $(CFLAGS) $(DBGFLAGS) -o out/functions.o
 
 
-out/optprsr.o: optprsr.c optprsr.h util.h
+out/optprsr.o: optprsr.c optprsr.h out/util.o
 	$(CC) -c optprsr.c $(CFLAGS) $(DBGFLAGS) -o out/optprsr.o
 
 
-out/util.o: util.c util.h
+out/util.o: init util.c util.h
 	$(CC) -c util.c $(CFLAGS) $(DBGFLAGS) -o out/util.o
 
 
