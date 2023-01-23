@@ -15,7 +15,7 @@ const char* readInput();
  * and stores the argc into the given 'argc' variable.
  * 
  * @param argc ptr to variable in which to store the number of argument
- * @param isForeground ptr to ptr to variable in which to store if the line contained a '&' at the end
+ * @param isForeground ptr to variable in which to store if the line contained a '&' at the end
 
  * @return Array of argument
  */
