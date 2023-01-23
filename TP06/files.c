@@ -8,7 +8,6 @@
 #include <sys/types.h> //  idem
 #include <fcntl.h>    //   idem
 #include <unistd.h>  //    close, stat 
-#include <time.h>
 
 #include "util.h"
 #include "files.h"
@@ -67,21 +66,6 @@ int isDir(const char* path) {
 }
 
 
-const char* getFileName(const char* path) {
-    const char* abs_path = realpath(path, NULL);
-    if (abs_path == NULL) {
-        int savedErr = errno;
-        fprintf(stderr, "%s, Cannot get fileName: %s\n", path, strerror(savedErr));
-        return NULL;
-    }
-    int len = strlen(abs_path)-1;
-
-    while(abs_path[len] != '/' && len >= 0) len--;
-    //* Now abs_path[len] points to first '/' in abs_path (starting from the end)
-    const char* out = &(abs_path[len+1]); //extract a view on a sublist of abs_path. (i.e. pointer to some element in it)
-    return out;
-}
-
 const char* absPath(const char* path) {
     if (path == NULL) return NULL;
 
@@ -101,39 +85,6 @@ ssize_t getFileSize(const char* path) {
     return out;
 }
 
-
-
-char* buffeReadFd(int fd, int chunkSize, int totalSize) {
-    char* buff = tryalc(malloc(totalSize+1));
-    ssize_t readNb; // number of bytes read by iteration
-    size_t readTotNb = 0; int tmp = 0;
-
-    //* While there are bytes left to be read, reads them 'chunkSize' by 'chunkSize'
-    //* nb: if readNb is < to what we expected we dont really care because the program will retry until having read everything
-    //*
-    while (readTotNb < totalSize) {
-
-        while ((readTotNb < totalSize) && (readNb = read(fd,&buff[readTotNb], chunkSize)) > 0) {
-            readTotNb += readNb;
-            readNb = 0;
-        }
-            
-
-        if (readNb < 0) {
-            hdlReadErr("descriptor", 0, 0, fd);
-            //return NULL;
-        }
-
-        if (tmp != 0) printf(" ");
-        printf("continue %d\n", readTotNb < totalSize);
-    }
-
-    if (close(fd) < 0) {
-        hdlCloseErr("descriptor", 0);
-        return NULL;
-    }
-    return buff;
-}
 
 /**
  * Read file and returns its content

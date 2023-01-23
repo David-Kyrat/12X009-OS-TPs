@@ -77,18 +77,12 @@ ssize_t getFileSize(const char* path);
  */
 const char* absPath(const char* path);
 
+
 /**
- * Read in a bufferized way from the given file descriptor until we read 'totalSize' (or more)
- * (if there not more than totalSize on the file pointed to by the file-descriptor, and this file is not updated,
- * i.e. like a socket would be, this function will loop forever and never stop.)
+ * Read file and returns its content
  * 
- * @param fd int, file descriptor to read from
- * @param chunkSize int, size of a chunk of the buffer i.e. the amount data to expect with each call to read
- * @param totalSize int, total size of content to read.
- * @return Content read a string or null if an error happened.
+ * @return Content of 'fileToRead' (returned string is malloc'd => remember to free().)
  */
-char* buffeReadFd(int fd, int chunkSize, int totalSize);
-
-
+char* buffread(const char* fileToRead);
 
 #endif /* FILES_H */
