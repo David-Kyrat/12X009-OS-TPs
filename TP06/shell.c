@@ -273,11 +273,16 @@ void exit_shell(Shell* sh, const char* arg) {
  */
 void redirectIO() {
     const char* redirection = "/dev/null";
-    //close stdin
-    //- do not close stderr/out
-    if (close(STDIN_FILENO) < 0) hdlCloseErr("stdin", 1);
-    //reopens /dev/null, so that the 'STDIN_FILENO' file descriptor points to it.
-    if (open(redirection, O_RDONLY | O_EXCL) < 0) hdlOpenErr(redirection, 1);
+    //close stdin & make its old file descriptor point to 'redirection'
+
+		int redirection_fd = open(redirection, O_RDONLY | O_EXCL);
+    if (redirection_fd < 0) hdlOpenErr(redirection, 1); //print error message to stderr and exits
+
+		if (dup2(redirection_fd, STDIN_FILENO) < 0) hdlCloseErr("stdin (redirection to /dev/null : in redirectIO)", 1); 
+
+		//We now have that both STDIN_FILENO and redirection_fd points to 'redirection' => hence we close redirection_fd
+		if (close(redirection_fd) < 0) hdlCloseErr("/dev/null (in redirectIO)", 1); 
+
 }
 
 
