@@ -3,16 +3,14 @@
 **/.idea
 
 **/.clang-format
-TP03/out
 
 .fake
-*.zip
 *.gz
 *.tar.gz
 *.xcf
 *.xfc
 
-**/noah.munz.gregory.sedykh.tp?
+#**/noah.munz.gregory.sedykh.tp?
 
 .directory
 **/c_cpp_properties.json
