@@ -23,9 +23,11 @@ Below you can find the links to the enonce & reports for each TP of the semester
 
 
 - [TP 05](TP05/instructions-report/TP5.pdf)  
+  - [Exam-Presentation](Slides/TP05-Presentation.pdf)
 
 - [TP 06](TP06/instructions-report/TP6.pdf)
   - [Report](TP06/instructions-report/TP06-rapport.pdf)  
+  - [Exam-Presentation](Slides/TP06-Presentation.pdf)
   
 - [TP 07](TP07/instructions-report/TP7.pdf)
   - [Report](TP07/instructions-report/TP07-rapport.pdf)  
