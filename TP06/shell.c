@@ -273,10 +273,9 @@ void exit_shell(Shell* sh, const char* arg) {
  */
 void redirectIO() {
     const char* redirection = "/dev/null";
-    //close stdin, stdout
-    //TODO: USE DUP2
+    //close stdin
     //- do not close stderr/out
-    if (close(0) < 0) hdlCloseErr("stdin/out", 1);
+    if (close(STDIN_FILENO) < 0) hdlCloseErr("stdin", 1);
     //reopens /dev/null, so that the first file descriptor points to it.
     // (3 first fd's are always std in/out/err)
     if (open(redirection, O_RDONLY | O_EXCL) < 0) hdlOpenErr(redirection, 1);
@@ -368,12 +367,9 @@ int executeJob(Shell* sh, const char* cmd_name, char* const argv[], int isForegr
 }
 
 
-//TODO: modify this comment
 /**
  * Reads the user input, parses it, and executes the command
- * 
  * @param sh the shell instance
- * 
  * @return The return value is the exit code of the last command executed.
  */
 int sh_getAndResolveCmd(Shell* sh) {
@@ -397,7 +393,6 @@ int sh_getAndResolveCmd(Shell* sh) {
             exit_shell(sh, (argc <= 1 || *argv[1] == '\n') ? NULL : argv[1]);
 
         default: {
-            //TODO: handle background jobs
             int errcode = executeJob(sh, cmd_name, argv, isForeground);
             update_old_job(sh, isForeground, &argv, argc);
             if (errcode < 0) return -1;
