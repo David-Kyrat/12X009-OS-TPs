@@ -1,4 +1,4 @@
-$patt = "gregory.sedykh.noah.munz.TP"
+$patt = "gregory.sedykh.noah.munz.tp"
 
 rm rendus -Recurse -ErrorAction SilentlyContinue
 rm "$patt*" -Recurse -ErrorAction SilentlyContinue
@@ -29,4 +29,3 @@ for ($i = 2; $i -lt 8; $i += 1) {
 mkdir rendus -ErrorAction SilentlyContinue
 
 mv "$patt*" rendus/ -Exclude "*.zip" -ErrorAction SilentlyContinue
-
