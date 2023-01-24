@@ -2,6 +2,8 @@
 
 ### TPs of "Systèmes d'exploitations" (OS) to be handed in on Moodle (Fall semester 2022)
 
+#### Branch containing the state of the repo as it was for the exam deadline
+
 ---
 
 Below you can find the links to the enonce & reports for each TP of the semester.  
