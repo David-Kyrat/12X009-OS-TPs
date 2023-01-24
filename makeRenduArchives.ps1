@@ -1,4 +1,4 @@
-$patt = "gregory.sedykh.noah.munz.TP"
+$patt = "gregory.sedykh.noah.munz.tp"
 
 rm rendus -Recurse -ErrorAction SilentlyContinue
 rm "$patt*" -Recurse -ErrorAction SilentlyContinue
