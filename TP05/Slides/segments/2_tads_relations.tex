@@ -5,11 +5,11 @@
 \small
 3 modules (+ \texttt{server.c}, \texttt{client.c}) ont été créés pour la réalisation du TP\@:
 \begin{enumerate}
-     \item Le module \code{optprsr.c} (repris des TPs 2 à 4) \\
+     \item Le module \code{optprsr} (repris des TPs 2 à 4) \\
     contient 5 fonctions, servant à l'extraction \& copie\ldots des arguments passés paramètres.\\
     \vspace{0.3cm}
 
-    \item Le module \code{util.c} (repris des TPs 3 à 4) \\
+    \item Le module \code{util} (repris des TPs 3 à 4) \\
       Fonctions servant divers usages allant de la gestion d'erreurs à la gestion de chaînes de caractères, en passant par des wrappers qui incluent lesdites fonctions de gestions d'erreurs.\\
     
 \end{enumerate}
@@ -24,13 +24,13 @@
 
     \vspace{0.3cm}
 
-    \item \code{client.c} Contient le \quo{driver code} pour se connecter au server et jouer avec lui.
+    \item \code{client} Contient le \quo{driver code} pour se connecter au server et jouer avec lui.
     Se décompose en une partie \textit{connection}, (i.e. création de socket, connection au socket)\\ 
     puis en une partie \textit{jeu} (i.e. lecture/écriture sur la socket)
     
     \vspace{0.3cm}
 
-    \item \code{server.c} Contient le \quo{driver code} pour ouvrir des sockets attendre des connections clients et créé des enfants pour jouer avec les clients qui arrivent.
+    \item \code{server} Contient le \quo{driver code} pour ouvrir des sockets attendre des connections clients et créé des enfants pour jouer avec les clients qui arrivent.
     Se décompose en une partie \textit{connection}, (i.e. création de socket, attente \& acceptations de nouveau clients) géré par le parent\\ 
     puis en une partie \textit{jeu} (i.e. lecture/écriture sur la socket) géré par les enfants.
             

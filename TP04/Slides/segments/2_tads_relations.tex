@@ -5,12 +5,12 @@
 \small
 5 modules (+ \texttt{main.c}) ont été créés pour la réalisation du TP\@:
 \begin{enumerate}
-    \item Le fichier \code{main.c} qui contient la fonction main qui permet de lancer le programme.\\
+   \item Le fichier \code{main.c} qui contient la fonction main qui va être la première instruction à executer.\\
     
-    \item Le module \code{inp.c}\\
+    \item Le module \code{inp}\\
     Définit la struct \code{struct Inp} qui stock et gère l'input entré par l'utilisateur, pour ensuite l'utiliser dans \code{lock.c}.
 
-    \item Le module \code{lock.c}\\
+    \item Le module \code{lock}\\
     Utilise l'entrée de l'utilisateur pour ensuite remplir un \code{struct flock} avec les données nécessaires, et effectuer l'appel correspondant à \code{fcntl} pour lock/unlock les fichers.
 \end{enumerate}
 }
@@ -21,15 +21,15 @@
 \begin{enumerate}
     \stepcounter{enumi} \stepcounter{enumi} \stepcounter{enumi}
 
-    \item Le module \code{optprsr.c} (repris du TP02, openssl) \\
+    \item Le module \code{optprsr} (repris du TP02, openssl) \\
     contient 3 fonctions, servant à gérer les options passées en paramètres.\\
     \vspace{0.3cm}
     
-    \item Le module \code{files.c} (repris du TP03, ultra-cp) \\
+    \item Le module \code{files} (repris du TP03, ultra-cp) \\
     S'occupe de la gestion fichers, (existence, type, taille etc.), des path des fichiers (absolute path, concatenation...) et de la gestion des erreurs liées à ces opérations.
     \vspace{0.3cm}
 
-    \item Le module \code{util.c} (repris du TP03, ultra-cp) \\
+    \item Le module \code{util} (repris du TP03, ultra-cp) \\
       Fonctions servant divers usages allant de la gestion d'erreurs à la gestion de chaînes de caractères, en passant par des wrappers qui incluent lesdites fonctions de gestions d'erreurs.\\
             
     \end{enumerate}
@@ -84,7 +84,7 @@ Avoir stocké toutes les options dans une seule chaîne de caractère et non pas
     Les principales fonctions utilisés sont simplements des fonction de parsing d'input, manipulations de struct, wrapper simplifiant l'utilisation de fonctions de librairie C $\, $ + gestion d'erreur\ldots \\
     
     Le \quo{réel} vérouillage de fichier\ldots$\ $ est réalisé par des appels \code{fcntl()}, du type
-    \code{fcntln(fd, fl\_cmd, \&fl)}\\
+    \code{fcntl(fd, fl\_cmd, \&fl)}\\
     où \code{fl} est une \code{struct flock} qui a été converti directement depuis une \code{struct Inp} et \code{fl\_cmd} est la commande entrée par l'utilisateur stockée dans la \code{struct Inp}.
 
     \vspace{0.2cm}

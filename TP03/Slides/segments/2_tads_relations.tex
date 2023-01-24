@@ -7,13 +7,13 @@
         \item \code{main.c}: contient le code principal du programme \& appelle les fonctions appropriées
               des autres modules.\\
 
-        \item \code{copy.c}: contient 4 fonctions, sert à gérer la copie des fichiers et répertoires,
+        \item \code{copy}: contient 4 fonctions, sert à gérer la copie des fichiers et répertoires,
               de définir quand est-ce qu'un fichier est considéré comme \quo{modifié}\ldots \\
 
-        \item \code{files.c}: contient 11 fonctions, servant à gérer les fichiers et leurs attributs.\\
-        \item \code{optprsr.c}: contient 3 fonctions, servant à gérer les options passées en paramètres. (repris du tp d'avant)\\
+        \item \code{files}: contient 11 fonctions, servant à gérer les fichiers et leurs attributs.\\
+        \item \code{optprsr}: contient 3 fonctions, servant à gérer les options passées en paramètres. (repris du tp d'avant)\\
 
-        \item \code{util.c}: contient 9 fonctions, servant divers usages allant de la gestion d'erreurs à la gestion de chaînes de caractères, en passant par des wrappers qui incluent lesdites fonctions de gestions d'erreurs.\\
+        \item \code{util}: contient 9 fonctions, servant divers usages allant de la gestion d'erreurs à la gestion de chaînes de caractères, en passant par des wrappers qui incluent lesdites fonctions de gestions d'erreurs.\\
     \end{enumerate}
 }
 %
@@ -29,7 +29,7 @@
         \item[(1)]  \code{main.c}\\
               \begin{itemize}
                   \item \code{handleArgs}: Permet de gérer la totalité des arguments passés (les fichiers/dossiers (obligatoire) et les arguments optionnels tels que \code{-a} et \code{-f})
-                        appelle \code{optprsr.c} pour parse/extraire les arguments obligatoire \& optionnels et leurs fait
+                        utilise le module \code{optprsr} pour parse/extraire les arguments obligatoire \& optionnels et leurs fait
                         correspondre le bon chant du bitfield \code{ST\_\ldots}.
 
                         \vspace{0.3cm}
@@ -40,7 +40,7 @@
 }
 \bframes{
     \begin{enumerate}
-        \item[(2)] \code{copy.c}
+        \item[(2)] \code{copy}
         \begin{itemize}
             \item \code{is\_modified}: Compare les temps de la dernière modification, et leurs tailles. S'il y a une différence entre les deux, le fichier sera remplacé par le nouveau
             \item \code{copy}: Copie le contenu d'un fichier à un autre (code de l'exemple du chapitre 7: I/0 du cours, avec quelques modifications)
@@ -56,7 +56,7 @@
 
 \bframes{
     \begin{enumerate}
-        \item[(3)] \code{files.c}
+        \item[(3)] \code{files}
             \begin{itemize}
                 \item Les fonctions \code{is\ldots}: Vérifient si l'argument est quelque chose. Ex: isDir vérifie si l'argument est un directory
                 \item \code{computePerm}: Retrouve les permissions d'un fichier donné
@@ -74,7 +74,7 @@
 
 \bframes{
     \begin{enumerate} 
-        \item[(4)] \code{optprsr.c}
+        \item[(4)] \code{optprsr}
             \begin{itemize}
                 \item \code{checkEnoughArgs}: Vérifie que suffisamment d'arguments obligatoires ont été entrées
                 \item \code{parseArgs}: Parse les arguments obligatoires. Ici, ce sont les fichiers et dossiers sources et la destination
@@ -84,7 +84,7 @@
 }
 \bframes{
     \begin{enumerate} 
-        \item[(5)] \code{util.c}
+        \item[(5)] \code{util}
             \begin{itemize}
                 \item \code{tryalc}: Vérifie que malloc a été effecté sans problème
                 \item Les fonctions \code{hdl...}: Gèrent multiples erreurs avec les fichers (ouvrir, fermer etc.)

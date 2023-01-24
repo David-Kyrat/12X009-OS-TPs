@@ -1,0 +1,19 @@
+\section{Rappel: But du TP}
+\bframe{
+Créer son propre Shell. C-à-d:
+\bigskip
+   \begin{itemize}
+        \item Gérer 2 commandes \quo{built-in} \code{cd} et \code{exit()} + executer des jobs 
+      \item Créer des processus avec \code{fork} pour ces jobs
+      \item Gérer ces processus, notamment éviter les zombies et les orphelins 
+      \item Gérer les signaux envoyés au shell (en partie pour gérer zombies \& orphelins)
+ 
+    \end{itemize}
+
+\vskip 5pt
+    Les principaux défis de ce TP sont:
+    \begin{itemize}
+        \item La taille du projet, les petites erreurs qui avant étaient \quo{bénignes} voient leur impact grossir avec la taille du projet et le temps \quo{d'utilisation} / test de ce dernier.
+        \item La gestion de signaux qui peut rappeller une sorte de \code{try-catch} version C i.e. où le \code{catch} doit pouvoir être executé n'importe où et ne peut faire que certaines actions limités (\small pas de \code{printf}, pas de passage de variable en argument, ne doit pas accéder aux variable globales pour être réentrant\ldots)
+    \end{itemize}
+}
