@@ -405,7 +405,6 @@ int sh_getAndResolveCmd(Shell* sh) {
 void sh_free(Shell* sh) {
     free(sh->crt_path);
     free(sh);
-        // 'crt_path' and 'sh' were the only "malloc'ed" variables
 }
 
 
