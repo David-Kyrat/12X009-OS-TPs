@@ -276,8 +276,7 @@ void redirectIO() {
     //close stdin
     //- do not close stderr/out
     if (close(STDIN_FILENO) < 0) hdlCloseErr("stdin", 1);
-    //reopens /dev/null, so that the first file descriptor points to it.
-    // (3 first fd's are always std in/out/err)
+    //reopens /dev/null, so that the 'STDIN_FILENO' file descriptor points to it.
     if (open(redirection, O_RDONLY | O_EXCL) < 0) hdlOpenErr(redirection, 1);
 }
 
