@@ -1,0 +1,5 @@
+Pour installer les programmes il faut les droits roote a cause su sticky bit
+
+lancer le programme avec la commande:
+taskset -c 1 ./nomDuProg
+Cela permet de lancer le programme sur un seul coeur.
