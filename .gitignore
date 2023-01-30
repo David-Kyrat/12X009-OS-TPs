@@ -3,6 +3,7 @@
 **/.idea
 
 **/.clang-format
+TP03/out
 
 .fake
 *.gz
