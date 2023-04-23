@@ -29,6 +29,17 @@ int checkArgsNbClient(int argc);
 
 
 /**
+ * Parses the command line arguments and stores the port number into the given *_dest arguments.
+ * 
+ * @param argc the number of arguments passed to the program
+ * @param argv the array of arguments passed to the program
+ * @param port_dest the port number to be used for the connection
+ * 
+ * @return error code. -1 if an error happened (errno set appropriately), 0 for success.
+ */
+int parseArgvServ(int argc, char* argv[], int* port_dest);
+
+/**
  * Parses the command line arguments and stores the port number and the ip address into the given *_dest arguments.
  *
  * @param argc the number of arguments passed to the program
@@ -40,7 +51,6 @@ int checkArgsNbClient(int argc);
  * @return error code. -1 if an error happened (errno set appropriately), 0 for success.
  */
 int parseArgvClient(int argc, char* argv[], int* port_dest, char** ip_addr_dest);
-
 
 /**
  * Reads a line from stdin, and parses it into the given variables, then checks if the parsed values

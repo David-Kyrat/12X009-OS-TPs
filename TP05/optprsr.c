@@ -79,28 +79,13 @@ int parseArgv(int argc, char* argv[], int isServ, int* port_dest, char** ip_addr
         if (*ip_addr_dest == NULL) {
             printErr("%s, %s: Cannot copy IP address.\n", *ip_addr_dest);
             exit(EXIT_FAILURE);  //No memory Left => Force-exiting program.
-        }
+        } else printf("IP address: %s\n", *ip_addr_dest);
     }
-
-    printf("IP address: %s\n", *ip_addr_dest);
     printf("Port: %d\n", *port_dest);
-
     return 0;
 }
 
-//unused
-/**
- * Parses the command line arguments and stores the port number into the given *_dest arguments.
- * 
- * @param argc the number of arguments passed to the program
- * @param argv the array of arguments passed to the program
- * @param port_dest the port number to be used for the connection
- * 
- * @return error code. -1 if an error happened (errno set appropriately), 0 for success.
- */
-int parseArgvServ(int argc, char* argv[], int* port_dest) {
-    return parseArgv(argc, argv, 1, port_dest, NULL);
-}
-int parseArgvClient(int argc, char* argv[], int* port_dest, char** ip_addr_dest) {
-    return parseArgv(argc, argv, 0, port_dest, ip_addr_dest);
-}
+
+int parseArgvServ(int argc, char* argv[], int* port_dest) { return parseArgv(argc, argv, 1, port_dest, NULL); }
+
+int parseArgvClient(int argc, char* argv[], int* port_dest, char** ip_addr_dest) { return parseArgv(argc, argv, 0, port_dest, ip_addr_dest); }

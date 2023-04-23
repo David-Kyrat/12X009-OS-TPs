@@ -18,6 +18,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include "optprsr.h"
 #include "functions.h"
 #include "util.h"
 
@@ -31,13 +32,15 @@ const int MAX_PEND_CNCTN = 5;  //* Maximum length to which the queue of pending 
 int main(int argc, char* argv[]) {
 
     // Check the port
-    int port = atoi(argv[1]);
+    /* int port = atoi(argv[1]);
     if (!isPortValid(port)) {
         printf("Invalid port\n");
         return -1;
-    }
-
-
+    } */
+    int port;
+    int err_code = parseArgvServ(argc, argv, &port);
+    if (err_code != 0) return EXIT_FAILURE;
+    
     sockaddr_in address = new_sockaddr(port, NULL);
 
     // Create a server socket
