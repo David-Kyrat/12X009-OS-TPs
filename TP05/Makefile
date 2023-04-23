@@ -62,7 +62,7 @@ $(INIT):
 	mkdir out
 
 __clean__:
-	- @rm $(EXEC) *.out out/*.o out/*.out 2> /dev/null
+	- @rm $(EXEC) *.out out/*.o out/*.out *.exe* 2> /dev/null
 
 # supress error ouput because cleaning without having compiled "throws" ENOENT error, whereas
 # we don't really care whether they were indeed files to delete or not

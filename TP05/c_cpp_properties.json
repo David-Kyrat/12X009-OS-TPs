@@ -1,23 +1,35 @@
 {
     "configurations": [
         {
-            "name": "Linux",
+            "name": "win",
             "includePath": [
-                "${workspaceFolder}/**",
-                "/usr/include/**",
-                "/usr/include/x86_64-linux-gnu/**",
-                "/usr/lib/gcc/x86_64-linux-gnu/12/include/**"
-                
+                "C:/msys64/usr/include/**",
+                "C:/msys64/usr/bin",
+                ""
             ],
             "defines": [],
-            "compilerPath": "/usr/bin/gcc",
+            "compilerPath": "C:/msys64/usr/bin/gcc.exe",
             "compilerArgs": [
                 "-std=c11",
                 "-D_BSD_SOURCE"
             ],
-            "cStandard": "c11",
-            "intelliSenseMode": "clang-x64"
+            "cStandard": "c11"
         }
     ],
     "version": 4
+   /*  "comment": {
+        "_includePath": [
+            "C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/7.2.0/include",
+            "C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/7.2.0/include/c++/tr1",
+            "C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/7.2.0/include/c++",
+            "C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/7.2.0/include-fixed",
+            "C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/7.2.0/../../../../x86_64-w64-mingw32/include"
+        ],
+        "__includePath": [
+            "${workspaceFolder}/**",
+            "/usr/include/**",
+            "/usr/include/x86_64-linux-gnu/**",
+            "/usr/lib/gcc/x86_64-linux-gnu/12/include/**"
+        ]
+    } */
 }

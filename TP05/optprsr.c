@@ -11,18 +11,19 @@
 #include "optprsr.h"
 #include "util.h"
 
+#define USAGE_MSG_SERV "Usage: %s <portNumber> (2Bytes integer in [1024, 65535]) \n"
+#define USAGE_MSG_CLIENT "Usage: %s <ip-address>(in decimal)  <portNumber> (2Bytes integer in [1024, 65535]) \n"
 
 //static const char HELP_CHAR = '?', QUIT_CHAR = 'Q';
 //const char* OPT_STRING = "fa";
 const int MIN_ARG_NB_SERV = 1, MAX_ARG_NB_SERV = 1;
 const int MIN_ARG_NB_CLIENT = 2, MAX_ARG_NB_CLIENT = 2;
-/* const char* USAGE_MSG_SERV = "Usage: %s <portNumber> (2Bytes integer in [1024, 65535]) \n";
-const char* USAGE_MSG_CLIENT = "Usage: %s <ip-address>(in decimal)  <portNumber> (2Bytes integer in [1024, 65535]) \n"; */
+//static const char* USAGE_MSG_CLIENT = "Usage: %s <ip-address>(in decimal)  <portNumber> (2Bytes integer in [1024, 65535]) \n";
 
 const int PORT_SIZE = 2;
 
 //* Size of the file given when calling program
-size_t FILE_SIZE; 
+size_t FILE_SIZE;
 
 /**
  * @brief Check if there is at least 'minArgNb' and at max 'maxArgNb' argument.
@@ -45,7 +46,6 @@ int checkArgsNbClient(int argc) {
     return checkArgsNb(argc, MIN_ARG_NB_CLIENT, MAX_ARG_NB_CLIENT);
 }
 
-
 /**
  * Parses the command line arguments and stores the port number and the ip address (if client
  * called) into the given *_dest arguments.
@@ -61,9 +61,13 @@ int checkArgsNbClient(int argc) {
  */
 int parseArgv(int argc, char* argv[], int isServ, int* port_dest, char** ip_addr_dest) {
     int checkArgsErr = isServ ? checkArgsNbServ(argc) : checkArgsNbClient(argc);
-    if (checkArgsErr < 0) return -1;
+    if (checkArgsErr != 0) {
+        if (isServ) fprintf(stderr, USAGE_MSG_SERV, argv[0]);
+        else fprintf(stderr, USAGE_MSG_CLIENT, argv[0]);
+        return -1;
+    }
 
-    int port_idx = isServ ? 1 : 2; // position of port value (as a string) in argv[]
+    int port_idx = isServ ? 1 : 2;  // position of port value (as a string) in argv[]
     char* port_str = strndup(argv[port_idx], strlen(argv[port_idx]));
     int port = atoi(port_str);
     if (!isPortValid(port)) return -1;
@@ -74,13 +78,12 @@ int parseArgv(int argc, char* argv[], int isServ, int* port_dest, char** ip_addr
         *ip_addr_dest = strndup(argv[1], strlen(argv[1]));
         if (*ip_addr_dest == NULL) {
             printErr("%s, %s: Cannot copy IP address.\n", *ip_addr_dest);
-            exit(EXIT_FAILURE); //No memory Left => Force-exiting program.
+            exit(EXIT_FAILURE);  //No memory Left => Force-exiting program.
         }
     }
-    
+
     printf("IP address: %s\n", *ip_addr_dest);
     printf("Port: %d\n", *port_dest);
-
 
     return 0;
 }

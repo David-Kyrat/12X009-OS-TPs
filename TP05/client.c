@@ -21,14 +21,15 @@
 #include "optprsr.h"
 #include "util.h"
 
-const char* USAGE_MSG_CLIENT = "Usage: %s <ip-address> (in decimal)  <portNumber> (2Bytes integer in [1024, 65535]) \n";
+static const char* USAGE_MSG_CLIENT = "Usage: %s <ip-address> (in decimal)  <portNumber> (2Bytes integer in [1024, 65535]) \n";
 
 int main(int argc, char* argv[]) {
     /* int port = argv[2];ip
     const char* ip_addr = argv[1]; */
     int port;
     const char* ip_addr;
-    parseArgvClient(argc, argv, &port, &ip_addr);
+    int err_code = parseArgvClient(argc, argv, &port, &ip_addr);
+    if (err_code != 0) return EXIT_FAILURE;
 
     sockaddr_in address = new_sockaddr(port, ip_addr);
 
