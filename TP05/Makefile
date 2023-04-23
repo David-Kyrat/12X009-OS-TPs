@@ -8,12 +8,12 @@ INIT = out
 # Compiler flags
 #
 CC = gcc
-CFLAGS = -lm -Wall -Wuninitialized -Wfloat-equal -Wshadow -Wbad-function-cast -Wcast-qual -Wcast-align -Wconversion -Wunreachable-code -Wformat=2 -Winit-self -Wno-conversion -Wno-discarded-qualifiers -Wno-format-y2k -Wno-format-nonliteral 
+CFLAGS = #-lm -Wall #-Wuninitialized -Wfloat-equal -Wshadow -Wbad-function-cast -Wcast-qual -Wcast-align -Wconversion -Wunreachable-code -Wformat=2 -Winit-self -Wno-conversion -Wno-discarded-qualifiers -Wno-format-y2k -Wno-format-nonliteral 
 
 #
 # Debug build settings
 #
-DBGFLAGS = -g -DDEBUG
+DBGFLAGS = #-g -DDEBUG
 
 SERV_EXEC = server
 CLIENT_EXEC = client
